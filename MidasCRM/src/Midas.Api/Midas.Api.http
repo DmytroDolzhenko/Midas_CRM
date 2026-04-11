@@ -1,0 +1,6 @@
+@Midas.Api_HostAddress = http://localhost:5001
+
+GET {{Midas.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
