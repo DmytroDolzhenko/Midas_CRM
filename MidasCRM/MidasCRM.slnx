@@ -1,1 +1,7 @@
-<Solution />
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Midas.Api/Midas.Api.csproj" Id="873c2618-de6f-4a7a-895e-e24cece231a4" />
+    <Project Path="src/Midas.Application/Midas.Application.csproj" Id="64258447-f2a2-4418-a1fc-a0178f36808c" />
+    <Project Path="src/Midas.Core/Midas.Core.csproj" Id="206bca71-4f01-4df0-93ea-8eb7a2bd976d" />
+  </Folder>
+</Solution>
