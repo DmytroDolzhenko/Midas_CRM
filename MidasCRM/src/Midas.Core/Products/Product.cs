@@ -42,11 +42,14 @@ namespace Midas.Core.Products
 
         public void Update(
             string name,
-            string description,
-            int productCategoryId)
+            string description)
         {
             Name = name;
             Description = description;
+        }
+
+        public void UpdateCategory(int productCategoryId)
+        {
             ProductCategoryId = productCategoryId;
         }
 

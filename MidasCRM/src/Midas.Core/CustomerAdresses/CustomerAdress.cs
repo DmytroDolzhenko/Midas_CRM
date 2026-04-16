@@ -11,6 +11,7 @@ namespace Midas.Core.CustomerAdresses
         public string City { get; private set; }
         public int PostalCode { get; private set; }
         public int PostDepartmentNumber { get; private set; }
+        public bool IsDeleted { get; private set; }
 
         private CustomerAdress(
             int id,
@@ -49,6 +50,10 @@ namespace Midas.Core.CustomerAdresses
             City = city;
             PostalCode = postalCode;
             PostDepartmentNumber = postDepartmentNumber;
+        }
+        public void Delete()
+        {
+            IsDeleted = true;
         }
     }
 }

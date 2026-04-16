@@ -13,6 +13,7 @@ namespace Midas.Core.Payments
         public PaymentMethods Method { get; private set; }
         public PaymentStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public bool IsDeleted { get; private set; }
 
         private Payment(int id, int orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt)
         {
@@ -24,7 +25,7 @@ namespace Midas.Core.Payments
             CreatedAt = createdAt;
         }
 
-        public Payment Create(int orderId, decimal amount, PaymentMethods method)
+        public static Payment Create(int orderId, decimal amount, PaymentMethods method)
         {
             return new Payment(
                 0,
@@ -33,6 +34,10 @@ namespace Midas.Core.Payments
                 method,
                 PaymentStatus.Pending,
                 DateTime.UtcNow);
+        }
+        public void MasrkAsDeleted()
+        {
+            IsDeleted = true;
         }
 
     }

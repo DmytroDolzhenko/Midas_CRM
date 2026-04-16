@@ -17,6 +17,7 @@ namespace Midas.Core.Orders
 
         private readonly List<OrderItem> _orderItems = new();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
+        public bool IsDeleted { get; private set; }
 
         private Order(int id, string uniqCode, int customerId, OrderStatus status, decimal totalCost, DateTime createdAt)
         {
@@ -39,6 +40,20 @@ namespace Midas.Core.Orders
                 DateTime.UtcNow);
         }
 
+        public void MarkAsDeleted()
+        {
+            IsDeleted = true;
+        }
+
+        public void UpdateStatus(OrderStatus newStatus)
+        {
+            Status = newStatus;
+        }
+        public void RemoveOrderItem(OrderItem orderItem)
+        {
+            _orderItems.Remove(orderItem);
+            RecalculateTotalCost();
+        }
         public void AddOrderItem(OrderItem orderItem)
         {
             _orderItems.Add(orderItem);

@@ -8,7 +8,7 @@ namespace Midas.Core.OrderSources
     {
         public int Id { get; set; }
         public string Name { get; private set; }
-
+        public bool IsDeleted { get; private set; } 
         private OrderSource(int id, string name)
         {
             Id = id;
@@ -23,6 +23,10 @@ namespace Midas.Core.OrderSources
         public void Update(string name)
         {
             Name = name;
+        }
+        public void MarkAsDelete()
+        {
+            IsDeleted = true;
         }
     }
 }

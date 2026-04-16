@@ -1,0 +1,32 @@
+using MediatR;
+using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Core.Contacts;
+using Midas.Core.Customers;
+
+namespace Midas.Application.Entities.Customers.Commands
+{
+    public class CreateCustomerCommand : IRequest<Customer>
+    {
+        public required string Name { get; init; }
+        public required string Surname { get; init; }
+        public required string ContactValue { get; init; }
+        public required int Email { get; init; }
+    }
+
+    public class CreateCustomerCommandHandler(IEntityRepository<Customer> repository)
+        : IRequestHandler<CreateCustomerCommand, Customer>
+    {
+        public async Task<Customer> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+        {
+            var contact = Contact.Create(request.ContactValue);
+            var customer = Customer.Create(
+                request.Name,
+                request.Surname,
+                contact,
+                request.Email);
+
+            await repository.AddAsync(customer, cancellationToken);
+            return customer;
+        }
+    }
+}

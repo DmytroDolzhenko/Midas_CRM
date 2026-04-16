@@ -1,4 +1,4 @@
-﻿namespace Midas.Application
+﻿namespace Midas.Infrastructure
 {
     public class Class1
     {

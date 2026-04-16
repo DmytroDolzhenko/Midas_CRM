@@ -12,6 +12,7 @@ namespace Midas.Core.OrderItems
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; } // Ціна за одиницю товару на момент замовлення
         public decimal CostPriceSnapshot { get; private set; } // Ціна закупівлі на момент замовлення
+        public bool IsDeleted { get; private set; }
 
         private OrderItem(int id, int orderId, int productVariantId, int quantity, decimal unitPrice, decimal costPriceSnapshot)
         {
@@ -51,6 +52,11 @@ namespace Midas.Core.OrderItems
             Quantity = quantity;
             UnitPrice = unitPrice;
             CostPriceSnapshot = costPriceSnapshot;
+        }
+        
+        public void Delete()
+        {
+            IsDeleted = true;
         }
     }
 }

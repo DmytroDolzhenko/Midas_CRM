@@ -6,4 +6,30 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Exceptions\" />
+    <Folder Include="Common\Services\" />
+    <Folder Include="Common\Securities\" />
+    <Folder Include="Entities\Contacts\" />
+    <Folder Include="Entities\CustomerAdresses\" />
+    <Folder Include="Entities\Customers\" />
+    <Folder Include="Entities\Users\" />
+    <Folder Include="Entities\ProductVariants\" />
+    <Folder Include="Entities\OrderSources\" />
+    <Folder Include="Entities\ProductCategories\" />
+    <Folder Include="Entities\Payments\" />
+    <Folder Include="Entities\OrderItems\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Midas.Core\Midas.Core.csproj" />
+  </ItemGroup>
+
 </Project>

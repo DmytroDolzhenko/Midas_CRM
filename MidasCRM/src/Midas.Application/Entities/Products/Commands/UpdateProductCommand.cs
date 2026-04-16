@@ -1,0 +1,34 @@
+﻿using MediatR;
+using Midas.Application.Common.Interfaces.Queries;
+using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Core.Products;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Midas.Application.Entities.Products.Commands
+{
+    public class UpdateProductCommand : IRequest<Product>
+    {
+        public required int Id { get; init; }
+        public required string Name { get; init; }
+        public required string Description { get; init; }
+    }
+    public class UpdateProductCommandHandler
+        (IGetQueries<Product> queries, IEntityRepository<Product> repository)
+        : IRequestHandler<UpdateProductCommand, Product>
+    {
+        public async Task<Product> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+        {
+            var product =await queries.GetByIdAsync(request.Id, cancellationToken);
+            if (product == null)
+            {
+                throw new Exception($"Product with id {request.Id} not found.");
+            }
+
+            product.Update(request.Name, request.Description);
+            await repository.UpdateAsync(product, cancellationToken);
+            return product;
+        }
+    }
+}

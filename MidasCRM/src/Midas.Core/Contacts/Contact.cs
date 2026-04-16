@@ -9,6 +9,7 @@ namespace Midas.Core.Contacts
     {
         public int Id { get; }
         public string Value { get; private set; }
+        public bool IsDeleted { get; private set; }
         private Contact(int id, string value)
         {
             Id = id;
@@ -23,6 +24,9 @@ namespace Midas.Core.Contacts
         {
             Value = value;
         }
-
+        public void Delete()
+        {
+            IsDeleted = true;
+        }
     }
 }

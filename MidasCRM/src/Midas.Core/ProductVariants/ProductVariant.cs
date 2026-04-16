@@ -14,6 +14,7 @@ namespace Midas.Core.ProductVariants
         public int StockQuantity { get; private set; }
         public decimal CostPrice { get; private set; }
         public decimal SellPrice { get; private set; }
+        public bool IsDeleted { get; private set; }
 
         private ProductVariant(
             int id,
@@ -65,6 +66,10 @@ namespace Midas.Core.ProductVariants
             Size = size;
             CostPrice = costPrice;
             SellPrice = sellPrice;
+        }
+        public void MarkAsDeleted()
+        {
+            IsDeleted = true;
         }
     }
 }
