@@ -6,6 +6,8 @@ namespace Midas.Core.OrderSources
 {
     public class OrderSource
     {
+        //цей клас під питання, його взагалі можна забрати з системи,
+        //а на заміну йому використовувати просто захардкожений Enum (OLX, Shafa, Telegram ...)
         public int Id { get; set; }
         public string Name { get; private set; }
         public bool IsDeleted { get; private set; } 

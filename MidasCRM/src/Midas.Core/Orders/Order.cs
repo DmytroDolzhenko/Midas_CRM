@@ -1,4 +1,5 @@
-﻿using Midas.Core.Enums;
+﻿using Midas.Core.CustomerAdresses;
+using Midas.Core.Enums;
 using Midas.Core.OrderItems;
 using System;
 using System.Collections.Generic;
@@ -11,33 +12,39 @@ namespace Midas.Core.Orders
         public int Id { get;}
         public string UniqCode { get; private set; }
         public int CustomerId { get; private set; }
+        public CustomerAdress Adress { get; private set; }
         public OrderStatus Status { get; private set; }
         public decimal TotalCost { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public Guid OwnerId { get; private set; }
 
         private readonly List<OrderItem> _orderItems = new();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
         public bool IsDeleted { get; private set; }
 
-        private Order(int id, string uniqCode, int customerId, OrderStatus status, decimal totalCost, DateTime createdAt)
+        private Order(int id, string uniqCode, int customerId, CustomerAdress adress, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
         {
             Id = id;
             UniqCode = uniqCode;
             CustomerId = customerId;
+            Adress = adress;
             Status = status;
             TotalCost = totalCost;
             CreatedAt = createdAt;
+            OwnerId = ownerId;
         }
 
-        public static Order Create(int customerId)
+        public static Order Create(int customerId, CustomerAdress adress, Guid ownerId)
         {
             return new Order(
                 0,
                 Guid.NewGuid().ToString(),
                 customerId,
+                adress,
                 OrderStatus.Pending,
                 0,
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                ownerId);
         }
 
         public void MarkAsDeleted()

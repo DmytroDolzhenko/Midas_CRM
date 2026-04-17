@@ -13,6 +13,7 @@ namespace Midas.Core.Customers
         public Contact Contact { get; private set; }
         public int Email { get; private set; }
         public bool IsDeleted { get; private set; }
+        // public Guid OwnerId { get; private set; }
 
         private Customer(
             int id,

@@ -28,8 +28,22 @@ namespace Midas.Application.Entities.Orders.Commands
         public async Task<Order> Handle(AddItemToOrderCommand request, CancellationToken cancellationToken)
         {
             var product = await productQueries.GetByIdAsync(request.ProductId, cancellationToken);
+            if (product == null)
+            {
+                throw new Exception($"Product with id {request.ProductId} not found.");
+            }
+
             var productVariant = await variantQueries.GetByIdAsync(request.ProductVariantId, cancellationToken);
+            if (productVariant == null)
+            {
+                throw new Exception($"Product variant with id {request.ProductVariantId} not found.");
+            }
+
             var orderItem = OrderItem.Create(request.OrderId, request.ProductVariantId, request.Quantity, productVariant.CostPrice, productVariant.SellPrice);
+            if (orderItem == null)
+            {
+                throw new Exception($"Order item not found.");
+            }
 
             var order = await orderQueries.GetByIdAsync(request.OrderId, cancellationToken);
             if (order == null)

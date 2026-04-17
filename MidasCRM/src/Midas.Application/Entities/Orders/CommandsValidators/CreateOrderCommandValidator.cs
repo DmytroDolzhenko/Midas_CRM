@@ -10,6 +10,10 @@ namespace Midas.Application.Entities.Orders.CommandsValidators
             RuleFor(x => x.CustomerId)
                 .GreaterThan(0)
                 .WithMessage("CustomerId must be greater than 0.");
+
+            RuleFor(x => x.Adress)
+            .NotNull()
+            .WithMessage("Adress is required.");
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Text;
 
 namespace Midas.Core.CustomerAdresses
 {
+    //цей клас треба можна прив'язати до конкретного клієнта, або до замовлення,
+    //бо клієнт може мати декілька адрес, а замовлення може бути прив'язане до конкретної адреси доставки
     public class CustomerAdress
     {
         public int Id { get; }

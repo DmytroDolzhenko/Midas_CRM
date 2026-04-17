@@ -6,7 +6,7 @@ using Midas.Core.Enums;
 
 namespace Midas.Core.Users
 {
-    public class User : IdentityUser<int>
+    public class User : IdentityUser<Guid>
     {
         public string Name { get; private set; }
         public string Surname { get; private set; }
@@ -17,7 +17,6 @@ namespace Midas.Core.Users
         public bool IsDeleted { get; private set; }
 
         private User(
-            int id,
             string name,
             string surname,
             string fathername,
@@ -25,7 +24,7 @@ namespace Midas.Core.Users
             UserRole role,
             bool isApproved)
         {
-            Id = id;
+            Id = Guid.NewGuid();
             Name = name;
             Surname = surname;
             Fathername = fathername;
@@ -44,7 +43,6 @@ namespace Midas.Core.Users
             bool isApproved)
         {
             return new User(
-                0,
                 name,
                 surname,
                 fathername,

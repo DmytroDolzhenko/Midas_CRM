@@ -7,20 +7,24 @@ namespace Midas.Core.Products
     public class Product
     {
         public int Id { get; }
+        public int WarehouseId { get; private set; }
         public string Name { get; private set; }
         public string Description { get; private set; }
         public int ProductCategoryId { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
+        // public Guid OwnerId { get; private set; }
 
         private Product(
             int id,
+            int warehouseId,
             string name,
             string description,
             int productCategoryId,
             DateTime createdAt)
         {
             Id = id;
+            WarehouseId = warehouseId;
             Name = name;
             Description = description;
             ProductCategoryId = productCategoryId;
@@ -28,12 +32,14 @@ namespace Midas.Core.Products
         }
 
         public static Product Create(
+            int warehouseId,
             string name,
             string description,
             int productCategoryId)
         {
             return new Product(
                 0,
+                warehouseId,
                 name,
                 description,
                 productCategoryId,
@@ -56,6 +62,10 @@ namespace Midas.Core.Products
         public void MarkAsDeleted()
         {
             IsDeleted = true;
+        }
+        public void ChangeWarehouse(int newWarehouseId)
+        {
+            WarehouseId = newWarehouseId;
         }
     }
 }
