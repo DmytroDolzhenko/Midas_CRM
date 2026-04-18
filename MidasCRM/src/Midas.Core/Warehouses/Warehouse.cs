@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Midas.Core.Warehouses
 {
-    public class Warehouse
+    public class Warehouse : IEntity<int>
     {
         public int Id { get; }
         public string Name { get; private set; }

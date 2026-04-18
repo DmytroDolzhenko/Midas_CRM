@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Midas.Core.OrderItems
 {
-    public class OrderItem
+    public class OrderItem : IEntity<int>
     {
         public int Id { get; }
         public int OrderId { get; private set; }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Midas.Core.ProductVariants
 {
-    public class ProductVariant
+    public class ProductVariant : IEntity<int>
     {
         public int Id { get;}
         public int ProductId { get; private set; }

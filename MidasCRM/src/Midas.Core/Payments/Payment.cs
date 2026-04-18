@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Midas.Core.Payments
 {
-    public class Payment
+    public class Payment : IEntity<Guid>
     {
-        public int Id { get;}
+        public Guid Id { get;}
         public int OrderId { get; private set; }
         public decimal Amount { get; private set; }
         public PaymentMethods Method { get; private set; }
@@ -15,7 +15,7 @@ namespace Midas.Core.Payments
         public DateTime CreatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        private Payment(int id, int orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt)
+        private Payment(Guid id, int orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt)
         {
             Id = id;
             OrderId = orderId;
@@ -28,7 +28,7 @@ namespace Midas.Core.Payments
         public static Payment Create(int orderId, decimal amount, PaymentMethods method)
         {
             return new Payment(
-                0,
+                Guid.NewGuid(),
                 orderId,
                 amount,
                 method,

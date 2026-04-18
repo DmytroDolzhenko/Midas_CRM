@@ -6,4 +6,34 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.17.0" />
+    <PackageReference Include="Npgsql" Version="10.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
+    <PackageReference Include="System.Security.Claims" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Persistence\Configuration\" />
+    <Folder Include="Persistence\Services\" />
+    <Folder Include="Persistence\Repositories\" />
+    <Folder Include="Persistence\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Midas.Application\Midas.Application.csproj" />
+    <ProjectReference Include="..\Midas.Core\Midas.Core.csproj" />
+  </ItemGroup>
+
 </Project>

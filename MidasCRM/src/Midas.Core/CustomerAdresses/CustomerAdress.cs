@@ -6,7 +6,7 @@ namespace Midas.Core.CustomerAdresses
 {
     //цей клас треба можна прив'язати до конкретного клієнта, або до замовлення,
     //бо клієнт може мати декілька адрес, а замовлення може бути прив'язане до конкретної адреси доставки
-    public class CustomerAdress
+    public class CustomerAdress : IEntity<int>
     {
         public int Id { get; }
         public int CustomerId { get; private set; }

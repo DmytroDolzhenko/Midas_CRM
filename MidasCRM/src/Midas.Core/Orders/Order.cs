@@ -7,9 +7,9 @@ using System.Text;
 
 namespace Midas.Core.Orders
 {
-    public class Order
+    public class Order : IEntity<Guid>
     {
-        public int Id { get;}
+        public Guid Id { get;}
         public string UniqCode { get; private set; }
         public int CustomerId { get; private set; }
         public CustomerAdress Adress { get; private set; }
@@ -22,7 +22,7 @@ namespace Midas.Core.Orders
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
         public bool IsDeleted { get; private set; }
 
-        private Order(int id, string uniqCode, int customerId, CustomerAdress adress, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
+        private Order(Guid id, string uniqCode, int customerId, CustomerAdress adress, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
         {
             Id = id;
             UniqCode = uniqCode;
@@ -37,7 +37,7 @@ namespace Midas.Core.Orders
         public static Order Create(int customerId, CustomerAdress adress, Guid ownerId)
         {
             return new Order(
-                0,
+                Guid.NewGuid(),
                 Guid.NewGuid().ToString(),
                 customerId,
                 adress,
