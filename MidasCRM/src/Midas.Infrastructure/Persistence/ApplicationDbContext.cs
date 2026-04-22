@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Midas.Core.Contacts;
-using Midas.Core.CustomerAdresses;
+using Midas.Core.CustomerAddresses;
 using Midas.Core.Customers;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
@@ -35,7 +35,7 @@ namespace Infrastructure.Persistence
         public DbSet<OrderSource> OrderSources { get; init; }
         public DbSet<OrderItem> OrderItems { get; init; }
         public DbSet<Customer> Customers { get; init; }
-        public DbSet<CustomerAdress> CustomerAddresses { get; init; }
+        public DbSet<CustomerAddress> CustomerAddresses { get; init; }
         public DbSet<Contact> Contacts { get; init; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

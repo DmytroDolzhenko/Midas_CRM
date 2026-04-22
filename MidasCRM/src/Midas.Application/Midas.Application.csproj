@@ -14,10 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Exceptions\" />
     <Folder Include="Common\Services\" />
     <Folder Include="Entities\Contacts\" />
-    <Folder Include="Entities\CustomerAdresses\" />
     <Folder Include="Entities\Customers\" />
     <Folder Include="Entities\Users\" />
     <Folder Include="Entities\ProductVariants\" />
