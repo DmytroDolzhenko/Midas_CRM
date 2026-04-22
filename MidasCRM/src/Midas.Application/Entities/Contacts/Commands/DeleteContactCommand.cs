@@ -11,7 +11,7 @@ namespace Midas.Application.Entities.Contacts.Commands
     }
 
     public class DeleteContactCommandHandler(
-        IGetQueries<Contact> queries,
+        IGetQueries<Contact, int> queries,
         IEntityRepository<Contact> repository)
         : IRequestHandler<DeleteContactCommand, Contact>
     {

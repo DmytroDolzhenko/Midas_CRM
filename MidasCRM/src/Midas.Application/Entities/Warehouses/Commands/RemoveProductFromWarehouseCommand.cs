@@ -15,9 +15,9 @@ namespace Midas.Application.Entities.Warehouses.Commands
         public required int ProductId { get; set; }
     }
 
-    public class RemoveProductToWarehouseCommandHandler(
-        IGetQueries<Warehouse> warehouseQueries,
-        IGetQueries<Product> productQueries,
+    public class RemoveProductFromWarehouseCommandHandler(
+        IGetQueries<Warehouse, int> warehouseQueries,
+        IGetQueries<Product, int> productQueries,
         IEntityRepository<Warehouse> warehouseRepository)
         : IRequestHandler<RemoveProductFromWarehouseCommand, Warehouse>
     {

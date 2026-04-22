@@ -13,7 +13,7 @@ namespace Midas.Application.Entities.Products.Commands
         public required int Id { get; set; }
     }
     public class DeleteProductCommandHandler
-        (IGetQueries<Product> queries, IEntityRepository<Product> repository)
+        (IGetQueries<Product, int> queries, IEntityRepository<Product> repository)
         : IRequestHandler<DeleteProductCommand, Product>
     {
         public async Task<Product> Handle(DeleteProductCommand request, CancellationToken cancellationToken)

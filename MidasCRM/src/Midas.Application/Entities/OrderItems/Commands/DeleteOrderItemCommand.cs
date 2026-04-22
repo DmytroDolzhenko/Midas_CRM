@@ -11,7 +11,7 @@ namespace Midas.Application.Entities.OrderItems.Commands
     }
 
     public class DeleteOrderItemCommandHandler(
-        IGetQueries<OrderItem> queries,
+        IGetQueries<OrderItem, int> queries,
         IEntityRepository<OrderItem> repository)
         : IRequestHandler<DeleteOrderItemCommand, OrderItem>
     {

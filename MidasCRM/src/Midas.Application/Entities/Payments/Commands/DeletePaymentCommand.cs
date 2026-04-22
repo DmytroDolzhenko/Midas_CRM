@@ -7,11 +7,11 @@ namespace Midas.Application.Entities.Payments.Commands
 {
     public class DeletePaymentCommand : IRequest<Payment>
     {
-        public required int Id { get; init; }
+        public required Guid Id { get; init; }
     }
 
     public class DeletePaymentCommandHandler(
-        IGetQueries<Payment> queries,
+        IGetQueries<Payment, Guid> queries,
         IEntityRepository<Payment> repository)
         : IRequestHandler<DeletePaymentCommand, Payment>
     {

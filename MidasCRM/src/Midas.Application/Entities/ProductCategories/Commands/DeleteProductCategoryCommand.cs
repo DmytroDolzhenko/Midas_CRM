@@ -11,7 +11,7 @@ namespace Midas.Application.Entities.ProductCategories.Commands
     }
 
     public class DeleteProductCategoryCommandHandler(
-        IGetQueries<ProductCategory> queries,
+        IGetQueries<ProductCategory, int> queries,
         IEntityRepository<ProductCategory> repository)
         : IRequestHandler<DeleteProductCategoryCommand, ProductCategory>
     {

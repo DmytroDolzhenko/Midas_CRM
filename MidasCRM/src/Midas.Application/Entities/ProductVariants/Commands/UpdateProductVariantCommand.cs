@@ -17,7 +17,7 @@ namespace Midas.Application.Entities.ProductVariants.Commands
     }
 
     public class UpdateProductVariantCommandHandler(
-        IGetQueries<ProductVariant> queries,
+        IGetQueries<ProductVariant, int> queries,
         IEntityRepository<ProductVariant> repository)
         : IRequestHandler<UpdateProductVariantCommand, ProductVariant>
     {

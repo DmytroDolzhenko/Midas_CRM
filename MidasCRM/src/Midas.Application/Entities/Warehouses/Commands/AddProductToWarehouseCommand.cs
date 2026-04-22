@@ -16,8 +16,8 @@ namespace Midas.Application.Entities.Warehouses.Commands
     }
 
     public class AddProductToWarehouseCommandHandler(
-        IGetQueries<Warehouse> warehouseQueries,
-        IGetQueries<Product> productQueries,
+        IGetQueries<Warehouse, int> warehouseQueries,
+        IGetQueries<Product, int> productQueries,
         IEntityRepository<Warehouse> warehouseRepository)
         : IRequestHandler<AddProductToWarehouseCommand, Warehouse>
     {

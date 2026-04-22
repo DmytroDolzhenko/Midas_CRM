@@ -12,7 +12,7 @@ namespace Midas.Application.Entities.ProductCategories.Commands
     }
 
     public class UpdateProductCategoryNameCommandHandler(
-        IGetQueries<ProductCategory> queries,
+        IGetQueries<ProductCategory, int> queries,
         IEntityRepository<ProductCategory> repository)
         : IRequestHandler<UpdateProductCategoryNameCommand, ProductCategory>
     {

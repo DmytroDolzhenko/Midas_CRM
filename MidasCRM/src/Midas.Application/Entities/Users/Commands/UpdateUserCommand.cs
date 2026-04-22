@@ -7,7 +7,7 @@ namespace Midas.Application.Entities.Users.Commands
 {
     public class UpdateUserCommand : IRequest<User>
     {
-        public required int Id { get; init; }
+        public required Guid Id { get; init; }
         public required string Name { get; init; }
         public required string Surname { get; init; }
         public required string Fathername { get; init; }
@@ -15,7 +15,7 @@ namespace Midas.Application.Entities.Users.Commands
     }
 
     public class UpdateUserCommandHandler(
-        IGetQueries<User> queries,
+        IGetQueries<User, Guid> queries,
         IEntityRepository<User> repository)
         : IRequestHandler<UpdateUserCommand, User>
     {

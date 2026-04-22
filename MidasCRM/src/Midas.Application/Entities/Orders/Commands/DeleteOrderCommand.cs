@@ -7,11 +7,11 @@ namespace Midas.Application.Entities.Orders.Commands
 {
     public class DeleteOrderCommand : IRequest<Order>
     {
-        public required int Id { get; init; }
+        public required Guid Id { get; init; }
     }
 
     public class DeleteOrderCommandHandler(
-        IGetQueries<Order> queries,
+        IGetQueries<Order, Guid> queries,
         IEntityRepository<Order> repository)
         : IRequestHandler<DeleteOrderCommand, Order>
     {

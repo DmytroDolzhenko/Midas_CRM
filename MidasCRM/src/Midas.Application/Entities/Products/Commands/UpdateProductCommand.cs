@@ -15,7 +15,7 @@ namespace Midas.Application.Entities.Products.Commands
         public required string Description { get; init; }
     }
     public class UpdateProductCommandHandler
-        (IGetQueries<Product> queries, IEntityRepository<Product> repository)
+        (IGetQueries<Product, int> queries, IEntityRepository<Product> repository)
         : IRequestHandler<UpdateProductCommand, Product>
     {
         public async Task<Product> Handle(UpdateProductCommand request, CancellationToken cancellationToken)

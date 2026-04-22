@@ -8,8 +8,8 @@ namespace Midas.Application.Entities.Payments.CommandsValidators
         public DeletePaymentCommandValidator()
         {
             RuleFor(x => x.Id)
-                .GreaterThan(0)
-                .WithMessage("Id must be greater than 0.");
+                .NotEmpty()
+                .WithMessage("Payment id is required.");
         }
     }
 }

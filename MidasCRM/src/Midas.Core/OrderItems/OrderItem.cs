@@ -7,14 +7,14 @@ namespace Midas.Core.OrderItems
     public class OrderItem : IEntity<int>
     {
         public int Id { get; }
-        public int OrderId { get; private set; }
+        public Guid OrderId { get; private set; }
         public int ProductVariantId { get; private set; }
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; } // Ціна за одиницю товару на момент замовлення
         public decimal CostPriceSnapshot { get; private set; } // Ціна закупівлі на момент замовлення
         public bool IsDeleted { get; private set; }
 
-        private OrderItem(int id, int orderId, int productVariantId, int quantity, decimal unitPrice, decimal costPriceSnapshot)
+        private OrderItem(int id, Guid orderId, int productVariantId, int quantity, decimal unitPrice, decimal costPriceSnapshot)
         {
             Id = id;
             OrderId = orderId;
@@ -25,7 +25,7 @@ namespace Midas.Core.OrderItems
         }
 
         public static OrderItem Create(
-            int orderId,
+            Guid orderId,
             int productVariantId,
             int quantity,
             decimal unitPrice,
@@ -41,7 +41,7 @@ namespace Midas.Core.OrderItems
         }
 
         public void Update(
-            int orderId,
+            Guid orderId,
             int productVariantId,
             int quantity,
             decimal unitPrice,

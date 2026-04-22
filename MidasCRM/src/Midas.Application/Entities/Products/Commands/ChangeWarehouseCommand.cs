@@ -15,7 +15,7 @@ namespace Midas.Application.Entities.Products.Commands
     }
     public class ChangeWarehouseCommandHandler
         (IEntityRepository<Product> productRepository,
-        IGetQueries<Product> getQueries)
+        IGetQueries<Product, int> getQueries)
         : IRequestHandler<ChangeWarehouseCommand, Product>
     {
         public async Task<Product> Handle(ChangeWarehouseCommand request, CancellationToken cancellationToken)

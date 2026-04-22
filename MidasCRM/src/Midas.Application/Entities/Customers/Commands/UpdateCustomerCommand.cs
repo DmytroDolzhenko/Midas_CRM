@@ -16,7 +16,7 @@ namespace Midas.Application.Entities.Customers.Commands
     }
 
     public class UpdateCustomerCommandHandler(
-        IGetQueries<Customer> queries,
+        IGetQueries<Customer, int> queries,
         IEntityRepository<Customer> repository)
         : IRequestHandler<UpdateCustomerCommand, Customer>
     {

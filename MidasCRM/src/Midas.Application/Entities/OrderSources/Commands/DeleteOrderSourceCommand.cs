@@ -11,7 +11,7 @@ namespace Midas.Application.Entities.OrderSources.Commands
     }
 
     public class DeleteOrderSourceCommandHandler(
-        IGetQueries<OrderSource> queries,
+        IGetQueries<OrderSource, int> queries,
         IEntityRepository<OrderSource> repository)
         : IRequestHandler<DeleteOrderSourceCommand, OrderSource>
     {

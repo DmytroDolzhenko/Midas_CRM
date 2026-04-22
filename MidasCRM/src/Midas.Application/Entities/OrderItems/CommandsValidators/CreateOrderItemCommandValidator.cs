@@ -8,8 +8,8 @@ namespace Midas.Application.Entities.OrderItems.CommandsValidators
         public CreateOrderItemCommandValidator()
         {
             RuleFor(x => x.OrderId)
-                .GreaterThan(0)
-                .WithMessage("OrderId must be greater than 0.");
+                .NotEmpty()
+                .WithMessage("Order id is required.");
 
             RuleFor(x => x.ProductVariantId)
                 .GreaterThan(0)

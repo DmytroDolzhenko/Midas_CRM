@@ -11,10 +11,6 @@ namespace Midas.Application.Entities.OrderItems.CommandsValidators
                 .GreaterThan(0)
                 .WithMessage("Id must be greater than 0.");
 
-            RuleFor(x => x.OrderId)
-                .GreaterThan(0)
-                .WithMessage("OrderId must be greater than 0.");
-
             RuleFor(x => x.ProductVariantId)
                 .GreaterThan(0)
                 .WithMessage("ProductVariantId must be greater than 0.");

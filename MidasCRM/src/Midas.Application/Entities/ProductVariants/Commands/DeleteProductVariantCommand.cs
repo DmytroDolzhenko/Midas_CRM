@@ -11,7 +11,7 @@ namespace Midas.Application.Entities.ProductVariants.Commands
     }
 
     public class DeleteProductVariantCommandHandler(
-        IGetQueries<ProductVariant> queries,
+        IGetQueries<ProductVariant, int> queries,
         IEntityRepository<ProductVariant> repository)
         : IRequestHandler<DeleteProductVariantCommand, ProductVariant>
     {

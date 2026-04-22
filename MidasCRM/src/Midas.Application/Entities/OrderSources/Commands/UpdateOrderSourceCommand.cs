@@ -12,7 +12,7 @@ namespace Midas.Application.Entities.OrderSources.Commands
     }
 
     public class UpdateOrderSourceCommandHandler(
-        IGetQueries<OrderSource> queries,
+        IGetQueries<OrderSource, int> queries,
         IEntityRepository<OrderSource> repository)
         : IRequestHandler<UpdateOrderSourceCommand, OrderSource>
     {

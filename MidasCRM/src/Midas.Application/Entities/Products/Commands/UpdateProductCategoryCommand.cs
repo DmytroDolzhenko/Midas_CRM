@@ -15,7 +15,7 @@ namespace Midas.Application.Entities.Products.Commands
     }
 
     public class UpdateProductCategoryCommandHandler
-        (IGetQueries<Product> queries, IEntityRepository<Product> repository)
+        (IGetQueries<Product, int> queries, IEntityRepository<Product> repository)
         : IRequestHandler<UpdateProductCategoryCommand, Product>
     {
         public async Task<Product> Handle(UpdateProductCategoryCommand request, CancellationToken cancellationToken)

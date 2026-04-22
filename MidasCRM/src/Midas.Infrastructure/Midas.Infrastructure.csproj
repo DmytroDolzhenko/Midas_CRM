@@ -26,9 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Persistence\Configuration\" />
-    <Folder Include="Persistence\Services\" />
-    <Folder Include="Persistence\Repositories\" />
-    <Folder Include="Persistence\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

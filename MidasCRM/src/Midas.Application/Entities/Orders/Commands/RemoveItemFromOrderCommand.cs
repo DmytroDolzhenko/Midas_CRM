@@ -13,15 +13,15 @@ namespace Midas.Application.Entities.Orders.Commands
 {
     public class RemoveItemFromOrderCommand : IRequest<Order>
     {
-        public required int OrderId { get; init; }
+        public required Guid OrderId { get; init; }
         public required int ProductId { get; init; }
         public required int OrderItemId { get; init; }
         public required int Quantity { get; init; }
         public required int ProductVariantId { get; init; }
     }
     public class RemoveItemFromOrderCommandHandler(
-        IGetQueries<Order> orderQueries,
-        IGetQueries<OrderItem> orderItemQueries,
+        IGetQueries<Order, Guid> orderQueries,
+        IGetQueries<OrderItem, int> orderItemQueries,
         IEntityRepository<Order> orderRepository)
         : IRequestHandler<RemoveItemFromOrderCommand, Order>
     {

@@ -8,12 +8,12 @@ namespace Midas.Application.Entities.Users.Commands
 {
     public class ChangeUserRoleCommand : IRequest<User>
     {
-        public required int Id { get; init; }
+        public required Guid Id { get; init; }
         public required UserRole Role { get; init; }
     }
 
     public class ChangeUserRoleCommandHandler(
-        IGetQueries<User> queries,
+        IGetQueries<User, Guid> queries,
         IEntityRepository<User> repository)
         : IRequestHandler<ChangeUserRoleCommand, User>
     {

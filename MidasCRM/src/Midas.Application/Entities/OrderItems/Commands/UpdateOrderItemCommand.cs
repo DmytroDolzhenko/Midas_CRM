@@ -8,7 +8,7 @@ namespace Midas.Application.Entities.OrderItems.Commands
     public class UpdateOrderItemCommand : IRequest<OrderItem>
     {
         public required int Id { get; init; }
-        public required int OrderId { get; init; }
+        public required Guid OrderId { get; init; }
         public required int ProductVariantId { get; init; }
         public required int Quantity { get; init; }
         public required decimal UnitPrice { get; init; }
@@ -16,7 +16,7 @@ namespace Midas.Application.Entities.OrderItems.Commands
     }
 
     public class UpdateOrderItemCommandHandler(
-        IGetQueries<OrderItem> queries,
+        IGetQueries<OrderItem, int> queries,
         IEntityRepository<OrderItem> repository)
         : IRequestHandler<UpdateOrderItemCommand, OrderItem>
     {

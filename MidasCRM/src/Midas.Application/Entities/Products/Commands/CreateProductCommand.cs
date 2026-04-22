@@ -21,8 +21,8 @@ namespace Midas.Application.Entities.Products.Commands
     public class CreateProductCommandHandler
         (IEntityRepository<Product> repositories, 
         IEntityRepository<Warehouse> warehouseRepositories, 
-        IGetQueries<Product> productQueries,
-        IGetQueries<Warehouse> warehouseQueries,
+        IGetQueries<Product, int> productQueries,
+        IGetQueries<Warehouse, int> warehouseQueries,
         ICurrentUserService currentUserService
         ) : IRequestHandler<CreateProductCommand, Product>
     {

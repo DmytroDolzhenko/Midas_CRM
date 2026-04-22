@@ -15,7 +15,7 @@ namespace Midas.Application.Entities.CustomerAdresses.Commands
     }
 
     public class UpdateCustomerAdressCommandHandler(
-        IGetQueries<CustomerAdress> queries,
+        IGetQueries<CustomerAdress, int> queries,
         IEntityRepository<CustomerAdress> repository)
         : IRequestHandler<UpdateCustomerAdressCommand, CustomerAdress>
     {

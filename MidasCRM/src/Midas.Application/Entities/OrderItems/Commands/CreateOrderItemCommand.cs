@@ -6,7 +6,7 @@ namespace Midas.Application.Entities.OrderItems.Commands
 {
     public class CreateOrderItemCommand : IRequest<OrderItem>
     {
-        public required int OrderId { get; init; }
+        public required Guid OrderId { get; init; }
         public required int ProductVariantId { get; init; }
         public required int Quantity { get; init; }
         public required decimal UnitPrice { get; init; }

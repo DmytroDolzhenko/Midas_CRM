@@ -11,7 +11,7 @@ namespace Midas.Application.Entities.Customers.Commands
     }
 
     public class DeleteCustomerCommandHandler(
-        IGetQueries<Customer> queries,
+        IGetQueries<Customer, int> queries,
         IEntityRepository<Customer> repository)
         : IRequestHandler<DeleteCustomerCommand, Customer>
     {

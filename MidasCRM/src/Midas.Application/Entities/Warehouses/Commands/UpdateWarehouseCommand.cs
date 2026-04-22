@@ -14,7 +14,7 @@ namespace Midas.Application.Entities.Warehouses.Commands
         public required string Name { get; set; }
     }
     public class UpdateWarehouseCommandHandler(
-        IGetQueries<Warehouse> warehouseQueries,
+        IGetQueries<Warehouse, int> warehouseQueries,
         IEntityRepository<Warehouse> warehouseRepository)
         : IRequestHandler<UpdateWarehouseCommand, Warehouse>
     {

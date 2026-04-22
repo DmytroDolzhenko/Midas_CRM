@@ -13,15 +13,15 @@ namespace Midas.Application.Entities.Orders.Commands
 {
     public class AddItemToOrderCommand : IRequest<Order>
     {
-        public required int OrderId { get; init; }
+        public required Guid OrderId { get; init; }
         public required int ProductId { get; init; }
         public required int Quantity { get; init; }
         public required int ProductVariantId { get; init; }
     }
     public class AddItemToOrderCommandHandler(
-        IGetQueries<Order> orderQueries,
-        IGetQueries<ProductVariant> variantQueries,
-        IGetQueries<Product> productQueries,
+        IGetQueries<Order, Guid> orderQueries,
+        IGetQueries<ProductVariant, int> variantQueries,
+        IGetQueries<Product, int> productQueries,
         IEntityRepository<Order> orderRepository)
         : IRequestHandler<AddItemToOrderCommand, Order>
     {

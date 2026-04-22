@@ -12,7 +12,7 @@ namespace Midas.Application.Entities.Contacts.Commands
     }
 
     public class UpdateContactCommandHandler(
-        IGetQueries<Contact> queries,
+        IGetQueries<Contact, int> queries,
         IEntityRepository<Contact> repository)
         : IRequestHandler<UpdateContactCommand, Contact>
     {
