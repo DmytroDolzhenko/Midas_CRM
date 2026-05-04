@@ -1,10 +1,11 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Core.CustomerAddresses;
+using Midas.Application.Common.Messaging;
 
 namespace Midas.Application.Entities.CustomerAddresses.Commands
 {
-    public class CreateCustomerAddressCommand : IRequest<CustomerAddress>
+    public class CreateCustomerAddressCommand : ICommand<CustomerAddress>
     {
         public required int CustomerId { get; init; }
         public required string City { get; init; }

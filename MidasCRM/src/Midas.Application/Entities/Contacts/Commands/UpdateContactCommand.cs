@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Contacts;
 
 namespace Midas.Application.Entities.Contacts.Commands
 {
-    public class UpdateContactCommand : IRequest<Contact>
+    public class UpdateContactCommand : ICommand<Contact>
     {
         public required int Id { get; init; }
         public required string Value { get; init; }

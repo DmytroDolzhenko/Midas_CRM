@@ -12,7 +12,7 @@ namespace Midas.Api.Controllers
     [Route("api/[controller]")]
     public class ContactController(
         ISender sender,
-        ICurrentUserService currentUserService,
+      //  ICurrentUserService currentUserService,
         IGetQueries<Contact, int> getQueries
         ) : ControllerBase
     {
@@ -54,6 +54,7 @@ namespace Midas.Api.Controllers
 
             return Ok(result);
         }
+
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> MarkAsDelete(int id, CancellationToken cancellationToken)
         {

@@ -1,12 +1,13 @@
 using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.CustomerAddresses;
 using Midas.Core.Orders;
 
 namespace Midas.Application.Entities.Orders.Commands
 {
-    public class CreateOrderCommand : IRequest<Order>
+    public class CreateOrderCommand : ICommand<Order>
     {
         public required int CustomerId { get; init; }
         public required CustomerAddress Address { get; init; }

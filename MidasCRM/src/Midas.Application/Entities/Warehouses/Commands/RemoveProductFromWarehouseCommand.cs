@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Products;
 using Midas.Core.Warehouses;
 using System;
@@ -9,7 +10,7 @@ using System.Text;
 
 namespace Midas.Application.Entities.Warehouses.Commands
 {
-    public class RemoveProductFromWarehouseCommand : IRequest<Warehouse>
+    public class RemoveProductFromWarehouseCommand : ICommand<Warehouse>
     {
         public required int WarehouseId { get; set; }
         public required int ProductId { get; set; }

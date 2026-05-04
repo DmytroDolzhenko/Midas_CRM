@@ -15,19 +15,19 @@ namespace Midas.Infrastructure.Persistence.Repositories
         public async Task AddAsync(T entity, CancellationToken cancellationToken)
         {
             await _context.Set<T>().AddAsync(entity, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            // await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task DeleteAsync(T entity, CancellationToken cancellationToken)
         {
             _context.Set<T>().Update(entity);
-            await _context.SaveChangesAsync(cancellationToken);
+            // await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task UpdateAsync(T entity, CancellationToken cancellationToken)
         {
             _context.Set<T>().Update(entity);
-            await _context.SaveChangesAsync(cancellationToken);
+            // await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

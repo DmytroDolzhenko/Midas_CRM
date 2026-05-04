@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Infrastructure.Persistence.Queries;
@@ -47,8 +48,11 @@ namespace Infrastructure.Persistence
 
         private static void AddRepositories(this IServiceCollection services)
         {
-           services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
-           services.AddScoped(typeof(IGetQueries<,>), typeof(GetQueries<,>));
+            services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
+            services.AddScoped(typeof(IGetQueries<,>), typeof(GetQueries<,>));
+
+            services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>());
         }
     }
 }

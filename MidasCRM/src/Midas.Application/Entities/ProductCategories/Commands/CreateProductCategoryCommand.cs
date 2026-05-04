@@ -1,10 +1,11 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.ProductCategories;
 
 namespace Midas.Application.Entities.ProductCategories.Commands
 {
-    public class CreateProductCategoryCommand : IRequest<ProductCategory>
+    public class CreateProductCategoryCommand : ICommand<ProductCategory>
     {
         public required string Name { get; init; }
     }

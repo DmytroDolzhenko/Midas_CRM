@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Midas.Application.Common.Interfaces;
 using Midas.Core.Contacts;
 using Midas.Core.CustomerAddresses;
 using Midas.Core.Customers;
@@ -23,7 +24,7 @@ using System.Threading.Tasks;
 namespace Infrastructure.Persistence
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
+        : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options), IApplicationDbContext
     {
         public DbSet<User> Users { get; init; }
         public DbSet<Warehouse> Warehouses { get; init; }

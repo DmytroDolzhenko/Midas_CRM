@@ -1,12 +1,13 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Enums;
 using Midas.Core.Users;
 
 namespace Midas.Application.Entities.Users.Commands
 {
-    public class ChangeUserRoleCommand : IRequest<User>
+    public class ChangeUserRoleCommand : ICommand<User>
     {
         public required Guid Id { get; init; }
         public required UserRole Role { get; init; }

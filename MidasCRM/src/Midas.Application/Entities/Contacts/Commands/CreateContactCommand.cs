@@ -1,10 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Core.Contacts;
+using Midas.Application.Common.Messaging;
+using System.Windows.Input;
 
 namespace Midas.Application.Entities.Contacts.Commands
 {
-    public class CreateContactCommand : IRequest<Contact>
+    public class CreateContactCommand : ICommand<Contact>
     {
         public required string Value { get; init; }
     }

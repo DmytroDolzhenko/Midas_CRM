@@ -31,7 +31,7 @@ namespace Midas.Api.Modules.Validators.AuthDtoValidators
                 .MaximumLength(100)
                 .WithMessage("Surname must be less than 100 characters");
 
-            RuleFor(x => x.Middlename)
+            RuleFor(x => x.Fathername)
                 .NotEmpty()
                 .WithMessage("Middlename is required")
                 .MaximumLength(100)

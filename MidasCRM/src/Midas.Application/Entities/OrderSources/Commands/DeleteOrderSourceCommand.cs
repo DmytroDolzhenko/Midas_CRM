@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.OrderSources;
 
 namespace Midas.Application.Entities.OrderSources.Commands
 {
-    public class DeleteOrderSourceCommand : IRequest<OrderSource>
+    public class DeleteOrderSourceCommand : ICommand<OrderSource>
     {
         public required int Id { get; init; }
     }

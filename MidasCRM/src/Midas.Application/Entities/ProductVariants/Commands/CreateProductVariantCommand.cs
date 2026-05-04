@@ -1,10 +1,11 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.ProductVariants;
 
 namespace Midas.Application.Entities.ProductVariants.Commands
 {
-    public class CreateProductVariantCommand : IRequest<ProductVariant>
+    public class CreateProductVariantCommand : ICommand<ProductVariant>
     {
         public required int ProductId { get; init; }
         public required string UniqCode { get; init; }

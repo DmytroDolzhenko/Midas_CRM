@@ -2,6 +2,7 @@
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Products;
 using Midas.Core.Warehouses;
 using System;
@@ -10,7 +11,7 @@ using System.Text;
 
 namespace Midas.Application.Entities.Products.Commands
 {
-    public class CreateProductCommand : IRequest<Product>
+    public class CreateProductCommand : ICommand<Product>
     {
         public required int WarehouseId { get; init; }
         public required string Name { get; init; }

@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.CustomerAddresses;
 
 namespace Midas.Application.Entities.CustomerAddresses.Commands
 {
-    public class DeleteCustomerAddressCommand : IRequest<CustomerAddress>
+    public class DeleteCustomerAddressCommand : ICommand<CustomerAddress>
     {
         public required int Id { get; init; }
     }

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
 using Midas.Core.Products;
@@ -11,7 +12,7 @@ using System.Text;
 
 namespace Midas.Application.Entities.Orders.Commands
 {
-    public class RemoveItemFromOrderCommand : IRequest<Order>
+    public class RemoveItemFromOrderCommand : ICommand<Order>
     {
         public required Guid OrderId { get; init; }
         public required int ProductId { get; init; }
