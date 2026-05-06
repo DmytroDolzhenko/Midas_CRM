@@ -8,7 +8,7 @@ namespace Midas.Core.Users
 {
     public class User : IdentityUser<Guid>, IEntity<Guid>
     {
-        public Guid Id { get; }
+      //  public Guid Id { get; }
         public string Name { get; private set; }
         public string Surname { get; private set; }
         public string Fathername { get; private set; }

@@ -1,4 +1,5 @@
 using MediatR;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
 using Midas.Core.Contacts;
@@ -14,17 +15,21 @@ namespace Midas.Application.Entities.Customers.Commands
         public required int Email { get; init; }
     }
 
-    public class CreateCustomerCommandHandler(IEntityRepository<Customer> repository)
+    public class CreateCustomerCommandHandler(
+        IEntityRepository<Customer> repository,
+        ICurrentUserService currentUserService)
         : IRequestHandler<CreateCustomerCommand, Customer>
     {
         public async Task<Customer> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
         {
-            var contact = Contact.Create(request.ContactValue);
+            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var contact = Contact.Create(request.ContactValue, currentUserId);
             var customer = Customer.Create(
                 request.Name,
                 request.Surname,
                 contact,
-                request.Email);
+                request.Email,
+                currentUserId);
 
             await repository.AddAsync(customer, cancellationToken);
             return customer;

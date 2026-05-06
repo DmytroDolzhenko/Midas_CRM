@@ -1,4 +1,5 @@
 using MediatR;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Core.Contacts;
 using Midas.Application.Common.Messaging;
@@ -11,12 +12,15 @@ namespace Midas.Application.Entities.Contacts.Commands
         public required string Value { get; init; }
     }
 
-    public class CreateContactCommandHandler(IEntityRepository<Contact> repository)
+    public class CreateContactCommandHandler(
+        IEntityRepository<Contact> repository,
+        ICurrentUserService currentUserService)
         : IRequestHandler<CreateContactCommand, Contact>
     {
         public async Task<Contact> Handle(CreateContactCommand request, CancellationToken cancellationToken)
         {
-            var contact = Contact.Create(request.Value);
+            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var contact = Contact.Create(request.Value, currentUserId);
             await repository.AddAsync(contact, cancellationToken);
             return contact;
         }

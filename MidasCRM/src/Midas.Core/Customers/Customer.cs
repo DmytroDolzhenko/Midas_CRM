@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Midas.Core.Customers
 {
-    public class Customer : IEntity<int>
+    public class Customer : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
         public string Name { get; private set; }
@@ -13,34 +13,38 @@ namespace Midas.Core.Customers
         public Contact Contact { get; private set; }
         public int Email { get; private set; }
         public bool IsDeleted { get; private set; }
-        // public Guid OwnerId { get; private set; }
+        public Guid OwnerId { get; private set; }
 
         private Customer(
             int id,
             string name,
             string surname,
             Contact contact,
-            int email)
+            int email,
+            Guid ownerId)
         {
             Id = id;
             Name = name;
             Surname = surname;
             Contact = contact;
             Email = email;
+            OwnerId = ownerId;
         }
 
         public static Customer Create(
             string name,
             string surname,
             Contact contact,
-            int email)
+            int email,
+            Guid ownerId)
         {
             return new Customer(
                 0,
                 name,
                 surname,
                 contact,
-                email);
+                email,
+                ownerId);
         }
         public void Update(
             string name,

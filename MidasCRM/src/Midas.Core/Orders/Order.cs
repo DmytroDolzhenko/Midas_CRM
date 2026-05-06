@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Midas.Core.Orders
 {
-    public class Order : IEntity<Guid>
+    public class Order : IEntity<Guid>, IOwnedEntity
     {
         public Guid Id { get;}
         public string UniqCode { get; private set; }

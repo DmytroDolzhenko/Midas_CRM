@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Midas.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Midas.Core.ProductVariants
 {
-    public class ProductVariant : IEntity<int>
+    public class ProductVariant : IEntity<int>, IOwnedEntity
     {
         public int Id { get;}
         public int ProductId { get; private set; }
@@ -14,6 +15,8 @@ namespace Midas.Core.ProductVariants
         public int StockQuantity { get; private set; }
         public decimal CostPrice { get; private set; }
         public decimal SellPrice { get; private set; }
+        public ProductVariantStatus Status { get; private set; }
+        public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
         private ProductVariant(
@@ -23,7 +26,10 @@ namespace Midas.Core.ProductVariants
             string color,
             string size,
             decimal costPrice,
-            decimal sellPrice)
+            decimal sellPrice,
+            ProductVariantStatus status,
+            Guid ownerId
+            )
         {
             Id = id;
             ProductId = productId;
@@ -32,6 +38,8 @@ namespace Midas.Core.ProductVariants
             Size = size;
             CostPrice = costPrice;
             SellPrice = sellPrice;
+            Status = status;
+            OwnerId = ownerId;
         }
 
         public static ProductVariant Create(
@@ -40,7 +48,9 @@ namespace Midas.Core.ProductVariants
             string color,
             string size,
             decimal costPrice,
-            decimal sellPrice)
+            decimal sellPrice,
+            ProductVariantStatus status,
+            Guid ownerId)
         {
             return new ProductVariant(
                 0,
@@ -49,7 +59,10 @@ namespace Midas.Core.ProductVariants
                 color,
                 size,
                 costPrice,
-                sellPrice);
+                sellPrice,
+                ProductVariantStatus.Available,
+                ownerId
+                );
         }
 
         public void Update(
@@ -70,6 +83,10 @@ namespace Midas.Core.ProductVariants
         public void MarkAsDeleted()
         {
             IsDeleted = true;
+        }
+        public void UpdateStatus(ProductVariantStatus status)
+        {
+            Status = status;
         }
     }
 }

@@ -4,13 +4,14 @@ using System.Text;
 
 namespace Midas.Core.CustomerAddresses
 {
-    public class CustomerAddress : IEntity<int>
+    public class CustomerAddress : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
         public int CustomerId { get; private set; }
         public string City { get; private set; }
         public int PostalCode { get; private set; }
         public int PostDepartmentNumber { get; private set; }
+        public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
         private CustomerAddress(
@@ -18,27 +19,31 @@ namespace Midas.Core.CustomerAddresses
             int customerId,
             string city,
             int postalCode,
-            int postDepartmentNumber)
+            int postDepartmentNumber,
+            Guid ownerId)
         {
             Id = id;
             CustomerId = customerId;
             City = city;
             PostalCode = postalCode;
             PostDepartmentNumber = postDepartmentNumber;
+            OwnerId = ownerId;
         }
         public static CustomerAddress Create(
             int id,
             int customerId,
             string city,
             int postalCode,
-            int postDepartmentNumber)
+            int postDepartmentNumber,
+            Guid ownerId)
         {
             return new CustomerAddress(
                 id,
                 customerId,
                 city,
                 postalCode,
-                postDepartmentNumber);
+                postDepartmentNumber,
+                ownerId);
         }
         public void Update(
             int customerId,

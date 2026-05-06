@@ -29,6 +29,75 @@ namespace Midas.Api.Modules.Validators.OrdersDtoValidators
         }
     }
 
+    public class CreateOrderOneClickDtoValidator : AbstractValidator<CreateOrderOneClickDto>
+    {
+        public CreateOrderOneClickDtoValidator()
+        {
+            RuleFor(x => x.Customer)
+                .NotNull()
+                .SetValidator(new CreateOneClickCustomerDtoValidator());
+
+            RuleFor(x => x.Address)
+                .NotNull()
+                .SetValidator(new CreateOneClickAddressDtoValidator());
+
+            RuleFor(x => x.Items)
+                .NotEmpty();
+
+            RuleForEach(x => x.Items)
+                .SetValidator(new CreateOneClickOrderItemDtoValidator());
+        }
+    }
+
+    public class CreateOneClickCustomerDtoValidator : AbstractValidator<CreateOneClickCustomerDto>
+    {
+        public CreateOneClickCustomerDtoValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.Surname)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.ContactValue)
+                .NotEmpty()
+                .MaximumLength(255);
+
+            RuleFor(x => x.Email)
+                .GreaterThan(0);
+        }
+    }
+
+    public class CreateOneClickAddressDtoValidator : AbstractValidator<CreateOneClickAddressDto>
+    {
+        public CreateOneClickAddressDtoValidator()
+        {
+            RuleFor(x => x.City)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.PostalCode)
+                .GreaterThan(0);
+
+            RuleFor(x => x.PostDepartmentNumber)
+                .GreaterThan(0);
+        }
+    }
+
+    public class CreateOneClickOrderItemDtoValidator : AbstractValidator<CreateOneClickOrderItemDto>
+    {
+        public CreateOneClickOrderItemDtoValidator()
+        {
+            RuleFor(x => x.ProductVariantId)
+                .GreaterThan(0);
+
+            RuleFor(x => x.Quantity)
+                .GreaterThan(0);
+        }
+    }
+
     public class AddItemToOrderDtoValidator : AbstractValidator<AddItemToOrderDto>
     {
         public AddItemToOrderDtoValidator()

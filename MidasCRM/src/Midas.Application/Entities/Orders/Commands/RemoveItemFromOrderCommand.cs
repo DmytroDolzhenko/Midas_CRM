@@ -23,6 +23,7 @@ namespace Midas.Application.Entities.Orders.Commands
     public class RemoveItemFromOrderCommandHandler(
         IGetQueries<Order, Guid> orderQueries,
         IGetQueries<OrderItem, int> orderItemQueries,
+        IGetQueries<ProductVariant, int> productVariantQueries,
         IEntityRepository<Order> orderRepository)
         : IRequestHandler<RemoveItemFromOrderCommand, Order>
     {
@@ -39,6 +40,14 @@ namespace Midas.Application.Entities.Orders.Commands
             {
                 throw new Exception($"Order item with id {request.OrderItemId} not found");
             }
+
+
+            var productVariant = await productVariantQueries.GetByIdAsync(request.ProductVariantId, cancellationToken);
+            if(productVariant == null)
+            {
+                throw new Exception($"ProductVariant with id {request.ProductVariantId} not found");
+            }
+            productVariant.UpdateStatus(Core.Enums.ProductVariantStatus.Available);
 
             order.RemoveOrderItem(orderItem);
 

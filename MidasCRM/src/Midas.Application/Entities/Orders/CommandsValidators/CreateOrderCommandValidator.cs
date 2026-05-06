@@ -11,9 +11,15 @@ namespace Midas.Application.Entities.Orders.CommandsValidators
                 .GreaterThan(0)
                 .WithMessage("CustomerId must be greater than 0.");
 
-            RuleFor(x => x.Address)
-            .NotNull()
-            .WithMessage("Address is required.");
+            RuleFor(x => x.City)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.PostalCode)
+                .GreaterThan(0);
+
+            RuleFor(x => x.PostDepartmentNumber)
+                .GreaterThan(0);
         }
     }
 }

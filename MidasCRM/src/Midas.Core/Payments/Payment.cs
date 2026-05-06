@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Midas.Core.Payments
 {
-    public class Payment : IEntity<Guid>
+    public class Payment : IEntity<Guid>, IOwnedEntity
     {
         public Guid Id { get;}
         public int OrderId { get; private set; }
@@ -13,9 +13,10 @@ namespace Midas.Core.Payments
         public PaymentMethods Method { get; private set; }
         public PaymentStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        private Payment(Guid id, int orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt)
+        private Payment(Guid id, int orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt, Guid ownerId)
         {
             Id = id;
             OrderId = orderId;
@@ -23,9 +24,10 @@ namespace Midas.Core.Payments
             Method = method;
             Status = status;
             CreatedAt = createdAt;
+            OwnerId = ownerId;
         }
 
-        public static Payment Create(int orderId, decimal amount, PaymentMethods method)
+        public static Payment Create(int orderId, decimal amount, PaymentMethods method, Guid ownerId)
         {
             return new Payment(
                 Guid.NewGuid(),
@@ -33,7 +35,8 @@ namespace Midas.Core.Payments
                 amount,
                 method,
                 PaymentStatus.Pending,
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                ownerId);
         }
         public void MasrkAsDeleted()
         {

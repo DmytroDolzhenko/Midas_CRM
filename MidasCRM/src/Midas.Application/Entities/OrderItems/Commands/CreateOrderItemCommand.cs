@@ -1,4 +1,5 @@
 using MediatR;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
 using Midas.Core.OrderItems;
@@ -14,17 +15,21 @@ namespace Midas.Application.Entities.OrderItems.Commands
         public required decimal CostPriceSnapshot { get; init; }
     }
 
-    public class CreateOrderItemCommandHandler(IEntityRepository<OrderItem> repository)
+    public class CreateOrderItemCommandHandler(
+        IEntityRepository<OrderItem> repository,
+        ICurrentUserService currentUserService)
         : IRequestHandler<CreateOrderItemCommand, OrderItem>
     {
         public async Task<OrderItem> Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
         {
+            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
             var orderItem = OrderItem.Create(
                 request.OrderId,
                 request.ProductVariantId,
                 request.Quantity,
                 request.UnitPrice,
-                request.CostPriceSnapshot);
+                request.CostPriceSnapshot,
+                currentUserId);
 
             await repository.AddAsync(orderItem, cancellationToken);
             return orderItem;

@@ -40,17 +40,21 @@ namespace Midas.Application.Entities.Orders.Commands
                 throw new Exception($"Product variant with id {request.ProductVariantId} not found.");
             }
 
-            var orderItem = OrderItem.Create(request.OrderId, request.ProductVariantId, request.Quantity, productVariant.CostPrice, productVariant.SellPrice);
-            if (orderItem == null)
-            {
-                throw new Exception($"Order item not found.");
-            }
-
             var order = await orderQueries.GetByIdAsync(request.OrderId, cancellationToken);
             if (order == null)
             {
                 throw new Exception($"Order with id {request.OrderId} not found.");
             }
+
+            var orderItem = OrderItem.Create(
+                request.OrderId,
+                request.ProductVariantId,
+                request.Quantity,
+                productVariant.CostPrice,
+                productVariant.SellPrice,
+                order.OwnerId);
+
+            productVariant.UpdateStatus(Core.Enums.ProductVariantStatus.InOrder);
 
             order.AddOrderItem(orderItem);
             await orderRepository.UpdateAsync(order, cancellationToken);

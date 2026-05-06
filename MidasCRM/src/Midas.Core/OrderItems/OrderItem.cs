@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Midas.Core.OrderItems
 {
-    public class OrderItem : IEntity<int>
+    public class OrderItem : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
         public Guid OrderId { get; private set; }
@@ -12,9 +12,10 @@ namespace Midas.Core.OrderItems
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; } // Ціна за одиницю товару на момент замовлення
         public decimal CostPriceSnapshot { get; private set; } // Ціна закупівлі на момент замовлення
+        public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        private OrderItem(int id, Guid orderId, int productVariantId, int quantity, decimal unitPrice, decimal costPriceSnapshot)
+        private OrderItem(int id, Guid orderId, int productVariantId, int quantity, decimal unitPrice, decimal costPriceSnapshot, Guid ownerId)
         {
             Id = id;
             OrderId = orderId;
@@ -22,6 +23,7 @@ namespace Midas.Core.OrderItems
             Quantity = quantity;
             UnitPrice = unitPrice;
             CostPriceSnapshot = costPriceSnapshot;
+            OwnerId = ownerId;
         }
 
         public static OrderItem Create(
@@ -29,7 +31,8 @@ namespace Midas.Core.OrderItems
             int productVariantId,
             int quantity,
             decimal unitPrice,
-            decimal costPriceSnapshot)
+            decimal costPriceSnapshot,
+            Guid ownerId)
         {
             return new OrderItem(
                 0,
@@ -37,7 +40,8 @@ namespace Midas.Core.OrderItems
                 productVariantId,
                 quantity,
                 unitPrice,
-                costPriceSnapshot);
+                costPriceSnapshot,
+                ownerId);
         }
 
         public void Update(

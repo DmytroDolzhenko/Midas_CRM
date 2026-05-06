@@ -1,3 +1,4 @@
+using Microsoft.Identity.Client;
 using Midas.Core.Enums;
 using Midas.Core.Orders;
 
@@ -34,6 +35,30 @@ namespace Api.Dtos
     public record CreateOrderDto(
         int CustomerId,
         CreateCustomerAddressDto Address
+    );
+
+    public record CreateOrderOneClickDto(
+        CreateOneClickCustomerDto Customer,
+        CreateOneClickAddressDto Address,
+        IReadOnlyCollection<CreateOneClickOrderItemDto> Items
+    );
+
+    public record CreateOneClickCustomerDto(
+        string Name,
+        string Surname,
+        string ContactValue,
+        int Email
+    );
+
+    public record CreateOneClickAddressDto(
+        string City,
+        int PostalCode,
+        int PostDepartmentNumber
+    );
+
+    public record CreateOneClickOrderItemDto(
+        int ProductVariantId,
+        int Quantity
     );
 
     public record DeleteOrderDto(

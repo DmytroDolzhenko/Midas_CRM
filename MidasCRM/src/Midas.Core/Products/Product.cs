@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Midas.Core.Products
 {
-    public class Product : IEntity<int>
+    public class Product : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
         public int WarehouseId { get; private set; }
@@ -13,7 +13,7 @@ namespace Midas.Core.Products
         public int ProductCategoryId { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
-        // public Guid OwnerId { get; private set; }
+        public Guid OwnerId { get; private set; }
 
         private Product(
             int id,
@@ -21,7 +21,8 @@ namespace Midas.Core.Products
             string name,
             string description,
             int productCategoryId,
-            DateTime createdAt)
+            DateTime createdAt,
+            Guid ownerId)
         {
             Id = id;
             WarehouseId = warehouseId;
@@ -29,13 +30,15 @@ namespace Midas.Core.Products
             Description = description;
             ProductCategoryId = productCategoryId;
             CreatedAt = createdAt;
+            OwnerId = ownerId;
         }
 
         public static Product Create(
             int warehouseId,
             string name,
             string description,
-            int productCategoryId)
+            int productCategoryId,
+            Guid ownerId)
         {
             return new Product(
                 0,
@@ -43,7 +46,8 @@ namespace Midas.Core.Products
                 name,
                 description,
                 productCategoryId,
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                ownerId);
         }
 
         public void Update(

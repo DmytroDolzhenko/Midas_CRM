@@ -50,7 +50,8 @@ namespace Midas.Application.Entities.Products.Commands
                 request.WarehouseId,
                 request.Name,
                 request.Description,
-                category.Id);
+                category.Id,
+                currentUserService.UserId ?? throw new UnauthorizedAccessException());
 
             await repositories.AddAsync(product, cancellationToken);
             await warehouseRepositories.UpdateAsync(warehouse, cancellationToken);
