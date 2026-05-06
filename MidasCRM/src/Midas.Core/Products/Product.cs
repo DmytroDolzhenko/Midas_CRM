@@ -1,19 +1,30 @@
-﻿using System;
+using Midas.Core.ProductCategories;
+using Midas.Core.ProductVariants;
+using Midas.Core.Warehouses;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Midas.Core.Products
 {
     public class Product : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
+
         public int WarehouseId { get; private set; }
+        public Warehouse Warehouse { get; private set; } = null!;
+
         public string Name { get; private set; }
         public string Description { get; private set; }
+
         public int ProductCategoryId { get; private set; }
+        public ProductCategory ProductCategory { get; private set; } = null!;
+
         public DateTime CreatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
         public Guid OwnerId { get; private set; }
+
+        private readonly List<ProductVariant> _variants = new();
+        public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
 
         private Product(
             int id,
@@ -67,6 +78,7 @@ namespace Midas.Core.Products
         {
             IsDeleted = true;
         }
+
         public void ChangeWarehouse(int newWarehouseId)
         {
             WarehouseId = newWarehouseId;

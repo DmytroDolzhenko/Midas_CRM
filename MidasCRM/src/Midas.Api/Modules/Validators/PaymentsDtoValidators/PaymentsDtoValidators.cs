@@ -9,8 +9,8 @@ namespace Midas.Api.Modules.Validators.PaymentsDtoValidators
         public CreatePaymentDtoValidator()
         {
             RuleFor(x => x.OrderId)
-                .GreaterThan(0)
-                .WithMessage("Order Id must be greater than 0.");
+                .NotEmpty()
+                .WithMessage("Order Id is required.");
 
             RuleFor(x => x.Amount)
                 .GreaterThan(0)

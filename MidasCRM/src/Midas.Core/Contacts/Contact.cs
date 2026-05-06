@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using Midas.Core.Customers;
 
 namespace Midas.Core.Contacts
 {
@@ -11,6 +12,10 @@ namespace Midas.Core.Contacts
         public string Value { get; private set; }
         public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
+
+        private readonly List<Customer> _customers = new();
+        public IReadOnlyCollection<Customer> Customers => _customers.AsReadOnly();
+
         private Contact(int id, string value, Guid ownerId)
         {
             Id = id;
@@ -18,14 +23,16 @@ namespace Midas.Core.Contacts
             OwnerId = ownerId;
         }
 
-        public static Contact Create(string value, Guid ownerId) 
+        public static Contact Create(string value, Guid ownerId)
         {
             return new Contact(0, value, ownerId);
         }
+
         public void Update(string value)
         {
             Value = value;
         }
+
         public void Delete()
         {
             IsDeleted = true;

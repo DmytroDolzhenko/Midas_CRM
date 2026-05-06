@@ -9,8 +9,8 @@ namespace Midas.Application.Entities.Payments.CommandsValidators
         public CreatePaymentCommandValidator()
         {
             RuleFor(x => x.OrderId)
-                .GreaterThan(0)
-                .WithMessage("OrderId must be greater than 0.");
+                .NotEmpty()
+                .WithMessage("OrderId is required.");
 
             RuleFor(x => x.Amount)
                 .GreaterThan(0)

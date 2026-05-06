@@ -1,7 +1,9 @@
-﻿using Midas.Core.Contacts;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Midas.Core.Contacts;
+using Midas.Core.CustomerAddresses;
+using Midas.Core.Orders;
 
 namespace Midas.Core.Customers
 {
@@ -10,10 +12,19 @@ namespace Midas.Core.Customers
         public int Id { get; }
         public string Name { get; private set; }
         public string Surname { get; private set; }
+
+        public int ContactId { get; private set; }
         public Contact Contact { get; private set; }
+
         public int Email { get; private set; }
         public bool IsDeleted { get; private set; }
         public Guid OwnerId { get; private set; }
+
+        private readonly List<CustomerAddress> _addresses = new();
+        public IReadOnlyCollection<CustomerAddress> Addresses => _addresses.AsReadOnly();
+
+        private readonly List<Order> _orders = new();
+        public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();
 
         private Customer(
             int id,
@@ -27,6 +38,7 @@ namespace Midas.Core.Customers
             Name = name;
             Surname = surname;
             Contact = contact;
+            ContactId = contact.Id;
             Email = email;
             OwnerId = ownerId;
         }
@@ -46,6 +58,7 @@ namespace Midas.Core.Customers
                 email,
                 ownerId);
         }
+
         public void Update(
             string name,
             string surname,
@@ -55,6 +68,7 @@ namespace Midas.Core.Customers
             Name = name;
             Surname = surname;
             Contact = contact;
+            ContactId = contact.Id;
             Email = email;
         }
 

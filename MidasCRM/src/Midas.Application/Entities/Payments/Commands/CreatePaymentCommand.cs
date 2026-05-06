@@ -9,7 +9,7 @@ namespace Midas.Application.Entities.Payments.Commands
 {
     public class CreatePaymentCommand : ICommand<Payment>
     {
-        public required int OrderId { get; init; }
+        public required Guid OrderId { get; init; }
         public required decimal Amount { get; init; }
         public required PaymentMethods Method { get; init; }
     }

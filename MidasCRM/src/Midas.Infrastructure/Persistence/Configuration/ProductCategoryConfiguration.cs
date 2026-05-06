@@ -1,9 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Midas.Core.ProductCategories;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Midas.Infrastructure.Persistence.Configuration
 {
@@ -12,11 +9,16 @@ namespace Midas.Infrastructure.Persistence.Configuration
         public void Configure(EntityTypeBuilder<ProductCategory> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
             builder.Property(x => x.Name)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.HasMany(x => x.Products)
+                .WithOne(x => x.ProductCategory)
+                .HasForeignKey(x => x.ProductCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.ToTable("ProductCategory");
         }

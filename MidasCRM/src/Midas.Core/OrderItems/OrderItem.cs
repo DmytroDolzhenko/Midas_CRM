@@ -1,17 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Midas.Core.Orders;
+using Midas.Core.ProductVariants;
+using System;
 
 namespace Midas.Core.OrderItems
 {
     public class OrderItem : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
+
         public Guid OrderId { get; private set; }
+        public Order Order { get; private set; } = null!;
+
         public int ProductVariantId { get; private set; }
+        public ProductVariant ProductVariant { get; private set; } = null!;
+
         public int Quantity { get; private set; }
-        public decimal UnitPrice { get; private set; } // Ціна за одиницю товару на момент замовлення
-        public decimal CostPriceSnapshot { get; private set; } // Ціна закупівлі на момент замовлення
+        public decimal UnitPrice { get; private set; }
+        public decimal CostPriceSnapshot { get; private set; }
         public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
@@ -57,7 +62,7 @@ namespace Midas.Core.OrderItems
             UnitPrice = unitPrice;
             CostPriceSnapshot = costPriceSnapshot;
         }
-        
+
         public void Delete()
         {
             IsDeleted = true;

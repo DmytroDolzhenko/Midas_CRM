@@ -22,7 +22,7 @@ namespace Api.Dtos
                 user.Surname,
                 user.Fathername,
                 user.Role,
-                user.Email,
+                user.Email ?? string.Empty,
                 user.IsApproved,
                 user.RegistrationDate
             );

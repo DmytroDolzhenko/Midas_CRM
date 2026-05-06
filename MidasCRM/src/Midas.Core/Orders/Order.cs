@@ -1,6 +1,8 @@
-﻿using Midas.Core.CustomerAddresses;
+using Midas.Core.CustomerAddresses;
+using Midas.Core.Customers;
 using Midas.Core.Enums;
 using Midas.Core.OrderItems;
+using Midas.Core.Payments;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,10 +11,15 @@ namespace Midas.Core.Orders
 {
     public class Order : IEntity<Guid>, IOwnedEntity
     {
-        public Guid Id { get;}
+        public Guid Id { get; }
         public string UniqCode { get; private set; }
+
         public int CustomerId { get; private set; }
+        public Customer Customer { get; private set; } = null!;
+
+        public int AddressId { get; private set; }
         public CustomerAddress Address { get; private set; }
+
         public OrderStatus Status { get; private set; }
         public decimal TotalCost { get; private set; }
         public DateTime CreatedAt { get; private set; }
@@ -20,6 +27,10 @@ namespace Midas.Core.Orders
 
         private readonly List<OrderItem> _orderItems = new();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
+
+        private readonly List<Payment> _payments = new();
+        public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
+
         public bool IsDeleted { get; private set; }
 
         private Order(Guid id, string uniqCode, int customerId, CustomerAddress address, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
@@ -28,6 +39,7 @@ namespace Midas.Core.Orders
             UniqCode = uniqCode;
             CustomerId = customerId;
             Address = address;
+            AddressId = address.Id;
             Status = status;
             TotalCost = totalCost;
             CreatedAt = createdAt;
@@ -56,11 +68,13 @@ namespace Midas.Core.Orders
         {
             Status = newStatus;
         }
+
         public void RemoveOrderItem(OrderItem orderItem)
         {
             _orderItems.Remove(orderItem);
             RecalculateTotalCost();
         }
+
         public void AddOrderItem(OrderItem orderItem)
         {
             _orderItems.Add(orderItem);

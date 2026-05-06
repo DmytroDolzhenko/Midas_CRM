@@ -1,14 +1,18 @@
-﻿using Midas.Core.Enums;
+using Midas.Core.Enums;
+using Midas.Core.OrderItems;
+using Midas.Core.Products;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Midas.Core.ProductVariants
 {
     public class ProductVariant : IEntity<int>, IOwnedEntity
     {
-        public int Id { get;}
+        public int Id { get; }
+
         public int ProductId { get; private set; }
+        public Product Product { get; private set; } = null!;
+
         public string UniqCode { get; private set; }
         public string Color { get; private set; }
         public string Size { get; private set; }
@@ -18,6 +22,9 @@ namespace Midas.Core.ProductVariants
         public ProductVariantStatus Status { get; private set; }
         public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
+
+        private readonly List<OrderItem> _orderItems = new();
+        public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
 
         private ProductVariant(
             int id,
@@ -80,10 +87,12 @@ namespace Midas.Core.ProductVariants
             CostPrice = costPrice;
             SellPrice = sellPrice;
         }
+
         public void MarkAsDeleted()
         {
             IsDeleted = true;
         }
+
         public void UpdateStatus(ProductVariantStatus status)
         {
             Status = status;

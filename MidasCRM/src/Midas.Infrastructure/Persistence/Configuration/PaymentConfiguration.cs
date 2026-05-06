@@ -1,9 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Midas.Core.Payments;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Midas.Infrastructure.Persistence.Configuration
 {
@@ -12,24 +9,27 @@ namespace Midas.Infrastructure.Persistence.Configuration
         public void Configure(EntityTypeBuilder<Payment> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id)
-                .ValueGeneratedOnAdd();
 
-            builder.Property(x => x.OrderId)
-                .IsRequired();
+            builder.Property(x => x.OrderId).IsRequired();
 
             builder.Property(x => x.Amount)
                 .IsRequired()
                 .HasColumnType("decimal(18,2)");
 
             builder.Property(x => x.Method)
-                .IsRequired();
+                .IsRequired()
+                .HasConversion<string>();
 
             builder.Property(x => x.Status)
-                .IsRequired();
+                .IsRequired()
+                .HasConversion<string>();
 
-            builder.Property(x => x.CreatedAt)
-                .IsRequired();
+            builder.Property(x => x.CreatedAt).IsRequired();
+
+            builder.HasOne(x => x.Order)
+                .WithMany(x => x.Payments)
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.ToTable("Payment");
         }

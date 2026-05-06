@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Application.Common.Interfaces;
+using Infrastructure.Persistence.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -9,11 +12,6 @@ using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Infrastructure.Persistence.Queries;
 using Midas.Infrastructure.Persistence.Repositories;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence
 {
@@ -42,7 +40,14 @@ namespace Infrastructure.Persistence
                 services.AddDbContext<ApplicationDbContext>();
             }
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddScoped<ApplicationDbContextInitialiser>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+            services.AddSingleton<IAuthorizationHandler, NotDeletedHandler>();
+
             services.AddRepositories();
         }
 
@@ -52,7 +57,7 @@ namespace Infrastructure.Persistence
             services.AddScoped(typeof(IGetQueries<,>), typeof(GetQueries<,>));
 
             services.AddScoped<IApplicationDbContext>(provider =>
-            provider.GetRequiredService<ApplicationDbContext>());
+                provider.GetRequiredService<ApplicationDbContext>());
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Api.Dtos
 {
     public record PaymentDto(
         Guid Id,
-        int OrderId,
+        Guid OrderId,
         decimal Amount,
         PaymentMethods Method,
         PaymentStatus Status,
@@ -26,7 +26,7 @@ namespace Api.Dtos
     }
 
     public record CreatePaymentDto(
-        int OrderId,
+        Guid OrderId,
         decimal Amount,
         PaymentMethods Method
     );

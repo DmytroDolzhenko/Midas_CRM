@@ -1,7 +1,6 @@
-﻿using Midas.Core.Products;
+using Midas.Core.Products;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Midas.Core.Warehouses
 {
@@ -10,13 +9,14 @@ namespace Midas.Core.Warehouses
         public int Id { get; }
         public string Name { get; private set; }
         public Guid OwnerId { get; private set; }
-        public List<Product> Products { get; private set; }
+
+        private readonly List<Product> _products = new();
+        public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
 
         public Warehouse(string name, Guid ownerId)
         {
             Name = name;
             OwnerId = ownerId;
-            Products = new List<Product>();
         }
 
         public static Warehouse Create(string name, Guid ownerId)
@@ -33,13 +33,15 @@ namespace Midas.Core.Warehouses
         {
             OwnerId = newOwnerId;
         }
+
         public void AddProduct(Product product)
         {
-            Products.Add(product);
+            _products.Add(product);
         }
+
         public void RemoveProduct(Product product)
         {
-           Products.Remove(product);
+            _products.Remove(product);
         }
     }
 }
