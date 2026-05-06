@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Persistence\Configuration\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Midas.Application\Midas.Application.csproj" />
     <ProjectReference Include="..\Midas.Core\Midas.Core.csproj" />
   </ItemGroup>
