@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Enums;
 using Midas.Core.Payments;
 
 namespace Midas.Application.Entities.Payments.Commands
 {
-    public class CreatePaymentCommand : IRequest<Payment>
+    public class CreatePaymentCommand : ICommand<Payment>
     {
         public required int OrderId { get; init; }
         public required decimal Amount { get; init; }

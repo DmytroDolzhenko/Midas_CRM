@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Users;
 
 namespace Midas.Application.Entities.Users.Commands
 {
-    public class DeleteUserCommand : IRequest<User>
+    public class DeleteUserCommand : ICommand<User>
     {
         public required Guid Id { get; init; }
     }

@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Enums;
 using Midas.Core.Users;
 
 namespace Midas.Application.Entities.Users.Commands
 {
-    public class CreateUserCommand : IRequest<User>
+    public class CreateUserCommand : ICommand<User>
     {
         public required string Name { get; init; }
         public required string Surname { get; init; }

@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.ProductVariants;
 
 namespace Midas.Application.Entities.ProductVariants.Commands
 {
-    public class UpdateProductVariantCommand : IRequest<ProductVariant>
+    public class UpdateProductVariantCommand : ICommand<ProductVariant>
     {
         public required int Id { get; init; }
         public required int ProductId { get; init; }

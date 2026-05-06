@@ -1,10 +1,11 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.OrderItems;
 
 namespace Midas.Application.Entities.OrderItems.Commands
 {
-    public class CreateOrderItemCommand : IRequest<OrderItem>
+    public class CreateOrderItemCommand : ICommand<OrderItem>
     {
         public required Guid OrderId { get; init; }
         public required int ProductVariantId { get; init; }

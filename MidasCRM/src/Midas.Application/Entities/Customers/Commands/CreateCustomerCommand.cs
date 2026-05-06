@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Contacts;
 using Midas.Core.Customers;
 
 namespace Midas.Application.Entities.Customers.Commands
 {
-    public class CreateCustomerCommand : IRequest<Customer>
+    public class CreateCustomerCommand : ICommand<Customer>
     {
         public required string Name { get; init; }
         public required string Surname { get; init; }

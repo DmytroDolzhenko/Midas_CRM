@@ -1,4 +1,4 @@
-﻿using Midas.Core.CustomerAdresses;
+﻿using Midas.Core.CustomerAddresses;
 using Midas.Core.Enums;
 using Midas.Core.OrderItems;
 using System;
@@ -12,7 +12,7 @@ namespace Midas.Core.Orders
         public Guid Id { get;}
         public string UniqCode { get; private set; }
         public int CustomerId { get; private set; }
-        public CustomerAdress Adress { get; private set; }
+        public CustomerAddress Address { get; private set; }
         public OrderStatus Status { get; private set; }
         public decimal TotalCost { get; private set; }
         public DateTime CreatedAt { get; private set; }
@@ -22,25 +22,25 @@ namespace Midas.Core.Orders
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
         public bool IsDeleted { get; private set; }
 
-        private Order(Guid id, string uniqCode, int customerId, CustomerAdress adress, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
+        private Order(Guid id, string uniqCode, int customerId, CustomerAddress address, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
         {
             Id = id;
             UniqCode = uniqCode;
             CustomerId = customerId;
-            Adress = adress;
+            Address = address;
             Status = status;
             TotalCost = totalCost;
             CreatedAt = createdAt;
             OwnerId = ownerId;
         }
 
-        public static Order Create(int customerId, CustomerAdress adress, Guid ownerId)
+        public static Order Create(int customerId, CustomerAddress address, Guid ownerId)
         {
             return new Order(
                 Guid.NewGuid(),
                 Guid.NewGuid().ToString(),
                 customerId,
-                adress,
+                address,
                 OrderStatus.Pending,
                 0,
                 DateTime.UtcNow,

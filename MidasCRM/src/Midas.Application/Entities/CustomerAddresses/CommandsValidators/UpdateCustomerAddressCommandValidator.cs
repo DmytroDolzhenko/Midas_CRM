@@ -1,12 +1,16 @@
 using FluentValidation;
-using Midas.Application.Entities.CustomerAdresses.Commands;
+using Midas.Application.Entities.CustomerAddresses.Commands;
 
-namespace Midas.Application.Entities.CustomerAdresses.CommandsValidators
+namespace Midas.Application.Entities.CustomerAddresses.CommandsValidators
 {
-    public class CreateCustomerAdressCommandValidator : AbstractValidator<CreateCustomerAdressCommand>
+    public class UpdateCustomerAddressCommandValidator : AbstractValidator<UpdateCustomerAddressCommand>
     {
-        public CreateCustomerAdressCommandValidator()
+        public UpdateCustomerAddressCommandValidator()
         {
+            RuleFor(x => x.Id)
+                .GreaterThan(0)
+                .WithMessage("Id must be greater than 0.");
+
             RuleFor(x => x.CustomerId)
                 .GreaterThan(0)
                 .WithMessage("CustomerId must be greater than 0.");

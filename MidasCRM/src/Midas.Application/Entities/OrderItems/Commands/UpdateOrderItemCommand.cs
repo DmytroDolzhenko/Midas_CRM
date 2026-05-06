@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.OrderItems;
 
 namespace Midas.Application.Entities.OrderItems.Commands
 {
-    public class UpdateOrderItemCommand : IRequest<OrderItem>
+    public class UpdateOrderItemCommand : ICommand<OrderItem>
     {
         public required int Id { get; init; }
         public required Guid OrderId { get; init; }

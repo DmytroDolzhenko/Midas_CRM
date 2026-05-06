@@ -11,13 +11,12 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Exceptions\" />
     <Folder Include="Common\Services\" />
     <Folder Include="Entities\Contacts\" />
-    <Folder Include="Entities\CustomerAdresses\" />
     <Folder Include="Entities\Customers\" />
     <Folder Include="Entities\Users\" />
     <Folder Include="Entities\ProductVariants\" />

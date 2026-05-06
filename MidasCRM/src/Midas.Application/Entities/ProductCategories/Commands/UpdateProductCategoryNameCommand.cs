@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.ProductCategories;
 
 namespace Midas.Application.Entities.ProductCategories.Commands
 {
-    public class UpdateProductCategoryNameCommand : IRequest<ProductCategory>
+    public class UpdateProductCategoryNameCommand : ICommand<ProductCategory>
     {
         public required int Id { get; init; }
         public required string Name { get; init; }

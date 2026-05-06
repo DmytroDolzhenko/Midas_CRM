@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Midas.Core.CustomerAdresses
+namespace Midas.Core.CustomerAddresses
 {
-    public class CustomerAdress : IEntity<int>
+    public class CustomerAddress : IEntity<int>
     {
         public int Id { get; }
         public int CustomerId { get; private set; }
@@ -13,7 +13,7 @@ namespace Midas.Core.CustomerAdresses
         public int PostDepartmentNumber { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        private CustomerAdress(
+        private CustomerAddress(
             int id,
             int customerId,
             string city,
@@ -26,14 +26,14 @@ namespace Midas.Core.CustomerAdresses
             PostalCode = postalCode;
             PostDepartmentNumber = postDepartmentNumber;
         }
-        public static CustomerAdress Create(
+        public static CustomerAddress Create(
             int id,
             int customerId,
             string city,
             int postalCode,
             int postDepartmentNumber)
         {
-            return new CustomerAdress(
+            return new CustomerAddress(
                 id,
                 customerId,
                 city,

@@ -1,11 +1,12 @@
 using MediatR;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Payments;
 
 namespace Midas.Application.Entities.Payments.Commands
 {
-    public class DeletePaymentCommand : IRequest<Payment>
+    public class DeletePaymentCommand : ICommand<Payment>
     {
         public required Guid Id { get; init; }
     }

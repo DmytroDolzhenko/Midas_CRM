@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
 using Midas.Core.Warehouses;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace Midas.Application.Entities.Warehouses.Commands
 {
-    public class CreateWarehouseCommand : IRequest<Warehouse>
+    public class CreateWarehouseCommand : ICommand<Warehouse>
     {
         public required string Name { get; set; }
     }

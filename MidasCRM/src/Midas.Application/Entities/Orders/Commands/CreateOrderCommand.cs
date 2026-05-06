@@ -1,15 +1,16 @@
 using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
-using Midas.Core.CustomerAdresses;
+using Midas.Application.Common.Messaging;
+using Midas.Core.CustomerAddresses;
 using Midas.Core.Orders;
 
 namespace Midas.Application.Entities.Orders.Commands
 {
-    public class CreateOrderCommand : IRequest<Order>
+    public class CreateOrderCommand : ICommand<Order>
     {
         public required int CustomerId { get; init; }
-        public required CustomerAdress Adress { get; init; }
+        public required CustomerAddress Address { get; init; }
     }
 
     public class CreateOrderCommandHandler(
@@ -22,7 +23,7 @@ namespace Midas.Application.Entities.Orders.Commands
             var currentUserId = currentUserService.UserId
                     ?? throw new UnauthorizedAccessException();
 
-            var order = Order.Create(request.CustomerId, request.Adress, currentUserId);
+            var order = Order.Create(request.CustomerId, request.Address, currentUserId);
             await repository.AddAsync(order, cancellationToken);
             return order;
         }
