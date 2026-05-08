@@ -40,13 +40,14 @@ namespace Infrastructure.Persistence
                 services.AddDbContext<ApplicationDbContext>();
             }
 
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
+            //services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddScoped<ApplicationDbContextInitialiser>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-            services.AddSingleton<IAuthorizationHandler, NotDeletedHandler>();
+            services.AddScoped<IAuthorizationHandler, NotDeletedHandler>();
 
             services.AddRepositories();
         }

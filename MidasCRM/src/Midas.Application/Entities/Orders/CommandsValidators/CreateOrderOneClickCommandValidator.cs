@@ -20,7 +20,7 @@ namespace Midas.Application.Entities.Orders.CommandsValidators
                 .MaximumLength(255);
 
             RuleFor(x => x.CustomerEmail)
-                .GreaterThan(0);
+                .NotEmpty();
 
             RuleFor(x => x.City)
                 .NotEmpty()

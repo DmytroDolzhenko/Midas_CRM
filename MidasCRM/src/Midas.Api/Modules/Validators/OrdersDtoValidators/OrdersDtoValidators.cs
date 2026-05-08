@@ -66,7 +66,10 @@ namespace Midas.Api.Modules.Validators.OrdersDtoValidators
                 .MaximumLength(255);
 
             RuleFor(x => x.Email)
-                .GreaterThan(0);
+                .NotEmpty()
+                .WithMessage("Email is required")
+                .EmailAddress()
+                .WithMessage("Email must be a valid email address");
         }
     }
 

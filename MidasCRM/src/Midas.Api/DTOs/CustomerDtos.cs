@@ -7,7 +7,7 @@ namespace Api.Dtos
         string Name,
         string Surname,
         ContactDto Contact,
-        int Email,
+        string Email,
         bool IsDeleted
     )
     {
@@ -26,14 +26,14 @@ namespace Api.Dtos
         string Name,
         string Surname,
         string ContactValue,
-        int Email
+        string Email
     );
 
     public record UpdateCustomerDto(
         string Name,
         string Surname,
         string ContactValue,
-        int Email
+        string Email
     );
 
     public record DeleteCustomerDto(

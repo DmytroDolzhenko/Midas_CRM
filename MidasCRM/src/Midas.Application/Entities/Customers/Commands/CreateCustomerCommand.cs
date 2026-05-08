@@ -12,7 +12,7 @@ namespace Midas.Application.Entities.Customers.Commands
         public required string Name { get; init; }
         public required string Surname { get; init; }
         public required string ContactValue { get; init; }
-        public required int Email { get; init; }
+        public required string Email { get; init; }
     }
 
     public class CreateCustomerCommandHandler(
@@ -27,7 +27,7 @@ namespace Midas.Application.Entities.Customers.Commands
             var customer = Customer.Create(
                 request.Name,
                 request.Surname,
-                contact,
+                contact.Id,
                 request.Email,
                 currentUserId);
 

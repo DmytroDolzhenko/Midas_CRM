@@ -47,7 +47,7 @@ namespace Api.Dtos
         string Name,
         string Surname,
         string ContactValue,
-        int Email
+        string Email
     );
 
     public record CreateOneClickAddressDto(

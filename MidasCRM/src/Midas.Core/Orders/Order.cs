@@ -18,7 +18,7 @@ namespace Midas.Core.Orders
         public Customer Customer { get; private set; } = null!;
 
         public int AddressId { get; private set; }
-        public CustomerAddress Address { get; private set; }
+        public CustomerAddress Address { get; private set; } = null!;
 
         public OrderStatus Status { get; private set; }
         public decimal TotalCost { get; private set; }
@@ -33,13 +33,12 @@ namespace Midas.Core.Orders
 
         public bool IsDeleted { get; private set; }
 
-        private Order(Guid id, string uniqCode, int customerId, CustomerAddress address, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
+        private Order(Guid id, string uniqCode, int customerId, int addressId, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
         {
             Id = id;
             UniqCode = uniqCode;
             CustomerId = customerId;
-            Address = address;
-            AddressId = address.Id;
+            AddressId = addressId;
             Status = status;
             TotalCost = totalCost;
             CreatedAt = createdAt;
@@ -52,7 +51,7 @@ namespace Midas.Core.Orders
                 Guid.NewGuid(),
                 Guid.NewGuid().ToString(),
                 customerId,
-                address,
+                address.Id,
                 OrderStatus.Pending,
                 0,
                 DateTime.UtcNow,

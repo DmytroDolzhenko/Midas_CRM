@@ -26,7 +26,7 @@ namespace Midas.Api.Modules.Validators.CustomersDtoValidators
                 .WithMessage("ContactValue must be less than 255 characters");
 
             RuleFor(x => x.Email)
-                .GreaterThan(0)
+                .NotEmpty()
                 .WithMessage("Email must be greater than 0.");
         }
     }
@@ -54,8 +54,10 @@ namespace Midas.Api.Modules.Validators.CustomersDtoValidators
                 .WithMessage("ContactValue must be less than 255 characters");
 
             RuleFor(x => x.Email)
-                .GreaterThan(0)
-                .WithMessage("Email must be greater than 0.");
+                .NotEmpty()
+                .WithMessage("Email is required")
+                .EmailAddress()
+                .WithMessage("Email must be a valid email address");
         }
     }
 

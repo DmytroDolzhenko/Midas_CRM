@@ -14,9 +14,9 @@ namespace Midas.Core.Customers
         public string Surname { get; private set; }
 
         public int ContactId { get; private set; }
-        public Contact Contact { get; private set; }
+        public Contact Contact { get; private set; } = null!;
 
-        public int Email { get; private set; }
+        public string Email { get; private set; }
         public bool IsDeleted { get; private set; }
         public Guid OwnerId { get; private set; }
 
@@ -30,15 +30,15 @@ namespace Midas.Core.Customers
             int id,
             string name,
             string surname,
-            Contact contact,
-            int email,
+            int contactId,
+            string email,
             Guid ownerId)
         {
             Id = id;
             Name = name;
             Surname = surname;
-            Contact = contact;
-            ContactId = contact.Id;
+           // Contact = contact;
+            ContactId = contactId;
             Email = email;
             OwnerId = ownerId;
         }
@@ -46,15 +46,15 @@ namespace Midas.Core.Customers
         public static Customer Create(
             string name,
             string surname,
-            Contact contact,
-            int email,
+            int contactId,
+            string email,
             Guid ownerId)
         {
             return new Customer(
                 0,
                 name,
                 surname,
-                contact,
+                contactId,
                 email,
                 ownerId);
         }
@@ -62,13 +62,12 @@ namespace Midas.Core.Customers
         public void Update(
             string name,
             string surname,
-            Contact contact,
-            int email)
+            int contactId,
+            string email)
         {
             Name = name;
             Surname = surname;
-            Contact = contact;
-            ContactId = contact.Id;
+            ContactId = contactId;
             Email = email;
         }
 

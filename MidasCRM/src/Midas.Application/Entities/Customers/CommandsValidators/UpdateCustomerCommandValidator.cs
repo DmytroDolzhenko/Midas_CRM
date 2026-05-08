@@ -30,7 +30,7 @@ namespace Midas.Application.Entities.Customers.CommandsValidators
                 .WithMessage("ContactValue must be less than 255 characters");
 
             RuleFor(x => x.Email)
-                .GreaterThan(0)
+                .NotEmpty()
                 .WithMessage("Email must be greater than 0.");
         }
     }

@@ -17,7 +17,7 @@ namespace Midas.Application.Entities.Orders.Commands
         public required string CustomerName { get; init; }
         public required string CustomerSurname { get; init; }
         public required string CustomerContactValue { get; init; }
-        public required int CustomerEmail { get; init; }
+        public required string CustomerEmail { get; init; }
         public required string City { get; init; }
         public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
@@ -41,10 +41,12 @@ namespace Midas.Application.Entities.Orders.Commands
         {
             var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
 
+            var contact = Contact.Create(request.CustomerContactValue, currentUserId);
+
             var customer = Customer.Create(
                 request.CustomerName,
                 request.CustomerSurname,
-                Contact.Create(request.CustomerContactValue, currentUserId),
+                contact.Id,
                 request.CustomerEmail,
                 currentUserId);
 

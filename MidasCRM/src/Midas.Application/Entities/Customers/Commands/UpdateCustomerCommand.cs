@@ -13,7 +13,7 @@ namespace Midas.Application.Entities.Customers.Commands
         public required string Name { get; init; }
         public required string Surname { get; init; }
         public required string ContactValue { get; init; }
-        public required int Email { get; init; }
+        public required string Email { get; init; }
     }
 
     public class UpdateCustomerCommandHandler(
@@ -33,7 +33,7 @@ namespace Midas.Application.Entities.Customers.Commands
             customer.Update(
                 request.Name,
                 request.Surname,
-                contact,
+                contact.Id,
                 request.Email);
 
             await repository.UpdateAsync(customer, cancellationToken);
