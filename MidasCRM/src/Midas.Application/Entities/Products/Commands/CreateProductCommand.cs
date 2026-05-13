@@ -3,6 +3,7 @@ using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
+using Midas.Core.ProductCategories;
 using Midas.Core.Products;
 using Midas.Core.Warehouses;
 using System;
@@ -22,8 +23,9 @@ namespace Midas.Application.Entities.Products.Commands
     public class CreateProductCommandHandler
         (IEntityRepository<Product> repositories, 
         IEntityRepository<Warehouse> warehouseRepositories, 
-        IGetQueries<Product, int> productQueries,
+        //IGetQueries<Product, int> productQueries,
         IGetQueries<Warehouse, int> warehouseQueries,
+        IGetQueries<ProductCategory, int> productCategoryQueries,
         ICurrentUserService currentUserService
         ) : IRequestHandler<CreateProductCommand, Product>
     {
@@ -40,7 +42,7 @@ namespace Midas.Application.Entities.Products.Commands
                 throw new UnauthorizedAccessException("You are not the owner of this warehouse");
             }
 
-            var category = await productQueries.GetByIdAsync(request.ProductCategoryId, cancellationToken);
+            var category = await productCategoryQueries.GetByIdAsync(request.ProductCategoryId, cancellationToken);
             if(category == null)
             {
                 throw new Exception("Category not found");

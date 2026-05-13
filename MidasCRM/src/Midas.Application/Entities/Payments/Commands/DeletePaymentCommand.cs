@@ -24,7 +24,9 @@ namespace Midas.Application.Entities.Payments.Commands
                 throw new Exception($"Payment with id {request.Id} not found.");
             }
 
-            await repository.DeleteAsync(payment, cancellationToken);
+            payment.MarkAsDeleted();
+
+            await repository.UpdateAsync(payment, cancellationToken);
             return payment;
         }
     }

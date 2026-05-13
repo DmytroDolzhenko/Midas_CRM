@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
@@ -29,7 +30,8 @@ namespace Midas.Application.Entities.Orders.Commands
     {
         public async Task<Order> Handle(RemoveItemFromOrderCommand request, CancellationToken cancellationToken)
         {
-            var order = await orderQueries.GetByIdAsync(request.OrderId, cancellationToken);
+            var order = await orderQueries.GetByIdAsync(request.OrderId, cancellationToken,
+                query => query.Include(o => o.OrderItems));
             if (order == null)
             {
                 throw new Exception($"Order with id {request.OrderId} not found.");
@@ -47,9 +49,25 @@ namespace Midas.Application.Entities.Orders.Commands
             {
                 throw new Exception($"ProductVariant with id {request.ProductVariantId} not found");
             }
-            productVariant.UpdateStatus(Core.Enums.ProductVariantStatus.Available);
 
-            order.RemoveOrderItem(orderItem);
+            var existingQuantity = orderItem.Quantity;
+            if (request.Quantity > existingQuantity)
+            {
+                throw new Exception($"Cannot remove {request.Quantity} items as only {existingQuantity} exist in the order.");
+            }
+
+            if (request.Quantity == existingQuantity)
+            {
+                productVariant.UpdateStatus(Core.Enums.ProductVariantStatus.Available);
+                order.RemoveOrderItem(orderItem);
+            }
+            else
+            {
+                var updatedQuantity = existingQuantity - request.Quantity;
+                orderItem.UpdateQuantity(updatedQuantity);
+            }
+
+            order.RecalculateTotalCost();
 
             await orderRepository.UpdateAsync(order, cancellationToken);
             return order;

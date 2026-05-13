@@ -2,6 +2,7 @@
 using Midas.Application.Common.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -11,8 +12,16 @@ namespace Infrastructure.Persistence.Services
 {
     public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
     {
-        public Guid? UserId =>
-            Guid.TryParse(httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier), out var id)
-            ? id : null;
+        public Guid? UserId
+        {
+            get
+            {
+                var user = httpContextAccessor.HttpContext?.User;
+                var userIdClaim = user?.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ?? user?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+                return Guid.TryParse(userIdClaim, out var id) ? id : null;
+            }
+        }
     }
 }

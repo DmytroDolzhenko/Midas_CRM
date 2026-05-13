@@ -62,7 +62,10 @@ namespace Midas.Core.OrderItems
             UnitPrice = unitPrice;
             CostPriceSnapshot = costPriceSnapshot;
         }
-
+        public void UpdateQuantity(int quantity)
+        {
+            Quantity = quantity;
+        }
         public void Delete()
         {
             IsDeleted = true;

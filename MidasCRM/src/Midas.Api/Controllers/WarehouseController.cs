@@ -1,12 +1,15 @@
 using Api.Dtos;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Warehouses.Commands;
 using Midas.Core.Warehouses;
 
 namespace Midas.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class WarehouseController(ISender sender, IGetQueries<Warehouse, int> getQueries) : ControllerBase
@@ -14,7 +17,10 @@ namespace Midas.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<WarehouseDto>>> GetWarehouses(CancellationToken cancellationToken)
         {
-            var warehouses = await getQueries.GetAllAsync(cancellationToken);
+            var warehouses = await getQueries.GetAllAsync(
+                cancellationToken,
+                query => query
+                .Include(warehouse => warehouse.Products));
             return Ok(warehouses.Select(WarehouseDto.FromDomain));
         }
 

@@ -27,7 +27,7 @@ namespace Midas.Application.Entities.Customers.Commands
             var customer = Customer.Create(
                 request.Name,
                 request.Surname,
-                contact.Id,
+                contact,
                 request.Email,
                 currentUserId);
 

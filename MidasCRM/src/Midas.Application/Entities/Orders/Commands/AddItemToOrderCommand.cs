@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
@@ -28,7 +29,8 @@ namespace Midas.Application.Entities.Orders.Commands
     {
         public async Task<Order> Handle(AddItemToOrderCommand request, CancellationToken cancellationToken)
         {
-            var product = await productQueries.GetByIdAsync(request.ProductId, cancellationToken);
+            var product = await productQueries.GetByIdAsync(request.ProductId, cancellationToken,
+                query => query.Include(p => p.Variants));
             if (product == null)
             {
                 throw new Exception($"Product with id {request.ProductId} not found.");
@@ -40,23 +42,37 @@ namespace Midas.Application.Entities.Orders.Commands
                 throw new Exception($"Product variant with id {request.ProductVariantId} not found.");
             }
 
-            var order = await orderQueries.GetByIdAsync(request.OrderId, cancellationToken);
+            var order = await orderQueries.GetByIdAsync(request.OrderId, cancellationToken,
+                query => query.Include(o => o.OrderItems));
             if (order == null)
             {
                 throw new Exception($"Order with id {request.OrderId} not found.");
             }
 
-            var orderItem = OrderItem.Create(
-                request.OrderId,
-                request.ProductVariantId,
-                request.Quantity,
-                productVariant.CostPrice,
-                productVariant.SellPrice,
-                order.OwnerId);
+            var existingItem = order.OrderItems
+            .FirstOrDefault(oi => oi.ProductVariantId == request.ProductVariantId);
+
+            if(existingItem != null)
+            {
+                var updatedQuantity = existingItem.Quantity + request.Quantity;
+                existingItem.UpdateQuantity(updatedQuantity);
+            }
+            else
+            {
+                var orderItem = OrderItem.Create(
+                    request.OrderId,
+                    request.ProductVariantId,
+                    request.Quantity,
+                    productVariant.CostPrice,
+                    productVariant.SellPrice,
+                    order.OwnerId);
+                order.AddOrderItem(orderItem);
+            }
+
+            order.RecalculateTotalCost();
 
             productVariant.UpdateStatus(Core.Enums.ProductVariantStatus.InOrder);
 
-            order.AddOrderItem(orderItem);
             await orderRepository.UpdateAsync(order, cancellationToken);
             return order;
         }

@@ -1,4 +1,3 @@
-using Microsoft.Identity.Client;
 using Midas.Core.Enums;
 using Midas.Core.Orders;
 
@@ -8,7 +7,7 @@ namespace Api.Dtos
         Guid Id,
         string UniqCode,
         int CustomerId,
-        CustomerAddressDto Address,
+        CustomerAddressDto? Address,
         OrderStatus Status,
         decimal TotalCost,
         DateTime CreatedAt,
@@ -22,7 +21,7 @@ namespace Api.Dtos
                 order.Id,
                 order.UniqCode,
                 order.CustomerId,
-                CustomerAddressDto.FromDomain(order.Address),
+                order.Address is null ? null : CustomerAddressDto.FromDomain(order.Address),
                 order.Status,
                 order.TotalCost,
                 order.CreatedAt,
@@ -78,5 +77,9 @@ namespace Api.Dtos
         int OrderItemId,
         int Quantity,
         int ProductVariantId
+    );
+    public record UpdateOrderStatusDto(
+        Guid OrderId,
+        OrderStatus Status
     );
 }

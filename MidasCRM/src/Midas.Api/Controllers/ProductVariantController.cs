@@ -39,6 +39,7 @@ namespace Midas.Api.Controllers
                 UniqCode = request.UniqCode,
                 Color = request.Color,
                 Size = request.Size,
+                Quantity = request.Quantity,
                 CostPrice = request.CostPrice,
                 SellPrice = request.SellPrice
             };
@@ -61,6 +62,19 @@ namespace Midas.Api.Controllers
                 SellPrice = request.SellPrice
             };
 
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(ProductVariantDto.FromDomain(result));
+        }
+        [HttpPut]
+        [Route("{id:int}/quantity")]
+        public async Task<ActionResult<ProductVariantDto>> UpdateProductVariantQuantity(int id, [FromBody] UpdateProductVariantQuantity request, CancellationToken cancellationToken)
+        {
+            var command = new UpdateProductVariantQuantityCommand
+            {
+                Id = id,
+                Quantity = request.Quantity,
+            };
+            
             var result = await sender.Send(command, cancellationToken);
             return Ok(ProductVariantDto.FromDomain(result));
         }

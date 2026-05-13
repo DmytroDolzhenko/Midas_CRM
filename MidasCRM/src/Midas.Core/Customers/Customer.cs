@@ -46,17 +46,20 @@ namespace Midas.Core.Customers
         public static Customer Create(
             string name,
             string surname,
-            int contactId,
+            Contact contact,
             string email,
             Guid ownerId)
         {
-            return new Customer(
+            var customer = new Customer(
                 0,
                 name,
                 surname,
-                contactId,
+                contact.Id,
                 email,
                 ownerId);
+
+            customer.Contact = contact;
+            return customer;
         }
 
         public void Update(

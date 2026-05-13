@@ -33,6 +33,7 @@ namespace Api.Dtos
         string UniqCode,
         string Color,
         string Size,
+        int Quantity,
         decimal CostPrice,
         decimal SellPrice
     );
@@ -48,5 +49,8 @@ namespace Api.Dtos
 
     public record DeleteProductVariantDto(
         bool IsDeleted
+    );
+    public record UpdateProductVariantQuantity(
+        int Quantity
     );
 }

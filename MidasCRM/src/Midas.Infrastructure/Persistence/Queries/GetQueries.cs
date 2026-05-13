@@ -20,6 +20,12 @@ namespace Midas.Infrastructure.Persistence.Queries
         private IQueryable<T> BuildOwnedQuery()
         {
             var query = _context.Set<T>().AsQueryable();
+
+            if (typeof(T).GetProperty("IsDeleted") != null)
+            {
+                query = query.Where(entity => !EF.Property<bool>(entity, "IsDeleted"));
+            }
+
             if (!typeof(IOwnedEntity).IsAssignableFrom(typeof(T)))
             {
                 return query;
@@ -34,17 +40,31 @@ namespace Midas.Infrastructure.Persistence.Queries
             return query.Where(entity => EF.Property<Guid>(entity, nameof(IOwnedEntity.OwnerId)) == currentUserId.Value);
         }
 
-        public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<T>> GetAllAsync(
+            CancellationToken cancellationToken,
+            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null)
         {
-            return await BuildOwnedQuery()
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+            var query = BuildOwnedQuery().AsNoTracking();
+            if (queryShaper is not null)
+            {
+                query = queryShaper(query);
+            }
+
+            return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task<T?> GetByIdAsync(TKey id, CancellationToken cancellationToken)
+        public async Task<T?> GetByIdAsync(
+            TKey id,
+            CancellationToken cancellationToken,
+            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null)
         {
-            return await BuildOwnedQuery()
-                .FirstOrDefaultAsync(entity => entity.Id!.Equals(id), cancellationToken);
+            var query = BuildOwnedQuery();
+            if (queryShaper is not null)
+            {
+                query = queryShaper(query);
+            }
+
+            return await query.FirstOrDefaultAsync(entity => entity.Id!.Equals(id), cancellationToken);
         }
     }
 }
