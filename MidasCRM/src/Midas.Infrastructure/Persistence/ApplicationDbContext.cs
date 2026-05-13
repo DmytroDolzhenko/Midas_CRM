@@ -10,6 +10,7 @@ using Midas.Core.Orders;
 using Midas.Core.OrderSources;
 using Midas.Core.Payments;
 using Midas.Core.ProductCategories;
+using Midas.Core.ProductImages;
 using Midas.Core.Products;
 using Midas.Core.ProductVariants;
 using Midas.Core.Users;
@@ -38,6 +39,8 @@ namespace Infrastructure.Persistence
         public DbSet<Customer> Customers { get; init; }
         public DbSet<CustomerAddress> CustomerAddresses { get; init; }
         public DbSet<Contact> Contacts { get; init; }
+        public DbSet<ProductImage> ProductImages { get; init; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
