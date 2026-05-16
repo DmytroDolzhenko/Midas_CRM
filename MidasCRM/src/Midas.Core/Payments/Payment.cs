@@ -40,7 +40,7 @@ namespace Midas.Core.Payments
                 ownerId);
         }
 
-        public void MasrkAsDeleted()
+        public void MarkAsDeleted()
         {
             IsDeleted = true;
         }

@@ -54,6 +54,25 @@ namespace Midas.Core.CustomerAddresses
                 ownerId);
         }
 
+        public static CustomerAddress Create(
+            Customer customer,
+            string city,
+            int postalCode,
+            int postDepartmentNumber,
+            Guid ownerId)
+        {
+            var address = new CustomerAddress(
+                0,
+                customer.Id,
+                city,
+                postalCode,
+                postDepartmentNumber,
+                ownerId);
+
+            address.Customer = customer;
+            return address;
+        }
+
         public void Update(
             int customerId,
             string city,

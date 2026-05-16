@@ -47,7 +47,7 @@ namespace Midas.Core.Orders
 
         public static Order Create(int customerId, CustomerAddress address, Guid ownerId)
         {
-            return new Order(
+            var order = new Order(
                 Guid.NewGuid(),
                 Guid.NewGuid().ToString(),
                 customerId,
@@ -56,6 +56,26 @@ namespace Midas.Core.Orders
                 0,
                 DateTime.UtcNow,
                 ownerId);
+
+            order.Address = address;
+            return order;
+        }
+
+        public static Order Create(Customer customer, CustomerAddress address, Guid ownerId)
+        {
+            var order = new Order(
+                Guid.NewGuid(),
+                Guid.NewGuid().ToString(),
+                customer.Id,
+                address.Id,
+                OrderStatus.Pending,
+                0,
+                DateTime.UtcNow,
+                ownerId);
+
+            order.Customer = customer;
+            order.Address = address;
+            return order;
         }
 
         public void MarkAsDeleted()
@@ -80,7 +100,7 @@ namespace Midas.Core.Orders
             RecalculateTotalCost();
         }
 
-        private void RecalculateTotalCost()
+        public void RecalculateTotalCost()
         {
             TotalCost = 0;
             foreach (var item in _orderItems)

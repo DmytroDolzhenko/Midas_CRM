@@ -32,6 +32,7 @@ namespace Midas.Core.ProductVariants
             string uniqCode,
             string color,
             string size,
+            int stockQuantity,
             decimal costPrice,
             decimal sellPrice,
             ProductVariantStatus status,
@@ -43,6 +44,7 @@ namespace Midas.Core.ProductVariants
             UniqCode = uniqCode;
             Color = color;
             Size = size;
+            StockQuantity = stockQuantity;
             CostPrice = costPrice;
             SellPrice = sellPrice;
             Status = status;
@@ -54,6 +56,7 @@ namespace Midas.Core.ProductVariants
             string uniqCode,
             string color,
             string size,
+            int stockQuantity,
             decimal costPrice,
             decimal sellPrice,
             ProductVariantStatus status,
@@ -65,6 +68,7 @@ namespace Midas.Core.ProductVariants
                 uniqCode,
                 color,
                 size,
+                stockQuantity,
                 costPrice,
                 sellPrice,
                 ProductVariantStatus.Available,
@@ -86,6 +90,10 @@ namespace Midas.Core.ProductVariants
             Size = size;
             CostPrice = costPrice;
             SellPrice = sellPrice;
+        }
+        public void UpdateQuantity(int quantity)
+        {
+            StockQuantity = quantity;
         }
 
         public void MarkAsDeleted()

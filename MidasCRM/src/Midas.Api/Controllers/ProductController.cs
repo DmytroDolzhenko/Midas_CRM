@@ -1,6 +1,8 @@
 using Api.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Midas.Api.DTOs;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Products.Commands;
 using Midas.Core.Products;
@@ -14,14 +16,16 @@ namespace Midas.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(CancellationToken cancellationToken)
         {
-            var products = await getQueries.GetAllAsync(cancellationToken);
+            var products = await getQueries.GetAllAsync(cancellationToken,
+                query => query.Include(p => p.Images));
             return Ok(products.Select(ProductDto.FromDomain));
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDto>> GetProductById(int id, CancellationToken cancellationToken)
         {
-            var product = await getQueries.GetByIdAsync(id, cancellationToken);
+            var product = await getQueries.GetByIdAsync(id, cancellationToken,
+                query => query.Include(p => p.Images));
             if (product is null)
             {
                 return NotFound();
@@ -91,6 +95,40 @@ namespace Midas.Api.Controllers
 
             var result = await sender.Send(command, cancellationToken);
             return Ok(ProductDto.FromDomain(result));
+        }
+        [HttpPost("{id:int}/images")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<ProductImageDto>> AddProductImage(int id, IFormFile file, CancellationToken cancellationToken)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Файл не вибрано або він порожній.");
+            }
+
+            var command = new AddImageToProductCommand
+            {
+                ProductId = id,
+                Image = file
+            };
+
+            var result = await sender.Send(command, cancellationToken);
+
+            return Ok(ProductImageDto.FromDomainModel(result));
+        }
+
+        [HttpGet("{id:int}/image-file")]
+        [Produces("image/jpeg", "image/png")]
+        public async Task<IActionResult> GetProductImageFile(int id, CancellationToken ct)
+        {
+            var product = await getQueries.GetByIdAsync(id, ct, q => q.Include(p => p.Images));
+            var mainImage = product?.Images.FirstOrDefault(i => i.IsMain) ?? product?.Images.FirstOrDefault();
+
+            if (mainImage == null) return NotFound();
+
+            using var httpClient = new HttpClient();
+            var imageBytes = await httpClient.GetByteArrayAsync(mainImage.Url, ct);
+
+            return File(imageBytes, "image/jpeg");
         }
     }
 }

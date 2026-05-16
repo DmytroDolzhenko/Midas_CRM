@@ -46,21 +46,20 @@ namespace Midas.Application.Entities.Orders.Commands
             var customer = Customer.Create(
                 request.CustomerName,
                 request.CustomerSurname,
-                contact.Id,
+                contact,
                 request.CustomerEmail,
                 currentUserId);
 
             await customerRepository.AddAsync(customer, cancellationToken);
 
             var address = CustomerAddress.Create(
-                0,
-                customer.Id,
+                customer,
                 request.City,
                 request.PostalCode,
                 request.PostDepartmentNumber,
                 currentUserId);
 
-            var order = Order.Create(customer.Id, address, currentUserId);
+            var order = Order.Create(customer, address, currentUserId);
 
             foreach (var item in request.Items)
             {

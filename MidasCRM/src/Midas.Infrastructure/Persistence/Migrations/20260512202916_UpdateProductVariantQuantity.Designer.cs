@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Midas.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512202916_UpdateProductVariantQuantity")]
+    partial class UpdateProductVariantQuantity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -515,47 +518,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.ToTable("ProductCategory", (string)null);
                 });
 
-            modelBuilder.Entity("Midas.Core.ProductImages.ProductImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsMain")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_main");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer")
-                        .HasColumnName("product_id");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("url");
-
-                    b.HasKey("Id")
-                        .HasName("pk_product_images");
-
-                    b.HasIndex("OwnerId")
-                        .HasDatabaseName("ix_product_images_owner_id");
-
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_product_images_product_id");
-
-                    b.ToTable("ProductImages", (string)null);
-                });
-
             modelBuilder.Entity("Midas.Core.ProductVariants.ProductVariant", b =>
                 {
                     b.Property<int>("Id")
@@ -956,18 +918,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Midas.Core.ProductImages.ProductImage", b =>
-                {
-                    b.HasOne("Midas.Core.Products.Product", "Product")
-                        .WithMany("Images")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_images_product_product_id");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("Midas.Core.ProductVariants.ProductVariant", b =>
                 {
                     b.HasOne("Midas.Core.Products.Product", "Product")
@@ -1037,8 +987,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Midas.Core.Products.Product", b =>
                 {
-                    b.Navigation("Images");
-
                     b.Navigation("Variants");
                 });
 

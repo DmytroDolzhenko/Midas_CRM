@@ -14,6 +14,7 @@ namespace Midas.Application.Entities.ProductVariants.Commands
         public required string UniqCode { get; init; }
         public required string Color { get; init; }
         public required string Size { get; init; }
+        public required int Quantity { get; init; }
         public required decimal CostPrice { get; init; }
         public required decimal SellPrice { get; init; }
     }
@@ -38,6 +39,7 @@ namespace Midas.Application.Entities.ProductVariants.Commands
                 request.UniqCode,
                 request.Color,
                 request.Size,
+                request.Quantity,
                 request.CostPrice,
                 request.SellPrice,
                 Core.Enums.ProductVariantStatus.Available,

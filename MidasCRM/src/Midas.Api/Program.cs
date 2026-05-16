@@ -1,4 +1,4 @@
-using Api.Modules;
+﻿using Api.Modules;
 using Application;
 using Application.Common.Securities;
 using Infrastructure;
@@ -76,24 +76,19 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    var jwtSecurityScheme = new OpenApiSecurityScheme
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
+        Name = "JWT Authentication",
+        Description = "Paste JWT token only (without Bearer prefix).",
         In = ParameterLocation.Header,
-        Description = "Введіть JWT токен у форматі: Bearer {your_token}"
-    };
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT"
+    });
 
-    options.AddSecurityDefinition("Bearer", jwtSecurityScheme);
-
-    options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecuritySchemeReference("Bearer", null, null),
-            new List<string>()
-        }
+        [new OpenApiSecuritySchemeReference("bearer", document)] = new List<string>()
     });
 });
 

@@ -1,5 +1,6 @@
 using Api.Dtos;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Orders.Commands;
@@ -14,14 +15,25 @@ namespace Midas.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrders(CancellationToken cancellationToken)
         {
-            var orders = await getQueries.GetAllAsync(cancellationToken);
+            var orders = await getQueries.GetAllAsync(
+                cancellationToken,
+                query => query
+                    .Include(order => order.Address)
+                    .Include(order => order.OrderItems));
+
             return Ok(orders.Select(OrderDto.FromDomain));
         }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<OrderDto>> GetOrderById(Guid id, CancellationToken cancellationToken)
         {
-            var order = await getQueries.GetByIdAsync(id, cancellationToken);
+            var order = await getQueries.GetByIdAsync(
+                id,
+                cancellationToken,
+                query => query
+                    .Include(item => item.Address)
+                    .Include(item => item.OrderItems));
+
             if (order is null)
             {
                 return NotFound();
@@ -107,6 +119,18 @@ namespace Midas.Api.Controllers
                 ProductVariantId = request.ProductVariantId
             };
 
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(OrderDto.FromDomain(result));
+        }
+
+        [HttpPatch("update-status")]
+        public async Task<ActionResult<OrderDto>> UpdateOrderStatus([FromBody] UpdateOrderStatusDto request, CancellationToken cancellationToken)
+        {
+            var command = new UpdateOrderStatusCommand
+            {
+                OrderId = request.OrderId,
+                Status = request.Status
+            };
             var result = await sender.Send(command, cancellationToken);
             return Ok(OrderDto.FromDomain(result));
         }

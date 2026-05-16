@@ -1,4 +1,5 @@
 using Midas.Core.ProductCategories;
+using Midas.Core.ProductImages;
 using Midas.Core.ProductVariants;
 using Midas.Core.Warehouses;
 using System;
@@ -25,6 +26,9 @@ namespace Midas.Core.Products
 
         private readonly List<ProductVariant> _variants = new();
         public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
+
+        private readonly List<ProductImage> _images = new();
+        public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
 
         private Product(
             int id,
@@ -82,6 +86,17 @@ namespace Midas.Core.Products
         public void ChangeWarehouse(int newWarehouseId)
         {
             WarehouseId = newWarehouseId;
+        }
+        public void AddImage(string url, bool isMain = false)
+        {
+            if (!_images.Any()) isMain = true;
+
+            if (isMain)
+            {
+                foreach (var img in _images) img.UnsetMain();
+            }
+
+            _images.Add(ProductImage.Create(url, Id, OwnerId, isMain));
         }
     }
 }

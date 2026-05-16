@@ -1,7 +1,9 @@
+using Midas.Api.DTOs;
 using Midas.Core.Products;
 
 namespace Api.Dtos
 {
+   
     public record ProductDto(
         int Id,
         int WarehouseId,
@@ -9,7 +11,8 @@ namespace Api.Dtos
         string Description,
         int ProductCategoryId,
         DateTime CreatedAt,
-        bool IsDeleted
+        bool IsDeleted,
+        IEnumerable<ProductImageDto> Images
     )
     {
         public static ProductDto FromDomain(Product product)
@@ -20,7 +23,12 @@ namespace Api.Dtos
                 product.Description,
                 product.ProductCategoryId,
                 product.CreatedAt,
-                product.IsDeleted
+                product.IsDeleted,
+                product.Images.Select(img => new ProductImageDto(
+                    img.Id,
+                    img.Url,
+                    img.IsMain,
+                    img.ProductId))
             );
     }
 

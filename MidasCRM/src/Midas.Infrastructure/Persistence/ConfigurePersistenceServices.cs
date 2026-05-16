@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using CloudinaryDotNet;
 using Infrastructure.Persistence.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Infrastructure.Persistence.Queries;
 using Midas.Infrastructure.Persistence.Repositories;
+using Midas.Infrastructure.Persistence.Services;
 using Npgsql;
 
 namespace Infrastructure.Persistence
@@ -46,6 +48,9 @@ namespace Infrastructure.Persistence
             services.AddScoped<ApplicationDbContextInitialiser>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.Configure<Midas.Infrastructure.Persistence.Services.CloudinaryConfiguration>(
+            configuration.GetSection("Cloudinary"));
+            services.AddScoped<IFileService, CloudinaryService>();
 
             services.AddScoped<IAuthorizationHandler, NotDeletedHandler>();
 
