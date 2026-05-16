@@ -1,73 +1,53 @@
-# React + TypeScript + Vite
+# Midas CRM Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Simple React + Vite client without TypeScript. Components use `.jsx`, plain
+modules use `.js`.
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
+npm run build
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+On Windows PowerShell, use `npm.cmd` if script execution is blocked:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm.cmd run dev
 ```
+
+## Structure
+
+```text
+src/
+  components/       shared UI elements
+  features/         feature-specific CRM logic
+    auth/           login feature
+      api/
+      components/
+      hooks/
+      types.js
+    customers/      customer feature UI
+    sales/          orders, products and sales logic
+  hooks/            global hooks
+  lib/              api client and mock data
+  pages/            screens that compose features
+  App.jsx           app state and navigation
+  main.jsx          React entry point
+  styles.css        global styles
+```
+
+## Current Features
+
+- Login screen with demo credentials.
+- Dashboard with totals from current CRM state.
+- Orders list with search.
+- Product list with search.
+- Customers list.
+- Create order screen.
+- Create product screen.
+- Orders, products, customers and user session are stored in `localStorage`.
+
+When the backend endpoints are ready, replace mock data in `src/lib/mockData.js`
+with requests through `src/lib/apiClient.js`.
