@@ -45,11 +45,11 @@ namespace Midas.Core.Orders
             OwnerId = ownerId;
         }
 
-        public static Order Create(int customerId, CustomerAddress address, Guid ownerId)
+        public static Order Create(int customerId, CustomerAddress address, string uniqCode, Guid ownerId)
         {
             var order = new Order(
                 Guid.NewGuid(),
-                Guid.NewGuid().ToString(),
+                uniqCode,
                 customerId,
                 address.Id,
                 OrderStatus.Pending,
@@ -61,11 +61,11 @@ namespace Midas.Core.Orders
             return order;
         }
 
-        public static Order Create(Customer customer, CustomerAddress address, Guid ownerId)
+        public static Order Create(Customer customer, CustomerAddress address, string uniqCode, Guid ownerId)
         {
             var order = new Order(
                 Guid.NewGuid(),
-                Guid.NewGuid().ToString(),
+                uniqCode,
                 customer.Id,
                 address.Id,
                 OrderStatus.Pending,

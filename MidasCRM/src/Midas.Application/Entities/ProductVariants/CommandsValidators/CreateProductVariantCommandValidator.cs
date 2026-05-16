@@ -11,12 +11,6 @@ namespace Midas.Application.Entities.ProductVariants.CommandsValidators
                 .GreaterThan(0)
                 .WithMessage("ProductId must be greater than 0.");
 
-            RuleFor(x => x.UniqCode)
-                .NotEmpty()
-                .WithMessage("UniqCode is required")
-                .MaximumLength(100)
-                .WithMessage("UniqCode must be less than 100 characters");
-
             RuleFor(x => x.Color)
                 .NotEmpty()
                 .WithMessage("Color is required")

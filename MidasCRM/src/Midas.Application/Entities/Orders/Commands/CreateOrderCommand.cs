@@ -16,6 +16,7 @@ namespace Midas.Application.Entities.Orders.Commands
 
     public class CreateOrderCommandHandler(
         IEntityRepository<Order> repository,
+        IUniqCodeGenerator uniqCodeGenerator,
         ICurrentUserService currentUserService)
         : IRequestHandler<CreateOrderCommand, Order>
     {
@@ -32,7 +33,12 @@ namespace Midas.Application.Entities.Orders.Commands
                 request.PostDepartmentNumber,
                 currentUserId);
 
-            var order = Order.Create(request.CustomerId, address, currentUserId);
+            var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(
+                currentUserId,
+                DateTime.UtcNow,
+                cancellationToken);
+
+            var order = Order.Create(request.CustomerId, address, uniqCode, currentUserId);
             await repository.AddAsync(order, cancellationToken);
             return order;
         }

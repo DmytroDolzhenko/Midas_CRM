@@ -34,6 +34,7 @@ namespace Midas.Application.Entities.Orders.Commands
         IEntityRepository<Customer> customerRepository,
         IEntityRepository<Order> orderRepository,
         IGetQueries<ProductVariant, int> productVariantQueries,
+        IUniqCodeGenerator uniqCodeGenerator,
         ICurrentUserService currentUserService)
         : IRequestHandler<CreateOrderOneClickCommand, Order>
     {
@@ -59,7 +60,12 @@ namespace Midas.Application.Entities.Orders.Commands
                 request.PostDepartmentNumber,
                 currentUserId);
 
-            var order = Order.Create(customer, address, currentUserId);
+            var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(
+                currentUserId,
+                DateTime.UtcNow,
+                cancellationToken);
+
+            var order = Order.Create(customer, address, uniqCode, currentUserId);
 
             foreach (var item in request.Items)
             {

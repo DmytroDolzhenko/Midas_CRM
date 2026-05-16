@@ -36,7 +36,6 @@ namespace Midas.Api.Controllers
             var command = new CreateProductVariantCommand
             {
                 ProductId = request.ProductId,
-                UniqCode = request.UniqCode,
                 Color = request.Color,
                 Size = request.Size,
                 Quantity = request.Quantity,

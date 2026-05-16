@@ -30,7 +30,6 @@ namespace Api.Dtos
 
     public record CreateProductVariantDto(
         int ProductId,
-        string UniqCode,
         string Color,
         string Size,
         int Quantity,

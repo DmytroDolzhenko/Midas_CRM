@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
@@ -11,7 +12,6 @@ namespace Midas.Application.Entities.ProductVariants.Commands
     public class CreateProductVariantCommand : ICommand<ProductVariant>
     {
         public required int ProductId { get; init; }
-        public required string UniqCode { get; init; }
         public required string Color { get; init; }
         public required string Size { get; init; }
         public required int Quantity { get; init; }
@@ -22,21 +22,32 @@ namespace Midas.Application.Entities.ProductVariants.Commands
     public class CreateProductVariantCommandHandler(
         IEntityRepository<ProductVariant> repository,
         IGetQueries<Product, int> productQueries,
+        IUniqCodeGenerator uniqCodeGenerator,
         ICurrentUserService currentUserService)
         : IRequestHandler<CreateProductVariantCommand, ProductVariant>
     {
         public async Task<ProductVariant> Handle(CreateProductVariantCommand request, CancellationToken cancellationToken)
         {
             var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
-            var product = await productQueries.GetByIdAsync(request.ProductId, cancellationToken);
+            var product = await productQueries.GetByIdAsync(
+                request.ProductId,
+                cancellationToken,
+                query => query.Include(x => x.ProductCategory));
+
             if (product is null)
             {
                 throw new Exception($"Product with ID {request.ProductId} not found");
             }
 
+            var uniqCode = await uniqCodeGenerator.GenerateProductVariantCodeAsync(
+                product,
+                request.Size,
+                request.Color,
+                cancellationToken);
+
             var productVariant = ProductVariant.Create(
                 request.ProductId,
-                request.UniqCode,
+                uniqCode,
                 request.Color,
                 request.Size,
                 request.Quantity,
