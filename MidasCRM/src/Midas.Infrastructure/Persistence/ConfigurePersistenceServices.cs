@@ -12,6 +12,7 @@ using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Infrastructure.Persistence.Queries;
 using Midas.Infrastructure.Persistence.Repositories;
 using Midas.Infrastructure.Persistence.Services;
+using Midas.Infrastructure.Persistence.Services.NovaPoshta;
 using Npgsql;
 
 namespace Infrastructure.Persistence
@@ -66,6 +67,8 @@ namespace Infrastructure.Persistence
 
             services.AddScoped<IOrderQueries, OrderQueries>();
             services.AddScoped<IProductVariantQueries, ProductVariantQueries>();
+
+            services.AddHttpClient<INovaPoshtaClient, NovaPoshtaClient>();
 
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<ApplicationDbContext>());

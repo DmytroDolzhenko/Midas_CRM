@@ -14,6 +14,7 @@ namespace Midas.Application.Entities.Products.Commands
         public required int Id { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; }
+        public required decimal Weight { get; init; }
     }
     public class UpdateProductCommandHandler
         (IGetQueries<Product, int> queries, IEntityRepository<Product> repository)
@@ -27,7 +28,7 @@ namespace Midas.Application.Entities.Products.Commands
                 throw new Exception($"Product with id {request.Id} not found.");
             }
 
-            product.Update(request.Name, request.Description);
+            product.Update(request.Name, request.Description, request.Weight);
             await repository.UpdateAsync(product, cancellationToken);
             return product;
         }

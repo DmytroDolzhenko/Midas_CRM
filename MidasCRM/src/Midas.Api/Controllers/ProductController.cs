@@ -42,6 +42,7 @@ namespace Midas.Api.Controllers
                 WarehouseId = request.WarehouseId,
                 Name = request.Name,
                 Description = request.Description,
+                Weight = request.Weight,
                 ProductCategoryId = request.ProductCategoryId,
                 CreatedAt = DateTime.UtcNow
             };
@@ -57,7 +58,8 @@ namespace Midas.Api.Controllers
             {
                 Id = id,
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                Weight = request.Weight,
             };
 
             var result = await sender.Send(command, cancellationToken);

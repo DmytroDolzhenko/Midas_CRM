@@ -17,13 +17,13 @@ namespace Midas.Application.Entities.Products.Commands
         public required int WarehouseId { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; } 
+        public required decimal Weight { get; init; }
         public required int ProductCategoryId { get; init; }
         public required DateTime CreatedAt { get; init; }
     }
     public class CreateProductCommandHandler
         (IEntityRepository<Product> repositories, 
         IEntityRepository<Warehouse> warehouseRepositories, 
-        //IGetQueries<Product, int> productQueries,
         IGetQueries<Warehouse, int> warehouseQueries,
         IGetQueries<ProductCategory, int> productCategoryQueries,
         ICurrentUserService currentUserService
@@ -52,6 +52,7 @@ namespace Midas.Application.Entities.Products.Commands
                 request.WarehouseId,
                 request.Name,
                 request.Description,
+                request.Weight,
                 category.Id,
                 currentUserService.UserId ?? throw new UnauthorizedAccessException());
 

@@ -13,6 +13,7 @@ namespace Midas.Core.Orders
     {
         public Guid Id { get; }
         public string UniqCode { get; private set; }
+        public string? TrackingNumber { get; private set; }
 
         public int CustomerId { get; private set; }
         public Customer Customer { get; private set; } = null!;
@@ -107,6 +108,15 @@ namespace Midas.Core.Orders
             {
                 TotalCost += item.Quantity * item.UnitPrice;
             }
+        }
+        public void SetTrackingNumber(string trackingNumber)
+        {
+            if (string.IsNullOrWhiteSpace(trackingNumber))
+                throw new ArgumentException("Tracking number cannot be empty", nameof(trackingNumber));
+
+            TrackingNumber = trackingNumber;
+            
+            this.Status = OrderStatus.Processing;
         }
     }
 }

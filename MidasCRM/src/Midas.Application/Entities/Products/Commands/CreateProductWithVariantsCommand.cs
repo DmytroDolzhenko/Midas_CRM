@@ -16,6 +16,7 @@ namespace Midas.Application.Entities.Products.Commands
     {
         public string Name { get; init; } = null!;
         public string Description { get; init; } = null!;
+        public decimal Weight { get; init; }
         public int WarehouseId { get; init; }
         public int ProductCategoryId { get; init; }
         public required List<IFormFile> Images { get; init; }
@@ -47,6 +48,7 @@ namespace Midas.Application.Entities.Products.Commands
                 request.WarehouseId,
                 request.Name,
                 request.Description,
+                request.Weight,
                 request.ProductCategoryId,
                 currentUserId);
 
