@@ -130,5 +130,44 @@ namespace Midas.Api.Controllers
 
             return File(imageBytes, "image/jpeg");
         }
+        [HttpPost("product-with-variants")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<ProductDto>> CreateProductWithVariants(
+            [FromForm] CreateProductWithVariantDto request,
+          //  List<IFormFile> files,
+            CancellationToken cancellationToken)
+        {
+            if (request.Images == null || !request.Images.Any())
+            {
+                return BadRequest("Файли не вибрано або список порожній.");
+            }
+
+ /*           if (files == null || !files.Any())
+            {
+                return BadRequest("Файли не вибрано або список порожній.");
+            }*/
+
+            var command = new CreateProductWithVariantsCommand
+            {
+                Name = request.Name,
+                Description = request.Description,
+                WarehouseId = request.WarehouseId,
+                ProductCategoryId = request.ProductCategoryId,
+                Images = request.Images,
+
+                Variants = request.Variants
+                .Select(v => new CreateVariantCommandItem
+                {
+                    Color = v.Color,
+                    Size = v.Size,
+                    Quantity = v.Quantity,
+                    CostPrice = v.CostPrice,
+                    SellPrice = v.SellPrice
+                })
+                .ToList()
+            };
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(ProductDto.FromDomain(result));
+        }
     }
 }

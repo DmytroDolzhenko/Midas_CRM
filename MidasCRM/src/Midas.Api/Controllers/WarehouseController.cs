@@ -27,7 +27,9 @@ namespace Midas.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<WarehouseDto>> GetWarehouseById(int id, CancellationToken cancellationToken)
         {
-            var warehouse = await getQueries.GetByIdAsync(id, cancellationToken);
+            var warehouse = await getQueries.GetByIdAsync(id, cancellationToken,
+                query => query
+                .Include(warehouse => warehouse.Products));
             if (warehouse is null)
             {
                 return NotFound();

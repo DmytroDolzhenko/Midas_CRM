@@ -36,6 +36,13 @@ namespace Api.Dtos
         decimal CostPrice,
         decimal SellPrice
     );
+    public record ProductVariantRequestItem(
+        string Color,
+        string Size,
+        int Quantity,
+        decimal CostPrice,
+        decimal SellPrice
+    );
 
     public record UpdateProductVariantDto(
         int ProductId,

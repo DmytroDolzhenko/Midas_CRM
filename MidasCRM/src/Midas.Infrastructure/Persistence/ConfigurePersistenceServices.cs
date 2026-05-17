@@ -64,6 +64,9 @@ namespace Infrastructure.Persistence
             services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
             services.AddScoped(typeof(IGetQueries<,>), typeof(GetQueries<,>));
 
+            services.AddScoped<IOrderQueries, OrderQueries>();
+            services.AddScoped<IProductVariantQueries, ProductVariantQueries>();
+
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<ApplicationDbContext>());
         }

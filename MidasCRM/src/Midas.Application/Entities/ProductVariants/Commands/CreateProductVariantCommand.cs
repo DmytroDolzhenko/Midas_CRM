@@ -47,13 +47,13 @@ namespace Midas.Application.Entities.ProductVariants.Commands
 
             var productVariant = ProductVariant.Create(
                 request.ProductId,
-                uniqCode,
                 request.Color,
                 request.Size,
                 request.Quantity,
                 request.CostPrice,
                 request.SellPrice,
                 Core.Enums.ProductVariantStatus.Available,
+                uniqCode,
                 currentUserId);
 
             await repository.AddAsync(productVariant, cancellationToken);

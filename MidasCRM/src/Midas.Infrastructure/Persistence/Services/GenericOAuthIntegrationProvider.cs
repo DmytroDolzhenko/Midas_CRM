@@ -132,7 +132,7 @@ namespace Midas.Infrastructure.Persistence.Services
                 ? expiresInElement.GetInt32()
                 : 0;
 
-            if (string.IsNullOrWhiteSpace(accessToken))
+            if (string.IsNullOrWhiteSpace(accessToken)) 
             {
                 throw new InvalidOperationException("Provider token response does not contain access_token.");
             }

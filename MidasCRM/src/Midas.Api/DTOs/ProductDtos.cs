@@ -55,4 +55,17 @@ namespace Api.Dtos
     public record DeleteProductDto(
         bool IsDeleted
     );
+
+    //one click
+    public class CreateProductWithVariantDto
+    {
+        public int WarehouseId { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public int ProductCategoryId { get; set; }
+
+        public List<IFormFile> Images { get; set; } = new();
+
+        public List<CreateProductVariantDto> Variants { get; set; } = new();
+    }
 }
