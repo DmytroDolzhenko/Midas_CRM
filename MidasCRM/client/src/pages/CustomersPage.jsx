@@ -1,16 +1,27 @@
+import { useState } from 'react'
 import { CustomersTable } from '../features/customers/components/CustomersTable.jsx'
 
-export function CustomersPage({ customers }) {
+export function CustomersPage({ customers = [] }) {
+  const [search, setSearch] = useState('')
+
+  const filteredCustomers = customers.filter((customer) => {
+    const searchString = `${customer.name ?? ''} ${customer.phone ?? ''} ${customer.email ?? ''}`.toLowerCase()
+    return searchString.includes(search.toLowerCase())
+  })
+
   return (
     <section className="page-stack">
-      <div className="page-header">
-        <div>
-          <p className="eyebrow">Customers</p>
-          <h1>Клієнти</h1>
+      <section className="panel">
+        <div className="toolbar">
+          <input
+            aria-label="Пошук клієнтів"
+            placeholder="Пошук за ім'ям, телефоном або поштою"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
         </div>
-      </div>
-
-      <CustomersTable customers={customers} />
+        <CustomersTable customers={filteredCustomers} />
+      </section>
     </section>
   )
 }
