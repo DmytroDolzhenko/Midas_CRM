@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import { integrations as defaultIntegrations } from '../lib/integrationsApi.js'
 
 const navItems = [
   { id: 'dashboard', label: 'Головна' },
   { id: 'products', label: 'Товари' },
-  { id: 'orders', label: 'Замовлення' },
+  { id: 'orders', label: 'Продажі' },
+  { id: 'expenses', label: 'Витрати' },
   { id: 'customers', label: 'Клієнти' },
-  { id: 'chats', label: 'Чати' },
+  { id: 'operations', label: 'Історія' },
 ]
 
 function BellIcon() {
@@ -38,11 +40,30 @@ function SettingsIcon() {
 export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('profile')
+  const [integrations, setIntegrations] = useState(defaultIntegrations)
+  const [settingsMessage, setSettingsMessage] = useState('')
   const activeItem = navItems.find((item) => item.id === activePage)
 
-  function openSettings() {
+  function openSettings(tab = 'profile') {
     setIsAccountOpen(false)
+    setSettingsTab(tab)
     setIsSettingsOpen(true)
+  }
+
+  function toggleIntegration(id) {
+    setIntegrations((currentIntegrations) =>
+      currentIntegrations.map((integration) =>
+        integration.id === id ? { ...integration, enabled: !integration.enabled } : integration,
+      ),
+    )
+    setSettingsMessage('Зміни інтеграцій підготовлено до збереження')
+  }
+
+  function saveSettings() {
+    setSettingsMessage('Налаштування збережено')
+    window.setTimeout(() => setIsSettingsOpen(false), 500)
   }
 
   return (
@@ -87,9 +108,12 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
 
           {isAccountOpen && (
             <div className="sidebar-account-menu">
-              <button type="button" onClick={openSettings}>
+              <button type="button" onClick={() => openSettings('profile')}>
                 <SettingsIcon />
                 Налаштування
+              </button>
+              <button type="button" onClick={() => openSettings('integrations')}>
+                Інтеграції
               </button>
               <button type="button" onClick={onLogout}>
                 Вийти з акаунта
@@ -107,15 +131,21 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
           </div>
 
           <div className="topbar-actions">
-            <button
-              className="icon-button"
-              type="button"
-              aria-label="Налаштування"
-              onClick={() => setIsSettingsOpen(true)}
-            >
+            <button className="secondary-button" type="button" onClick={() => onNavigate('createOrder')}>
+              + Додати продаж
+            </button>
+            <button className="secondary-button" type="button" onClick={() => onNavigate('expenses')}>
+              + Додати витрату
+            </button>
+            <button className="icon-button" type="button" aria-label="Налаштування" onClick={() => openSettings('profile')}>
               <SettingsIcon />
             </button>
-            <button className="icon-button notification-button" type="button" aria-label="Сповіщення">
+            <button
+              className="icon-button notification-button"
+              type="button"
+              aria-label="Сповіщення"
+              onClick={() => setIsNotificationsOpen(true)}
+            >
               <BellIcon />
               <span className="notification-dot" aria-hidden="true" />
             </button>
@@ -126,56 +156,95 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
       </div>
 
       {isSettingsOpen && (
-        <div className="modal-backdrop" role="presentation">
-          <section className="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div className="modal-backdrop" role="presentation" onClick={() => setIsSettingsOpen(false)}>
+          <section className="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" onClick={(event) => event.stopPropagation()}>
             <div className="settings-header">
               <div>
-                <p className="eyebrow">Account</p>
                 <h2 id="settings-title">Налаштування</h2>
               </div>
-              <button
-                className="modal-close-button"
-                type="button"
-                aria-label="Закрити налаштування"
-                onClick={() => setIsSettingsOpen(false)}
-              >
+              <button className="modal-close-button" type="button" aria-label="Закрити налаштування" onClick={() => setIsSettingsOpen(false)}>
                 ×
               </button>
             </div>
 
-            <div className="settings-grid">
-              <label className="field">
-                <span>Ім’я</span>
-                <input readOnly value={user?.name ?? ''} />
-              </label>
-              <label className="field">
-                <span>Email</span>
-                <input readOnly value={user?.email ?? ''} />
-              </label>
-              <label className="field">
-                <span>Мова інтерфейсу</span>
-                <select defaultValue="uk">
-                  <option value="uk">Українська</option>
-                  <option value="en">English</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Сповіщення</span>
-                <select defaultValue="important">
-                  <option value="all">Усі події</option>
-                  <option value="important">Тільки важливі</option>
-                  <option value="off">Вимкнено</option>
-                </select>
-              </label>
+            <div className="settings-tabs">
+              <button type="button" className={settingsTab === 'profile' ? 'tab-button active' : 'tab-button'} onClick={() => setSettingsTab('profile')}>
+                Профіль
+              </button>
+              <button type="button" className={settingsTab === 'integrations' ? 'tab-button active' : 'tab-button'} onClick={() => setSettingsTab('integrations')}>
+                Інтеграції
+              </button>
             </div>
+
+            {settingsTab === 'profile' && (
+              <div className="settings-grid">
+                <label className="field">
+                  <span>Ім’я</span>
+                  <input readOnly value={user?.name ?? ''} />
+                </label>
+                <label className="field">
+                  <span>Email</span>
+                  <input readOnly value={user?.email ?? ''} />
+                </label>
+                <label className="field">
+                  <span>Мова інтерфейсу</span>
+                  <select defaultValue="uk">
+                    <option value="uk">Українська</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Сповіщення</span>
+                  <select defaultValue="important">
+                    <option value="all">Усі події</option>
+                    <option value="important">Тільки важливі</option>
+                    <option value="off">Вимкнено</option>
+                  </select>
+                </label>
+              </div>
+            )}
+
+            {settingsTab === 'integrations' && (
+              <div className="integration-grid">
+                {integrations.map((integration) => (
+                  <article className="integration-card" key={integration.id}>
+                    <div>
+                      <h3>{integration.name}</h3>
+                      <p>{integration.description}</p>
+                    </div>
+                    <button className={integration.enabled ? 'toggle-button active' : 'toggle-button'} type="button" onClick={() => toggleIntegration(integration.id)}>
+                      {integration.enabled ? 'Підключено' : 'Підключити'}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+
+            {settingsMessage && <p className="settings-message">{settingsMessage}</p>}
 
             <div className="settings-actions">
               <button className="secondary-button" type="button" onClick={() => setIsSettingsOpen(false)}>
                 Скасувати
               </button>
-              <button className="primary-button" type="button" onClick={() => setIsSettingsOpen(false)}>
+              <button className="primary-button" type="button" onClick={saveSettings}>
                 Зберегти
               </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {isNotificationsOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setIsNotificationsOpen(false)}>
+          <section className="notifications-modal" role="dialog" aria-modal="true" aria-labelledby="notifications-title" onClick={(event) => event.stopPropagation()}>
+            <div className="notifications-header">
+              <h2 id="notifications-title">Сповіщення</h2>
+              <button className="modal-close-button" type="button" onClick={() => setIsNotificationsOpen(false)}>
+                ×
+              </button>
+            </div>
+            <div className="notifications-content">
+              <p className="empty-state">Нових сповіщень немає</p>
             </div>
           </section>
         </div>

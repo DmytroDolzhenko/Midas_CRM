@@ -14,7 +14,12 @@ export function useLoginForm(onLogin) {
     }
 
     setError('')
-    await onLogin({ email, password })
+
+    try {
+      await onLogin({ email, password })
+    } catch (error) {
+      setError(error.message || 'Не вдалося увійти в систему')
+    }
   }
 
   return {
