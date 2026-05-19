@@ -9,7 +9,7 @@ namespace Midas.Application.Entities.Contacts.Commands
 {
     public class CreateContactCommand : ICommand<Contact>
     {
-        public required string Value { get; init; }
+        public required string PhoneNumber { get; init; }
     }
 
     public class CreateContactCommandHandler(
@@ -20,7 +20,7 @@ namespace Midas.Application.Entities.Contacts.Commands
         public async Task<Contact> Handle(CreateContactCommand request, CancellationToken cancellationToken)
         {
             var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
-            var contact = Contact.Create(request.Value, currentUserId);
+            var contact = Contact.Create(request.PhoneNumber, currentUserId);
             await repository.AddAsync(contact, cancellationToken);
             return contact;
         }

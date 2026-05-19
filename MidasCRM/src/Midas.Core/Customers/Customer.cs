@@ -20,8 +20,10 @@ namespace Midas.Core.Customers
         public bool IsDeleted { get; private set; }
         public Guid OwnerId { get; private set; }
 
+
         private readonly List<CustomerAddress> _addresses = new();
         public IReadOnlyCollection<CustomerAddress> Addresses => _addresses.AsReadOnly();
+
 
         private readonly List<Order> _orders = new();
         public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();

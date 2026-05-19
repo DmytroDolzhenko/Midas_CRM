@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
@@ -8,7 +8,6 @@ using Midas.Core.Products;
 using Midas.Core.ProductVariants;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Midas.Application.Entities.Products.Commands
 {
@@ -19,7 +18,6 @@ namespace Midas.Application.Entities.Products.Commands
         public decimal Weight { get; init; }
         public int WarehouseId { get; init; }
         public int ProductCategoryId { get; init; }
-        public required List<IFormFile> Images { get; init; }
         public List<CreateVariantCommandItem> Variants { get; init; } = new();
     }
     public class CreateVariantCommandItem
@@ -37,7 +35,7 @@ namespace Midas.Application.Entities.Products.Commands
         IEntityRepository<ProductVariant> variantRepository,
         IUniqCodeGenerator uniqCodeGenerator,
         ICurrentUserService currentUserService,
-        IFileService fileService)
+        IApplicationDbContext context)
         : IRequestHandler<CreateProductWithVariantsCommand, Product>
     {
         public async Task<Product> Handle(CreateProductWithVariantsCommand request, CancellationToken cancellationToken)
@@ -52,22 +50,9 @@ namespace Midas.Application.Entities.Products.Commands
                 request.ProductCategoryId,
                 currentUserId);
 
-            if (request.Images != null)
-            {
-                foreach (var image in request.Images)
-                {
-                    if (image.Length == 0) continue;
+            await productRepository.AddAsync(product, cancellationToken);
 
-                    var imageUrl = await fileService.UploadImageAsycn(image, "products");
-
-                    if (string.IsNullOrEmpty(imageUrl))
-                    {
-                        throw new Exception("Failed to upload image to Cloudinary.");
-                    }
-
-                    product.AddImage(imageUrl);
-                }
-            }
+            await context.SaveChangesAsync(cancellationToken);
 
             foreach (var variant in request.Variants)
             {
@@ -85,7 +70,7 @@ namespace Midas.Application.Entities.Products.Commands
                 await variantRepository.AddAsync(productVariant, cancellationToken);
             }
 
-            await productRepository.AddAsync(product, cancellationToken);
+            //await productRepository.AddAsync(product, cancellationToken);
 
             return product;
         }

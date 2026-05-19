@@ -28,14 +28,15 @@ namespace Api.Dtos
             );
     }
 
-    public record CreateProductVariantDto(
-        int ProductId,
-        string Color,
-        string Size,
-        int Quantity,
-        decimal CostPrice,
-        decimal SellPrice
-    );
+    public class CreateProductVariantDto
+    {
+        public int ProductId { get; set; }
+        public string Color { get; set; } = null!;
+        public string Size { get; set; } = null!;
+        public int Quantity { get; set; }
+        public decimal CostPrice { get; set; }
+        public decimal SellPrice { get; set; }
+    }
     public record ProductVariantRequestItem(
         string Color,
         string Size,

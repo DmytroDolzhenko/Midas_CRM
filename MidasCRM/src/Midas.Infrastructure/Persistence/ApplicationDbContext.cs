@@ -5,6 +5,7 @@ using Midas.Application.Common.Interfaces;
 using Midas.Core.Contacts;
 using Midas.Core.CustomerAddresses;
 using Midas.Core.Customers;
+using Midas.Core.NovaPoshta;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
 using Midas.Core.OrderSources;
@@ -42,6 +43,9 @@ namespace Infrastructure.Persistence
         public DbSet<Contact> Contacts { get; init; }
         public DbSet<ProductImage> ProductImages { get; init; }
         public DbSet<UserIntegration> UserIntegrations { get; init; }
+        public DbSet<NovaPoshtaCity> NovaPoshtaCities { get; set; } = null!;
+        public DbSet<NovaPoshtaWarehouse> NovaPoshtaWarehouses { get; set; } = null!;
+        public DbSet<UserLogisticProfile> UserLogisticProfiles { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

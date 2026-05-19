@@ -54,6 +54,11 @@ namespace Infrastructure.Persistence
             services.AddScoped<IEncryptionService, AesEncryptionService>();
             services.AddScoped<IIntegrationStateService, HmacIntegrationStateService>();
 
+            services.AddScoped<NovaPoshtaSyncService>();
+            services.AddHostedService<NovaPoshtaSyncWorker>();
+            services.AddScoped<OrderTrackingService>();
+            services.AddHostedService<NovaPoshtaOrderTrackingWorker>();
+
             services.AddScoped<IAuthorizationHandler, NotDeletedHandler>();
 
             services.AddRepositories();
@@ -67,6 +72,7 @@ namespace Infrastructure.Persistence
 
             services.AddScoped<IOrderQueries, OrderQueries>();
             services.AddScoped<IProductVariantQueries, ProductVariantQueries>();
+            services.AddScoped<ICustomerQueries, CustomerQueries>();
 
             services.AddHttpClient<INovaPoshtaClient, NovaPoshtaClient>();
 

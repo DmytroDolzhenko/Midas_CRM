@@ -9,7 +9,7 @@ namespace Midas.Application.Entities.Contacts.Commands
     public class UpdateContactCommand : ICommand<Contact>
     {
         public required int Id { get; init; }
-        public required string Value { get; init; }
+        public required string PhoneNumber { get; init; }
     }
 
     public class UpdateContactCommandHandler(
@@ -25,7 +25,7 @@ namespace Midas.Application.Entities.Contacts.Commands
                 throw new Exception($"Contact with id {request.Id} not found.");
             }
 
-            contact.Update(request.Value);
+            contact.Update(request.PhoneNumber);
             await repository.UpdateAsync(contact, cancellationToken);
             return contact;
         }

@@ -13,6 +13,7 @@ namespace Midas.Application.Entities.Users.Commands
         public required string Surname { get; init; }
         public required string Fathername { get; init; }
         public required string Email { get; init; }
+        public required string PhoneNumber { get; init; }
     }
 
     public class UpdateUserCommandHandler(
@@ -32,7 +33,8 @@ namespace Midas.Application.Entities.Users.Commands
                 request.Name,
                 request.Surname,
                 request.Fathername,
-                request.Email);
+                request.Email,
+                request.PhoneNumber);
 
             await repository.UpdateAsync(user, cancellationToken);
             return user;

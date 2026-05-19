@@ -6,6 +6,7 @@ using Midas.Api.DTOs;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Products.Commands;
 using Midas.Core.Products;
+using System.Text.Json;
 
 namespace Midas.Api.Controllers
 {
@@ -98,13 +99,14 @@ namespace Midas.Api.Controllers
             var result = await sender.Send(command, cancellationToken);
             return Ok(ProductDto.FromDomain(result));
         }
+
         [HttpPost("{id:int}/images")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<ProductImageDto>> AddProductImage(int id, IFormFile file, CancellationToken cancellationToken)
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest("Файл не вибрано або він порожній.");
+                return BadRequest("���� �� ������� ��� �� ��������.");
             }
 
             var command = new AddImageToProductCommand
@@ -132,30 +134,19 @@ namespace Midas.Api.Controllers
 
             return File(imageBytes, "image/jpeg");
         }
+
         [HttpPost("product-with-variants")]
-        [Consumes("multipart/form-data")]
         public async Task<ActionResult<ProductDto>> CreateProductWithVariants(
-            [FromForm] CreateProductWithVariantDto request,
-          //  List<IFormFile> files,
-            CancellationToken cancellationToken)
+           [FromBody] CreateProductWithVariantDto request,
+           CancellationToken cancellationToken)
         {
-            if (request.Images == null || !request.Images.Any())
-            {
-                return BadRequest("Файли не вибрано або список порожній.");
-            }
-
- /*           if (files == null || !files.Any())
-            {
-                return BadRequest("Файли не вибрано або список порожній.");
-            }*/
-
             var command = new CreateProductWithVariantsCommand
             {
                 Name = request.Name,
                 Description = request.Description,
                 WarehouseId = request.WarehouseId,
+                Weight = request.Weight,
                 ProductCategoryId = request.ProductCategoryId,
-                Images = request.Images,
 
                 Variants = request.Variants
                 .Select(v => new CreateVariantCommandItem

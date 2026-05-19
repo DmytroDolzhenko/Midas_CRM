@@ -201,11 +201,11 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
-                    b.Property<string>("Value")
+                    b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("value");
+                        .HasMaxLength(13)
+                        .HasColumnType("character varying(13)")
+                        .HasColumnName("phone_number");
 
                     b.HasKey("Id")
                         .HasName("pk_contact");
@@ -235,6 +235,14 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<string>("NovaPoshtaCityRef")
+                        .HasColumnType("text")
+                        .HasColumnName("nova_poshta_city_ref");
+
+                    b.Property<string>("NovaPoshtaWarehouseRef")
+                        .HasColumnType("text")
+                        .HasColumnName("nova_poshta_warehouse_ref");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
@@ -306,6 +314,99 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_customer_email");
 
                     b.ToTable("Customer", (string)null);
+                });
+
+            modelBuilder.Entity("Midas.Core.NovaPoshta.NovaPoshtaCity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AreaDescription")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("area_description");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Ref")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ref");
+
+                    b.Property<string>("SettlementTypeDescription")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("settlement_type_description");
+
+                    b.HasKey("Id")
+                        .HasName("pk_nova_poshta_cities");
+
+                    b.HasIndex("Ref")
+                        .IsUnique()
+                        .HasDatabaseName("ix_nova_poshta_cities_ref");
+
+                    b.ToTable("nova_poshta_cities", (string)null);
+                });
+
+            modelBuilder.Entity("Midas.Core.NovaPoshta.NovaPoshtaWarehouse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CityRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("city_ref");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("number");
+
+                    b.Property<string>("Ref")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ref");
+
+                    b.Property<string>("TypeOfWarehouse")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type_of_warehouse");
+
+                    b.Property<string>("WarehouseIndex")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("warehouse_index");
+
+                    b.HasKey("Id")
+                        .HasName("pk_nova_poshta_warehouses");
+
+                    b.HasIndex("CityRef")
+                        .HasDatabaseName("ix_nova_poshta_warehouses_city_ref");
+
+                    b.HasIndex("Ref")
+                        .IsUnique()
+                        .HasDatabaseName("ix_nova_poshta_warehouses_ref");
+
+                    b.ToTable("nova_poshta_warehouses", (string)null);
                 });
 
             modelBuilder.Entity("Midas.Core.OrderItems.OrderItem", b =>
@@ -405,6 +506,11 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("customer_id");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
@@ -412,6 +518,14 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
+
+                    b.Property<int>("PaymentMethods")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_methods");
+
+                    b.Property<int>("ServiceType")
+                        .HasColumnType("integer")
+                        .HasColumnName("service_type");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -422,6 +536,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("total_cost");
+
+                    b.Property<decimal>("TotalWeight")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_weight");
 
                     b.Property<string>("TrackingNumber")
                         .HasColumnType("text")
@@ -686,6 +804,48 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.ToTable("Product", (string)null);
                 });
 
+            modelBuilder.Entity("Midas.Core.UserIntegrations.Midas.Core.UserIntegrations.UserSenderAddress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AddressRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("address_ref");
+
+                    b.Property<string>("CityRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("city_ref");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<int>("UserLogisticProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_logistic_profile_id");
+
+                    b.Property<string>("WarehouseIndex")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("warehouse_index");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_sender_address");
+
+                    b.HasIndex("UserLogisticProfileId")
+                        .HasDatabaseName("ix_user_sender_address_user_logistic_profile_id");
+
+                    b.ToTable("user_sender_address", (string)null);
+                });
+
             modelBuilder.Entity("Midas.Core.UserIntegrations.UserIntegration", b =>
                 {
                     b.Property<int>("Id")
@@ -700,7 +860,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("EncryptedAccessToken")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("encrypted_access_token");
 
@@ -727,13 +886,54 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_user_integration");
+                        .HasName("pk_user_integrations");
 
                     b.HasIndex("UserId", "Provider")
                         .IsUnique()
-                        .HasDatabaseName("ix_user_integration_user_id_provider");
+                        .HasDatabaseName("ix_user_integrations_user_id_provider");
 
-                    b.ToTable("UserIntegration", (string)null);
+                    b.ToTable("UserIntegrations", (string)null);
+                });
+
+            modelBuilder.Entity("Midas.Core.UserIntegrations.UserLogisticProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContactSenderRef")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("contact_sender_ref");
+
+                    b.Property<string>("SenderRef")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("sender_ref");
+
+                    b.Property<string>("SendersPhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("senders_phone");
+
+                    b.Property<int>("UserIntegrationId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_integration_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_logistic_profiles");
+
+                    b.HasIndex("UserIntegrationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_logistic_profiles_user_integration_id");
+
+                    b.ToTable("UserLogisticProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Midas.Core.Users.User", b =>
@@ -1059,6 +1259,30 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Navigation("Warehouse");
                 });
 
+            modelBuilder.Entity("Midas.Core.UserIntegrations.Midas.Core.UserIntegrations.UserSenderAddress", b =>
+                {
+                    b.HasOne("Midas.Core.UserIntegrations.UserLogisticProfile", "UserLogisticProfile")
+                        .WithMany("SenderAddresses")
+                        .HasForeignKey("UserLogisticProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_sender_address_user_logistic_profiles_user_logistic_pr");
+
+                    b.Navigation("UserLogisticProfile");
+                });
+
+            modelBuilder.Entity("Midas.Core.UserIntegrations.UserLogisticProfile", b =>
+                {
+                    b.HasOne("Midas.Core.UserIntegrations.UserIntegration", "UserIntegration")
+                        .WithOne("LogisticProfile")
+                        .HasForeignKey("Midas.Core.UserIntegrations.UserLogisticProfile", "UserIntegrationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_logistic_profiles_user_integrations_user_integration_id");
+
+                    b.Navigation("UserIntegration");
+                });
+
             modelBuilder.Entity("Midas.Core.Contacts.Contact", b =>
                 {
                     b.Navigation("Customers");
@@ -1098,6 +1322,16 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("Midas.Core.UserIntegrations.UserIntegration", b =>
+                {
+                    b.Navigation("LogisticProfile");
+                });
+
+            modelBuilder.Entity("Midas.Core.UserIntegrations.UserLogisticProfile", b =>
+                {
+                    b.Navigation("SenderAddresses");
                 });
 
             modelBuilder.Entity("Midas.Core.Warehouses.Warehouse", b =>

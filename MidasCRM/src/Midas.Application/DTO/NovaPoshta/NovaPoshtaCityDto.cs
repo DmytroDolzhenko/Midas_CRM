@@ -10,7 +10,7 @@ namespace Midas.Application.DTOs.NovaPoshta
     public class NovaPoshtaCityDto
     {
         public string Description { get; set; } = null!; // Назва міста (Київ)
-        public string Ref { get; set; } = null!;         // НАЙВАЖЛИВІШЕ: GUID міста для майбутніх методів
+        public string Ref { get; set; } = null!;         //GUID міста для майбутніх методів
         public string AreaDescription { get; set; } = null!; // Область
     }
 }

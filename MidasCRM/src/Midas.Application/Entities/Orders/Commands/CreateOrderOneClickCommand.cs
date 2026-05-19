@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
@@ -19,9 +20,16 @@ namespace Midas.Application.Entities.Orders.Commands
         public required string CustomerSurname { get; init; }
         public required string CustomerContactValue { get; init; }
         public required string CustomerEmail { get; init; }
+
         public required string City { get; init; }
         public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
+        public required ServiceType ServiceType { get; init; }
+        public required string Description { get; init; }
+        //public string NovaPoshtaCityRef { get; init; }
+        //public string NovaPoshtaWarehouseRef { get; init; }
+
+        public required PaymentMethods PaymentMethods { get; init; }
         public required IReadOnlyCollection<CreateOrderOneClickCommandItem> Items { get; init; }
     }
 
@@ -35,6 +43,7 @@ namespace Midas.Application.Entities.Orders.Commands
         IEntityRepository<Customer> customerRepository,
         IEntityRepository<Order> orderRepository,
         IGetQueries<ProductVariant, int> productVariantQueries,
+        ICustomerQueries customerQueries,
         IUniqCodeGenerator uniqCodeGenerator,
         ICurrentUserService currentUserService)
         : IRequestHandler<CreateOrderOneClickCommand, Order>
@@ -43,16 +52,29 @@ namespace Midas.Application.Entities.Orders.Commands
         {
             var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
 
-            var contact = Contact.Create(request.CustomerContactValue, currentUserId);
+            decimal calculatedTotalWeight = 0;
 
-            var customer = Customer.Create(
-                request.CustomerName,
-                request.CustomerSurname,
-                contact,
-                request.CustomerEmail,
-                currentUserId);
+            var existingCustomer = await customerQueries.GetCustomerByEmailAsync(request.CustomerEmail, cancellationToken);
 
-            await customerRepository.AddAsync(customer, cancellationToken);
+            Customer customer;
+
+            if (existingCustomer != null)
+            {
+                customer = existingCustomer;
+            }
+            else
+            {
+                var contact = Contact.Create(request.CustomerContactValue, currentUserId);
+
+                customer = Customer.Create(
+                    request.CustomerName,
+                    request.CustomerSurname,
+                    contact,
+                    request.CustomerEmail,
+                    currentUserId);
+
+                await customerRepository.AddAsync(customer, cancellationToken);
+            }
 
             var address = CustomerAddress.Create(
                 customer,
@@ -61,20 +83,25 @@ namespace Midas.Application.Entities.Orders.Commands
                 request.PostDepartmentNumber,
                 currentUserId);
 
+            //address.SetNovaPoshtaRefs(request.NovaPoshtaCityRef, request.NovaPoshtaWarehouseRef);
+
             var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(
                 currentUserId,
                 DateTime.UtcNow,
                 cancellationToken);
 
-            var order = Order.Create(customer, address, uniqCode, currentUserId);
+            var order = Order.Create(customer, address, request.ServiceType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
 
             foreach (var item in request.Items)
             {
-                var productVariant = await productVariantQueries.GetByIdAsync(item.ProductVariantId, cancellationToken);
+                var productVariant = await productVariantQueries.GetByIdAsync(item.ProductVariantId, cancellationToken,
+                    query => query.Include(pv => pv.Product));
                 if (productVariant is null)
                 {
                     throw new Exception($"Product variant with id {item.ProductVariantId} not found.");
                 }
+
+                calculatedTotalWeight += item.Quantity * productVariant.Product.Weight;
 
                 productVariant.UpdateStatus(ProductVariantStatus.InOrder);
 
@@ -88,6 +115,9 @@ namespace Midas.Application.Entities.Orders.Commands
 
                 order.AddOrderItem(orderItem);
             }
+
+            //order.RecalculateTotalWeight();
+            order.SetTotalWeight(calculatedTotalWeight);
 
             await orderRepository.AddAsync(order, cancellationToken);
             return order;

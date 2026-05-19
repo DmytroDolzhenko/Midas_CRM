@@ -79,8 +79,11 @@ namespace Midas.Api.Controllers
             {
                 CustomerId = request.CustomerId,
                 City = request.Address.City,
+                ServiceType = request.ServiceType,
                 PostalCode = request.Address.PostalCode,
-                PostDepartmentNumber = request.Address.PostDepartmentNumber
+                PostDepartmentNumber = request.Address.PostDepartmentNumber,
+                PaymentMethods = request.PaymentMethods,
+                Description = request.Description
             };
 
             var result = await sender.Send(command, cancellationToken);
@@ -107,10 +110,14 @@ namespace Midas.Api.Controllers
                 CustomerContactValue = request.Customer.ContactValue,
                 CustomerEmail = request.Customer.Email,
                 City = request.Address.City,
+                ServiceType= request.ServiceType,
+                Description = request.Description,
                 PostalCode = request.Address.PostalCode,
                 PostDepartmentNumber = request.Address.PostDepartmentNumber,
+                PaymentMethods = request.PaymentMethods,
+
                 Items = request.Items
-                    .Select(x => new CreateOrderOneClickCommandItem
+                    .Select(x => new CreateOrderOneClickCommandItem 
                     {
                         ProductVariantId = x.ProductVariantId,
                         Quantity = x.Quantity

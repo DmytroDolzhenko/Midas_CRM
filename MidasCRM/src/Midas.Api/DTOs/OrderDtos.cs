@@ -8,12 +8,15 @@ namespace Api.Dtos
         string UniqCode,
         int CustomerId,
         CustomerAddressDto? Address,
+        ServiceType ServiceType,
         OrderStatus Status,
         decimal TotalCost,
+        string Description,
         DateTime CreatedAt,
         Guid OwnerId,
         string? TrackingNumber,
         IReadOnlyCollection<OrderItemDto> OrderItems,
+        PaymentMethods PaymentMethods,
         bool IsDeleted
     )
     {
@@ -23,25 +26,34 @@ namespace Api.Dtos
                 order.UniqCode,
                 order.CustomerId,
                 order.Address is null ? null : CustomerAddressDto.FromDomain(order.Address),
+                order.ServiceType,
                 order.Status,
                 order.TotalCost,
+                order.Description,
                 order.CreatedAt,
                 order.OwnerId,
                 order.TrackingNumber,
                 order.OrderItems.Select(OrderItemDto.FromDomain).ToList(),
+                order.PaymentMethods,
                 order.IsDeleted
             );
     }
 
     public record CreateOrderDto(
         int CustomerId,
-        CreateCustomerAddressDto Address
+        CreateCustomerAddressDto Address,
+        ServiceType ServiceType,
+        PaymentMethods PaymentMethods,
+        string Description
     );
 
     public record CreateOrderOneClickDto(
         CreateOneClickCustomerDto Customer,
         CreateOneClickAddressDto Address,
-        IReadOnlyCollection<CreateOneClickOrderItemDto> Items
+        ServiceType ServiceType,
+        string Description,
+        IReadOnlyCollection<CreateOneClickOrderItemDto> Items,
+        PaymentMethods PaymentMethods
     );
 
     public record CreateOneClickCustomerDto(

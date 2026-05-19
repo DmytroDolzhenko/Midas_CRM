@@ -12,11 +12,16 @@ namespace Midas.Core.CustomerAddresses
         public int CustomerId { get; private set; }
         public Customer Customer { get; private set; } = null!;
 
+        public string? NovaPoshtaCityRef { get; private set; }
+        public string? NovaPoshtaWarehouseRef { get; private set; }
+
         public string City { get; private set; }
         public int PostalCode { get; private set; }
         public int PostDepartmentNumber { get; private set; }
+
         public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
+
 
         private readonly List<Order> _orders = new();
         public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();
@@ -88,6 +93,17 @@ namespace Midas.Core.CustomerAddresses
         public void Delete()
         {
             IsDeleted = true;
+        }
+
+        public void SetNovaPoshtaRefs(string cityRef, string warehouseRef)
+        {
+            if (string.IsNullOrWhiteSpace(cityRef))
+                throw new ArgumentException("CityRef cannot be empty", nameof(cityRef));
+            if (string.IsNullOrWhiteSpace(warehouseRef))
+                throw new ArgumentException("WarehouseRef cannot be empty", nameof(warehouseRef));
+
+            NovaPoshtaCityRef = cityRef;
+            NovaPoshtaWarehouseRef = warehouseRef;
         }
     }
 }

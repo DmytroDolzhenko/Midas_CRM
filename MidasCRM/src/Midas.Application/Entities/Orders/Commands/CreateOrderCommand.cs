@@ -2,6 +2,7 @@ using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
+using Midas.Core.Enums;
 using Midas.Core.Orders;
 
 namespace Midas.Application.Entities.Orders.Commands
@@ -12,6 +13,9 @@ namespace Midas.Application.Entities.Orders.Commands
         public required string City { get; init; }
         public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
+        public required string Description { get; init; }
+        public required ServiceType ServiceType { get; init; }
+        public required PaymentMethods PaymentMethods { get; init; }
     }
 
     public class CreateOrderCommandHandler(
@@ -38,7 +42,10 @@ namespace Midas.Application.Entities.Orders.Commands
                 DateTime.UtcNow,
                 cancellationToken);
 
-            var order = Order.Create(request.CustomerId, address, uniqCode, currentUserId);
+            var order = Order.Create(request.CustomerId, address, request.ServiceType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
+
+            order.RecalculateTotalWeight();
+
             await repository.AddAsync(order, cancellationToken);
             return order;
         }

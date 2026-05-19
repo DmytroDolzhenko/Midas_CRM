@@ -12,6 +12,7 @@ namespace Midas.Application.Entities.Users.Commands
         public required string Surname { get; init; }
         public required string Fathername { get; init; }
         public required string Email { get; init; }
+        public required string PhoneNumber { get; init; }
         public required UserRole Role { get; init; }
         public required bool IsApproved { get; init; }
     }
@@ -26,6 +27,7 @@ namespace Midas.Application.Entities.Users.Commands
                 request.Surname,
                 request.Fathername,
                 request.Email,
+                request.PhoneNumber,
                 request.Role,
                 request.IsApproved);
 

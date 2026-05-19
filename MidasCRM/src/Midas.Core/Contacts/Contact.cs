@@ -9,28 +9,28 @@ namespace Midas.Core.Contacts
     public class Contact : IEntity<int>, IOwnedEntity
     {
         public int Id { get; }
-        public string Value { get; private set; }
+        public string PhoneNumber { get; private set; }
         public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
         private readonly List<Customer> _customers = new();
         public IReadOnlyCollection<Customer> Customers => _customers.AsReadOnly();
 
-        private Contact(int id, string value, Guid ownerId)
+        private Contact(int id, string phoneNumber, Guid ownerId)
         {
             Id = id;
-            Value = value;
+            PhoneNumber = phoneNumber;
             OwnerId = ownerId;
         }
 
-        public static Contact Create(string value, Guid ownerId)
+        public static Contact Create(string phoneNumber, Guid ownerId)
         {
-            return new Contact(0, value, ownerId);
+            return new Contact(0, phoneNumber, ownerId);
         }
 
-        public void Update(string value)
+        public void Update(string phoneNumber)
         {
-            Value = value;
+            PhoneNumber = phoneNumber;
         }
 
         public void Delete()

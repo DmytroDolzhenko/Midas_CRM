@@ -1,8 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Midas.Application.DTOs.NovaPoshta;
 using Midas.Application.Entities.NovaPoshta;
+using Midas.Application.Entities.NovaPoshta.Commands;
 
 namespace Midas.Api.Controllers
 {
@@ -23,6 +24,13 @@ namespace Midas.Api.Controllers
         {
             var result = await sender.Send(new GetNPWarehousesQuery(cityRef), ct);
             return Ok(result);
+        }
+
+        [HttpPost("documents/{orderId:guid}")]
+        public async Task<ActionResult<object>> CreateDocument([FromRoute] Guid orderId, CancellationToken ct)
+        {
+            var ttnNumber = await sender.Send(new CreateNovaPoshtaDocumentCommand(orderId), ct);
+            return Ok(new { trackingNumber = ttnNumber });
         }
     }
 }

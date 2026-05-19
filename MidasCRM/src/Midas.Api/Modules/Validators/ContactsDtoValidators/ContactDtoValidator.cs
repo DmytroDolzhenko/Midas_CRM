@@ -7,11 +7,11 @@ namespace Midas.Api.Modules.Validators.ContactsDtoValidators
     {
         public ContactDtoValidator()
         {
-            RuleFor(x => x.Value)
+            RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .WithMessage("Value is required")
-                .MaximumLength(255)
-                .WithMessage("Value must be less than 255 characters");
+                .WithMessage("Phone number is required")
+                .MaximumLength(13)
+                .WithMessage("Phone number must be less than 13 characters");
         }
     }
 
@@ -19,11 +19,11 @@ namespace Midas.Api.Modules.Validators.ContactsDtoValidators
     {
         public UpdateContactDtoValidator()
         {
-            RuleFor(x => x.Value)
+            RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .WithMessage("Value is required")
-                .MaximumLength(255)
-                .WithMessage("Value must be less than 255 characters");
+                .WithMessage("Phone number is required")
+                .MaximumLength(13)
+                .WithMessage("Phone number must be less than 13 characters");
         }
     }
 

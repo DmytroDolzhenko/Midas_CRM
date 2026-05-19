@@ -20,59 +20,91 @@ namespace Midas.Core.Orders
 
         public int AddressId { get; private set; }
         public CustomerAddress Address { get; private set; } = null!;
+        public ServiceType ServiceType { get; private set; }
 
         public OrderStatus Status { get; private set; }
         public decimal TotalCost { get; private set; }
+        public decimal TotalWeight { get; private set; }
+        public string Description { get; private set; }
+
         public DateTime CreatedAt { get; private set; }
         public Guid OwnerId { get; private set; }
+        public PaymentMethods PaymentMethods { get; private set; }
+
 
         private readonly List<OrderItem> _orderItems = new();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
+
 
         private readonly List<Payment> _payments = new();
         public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
 
         public bool IsDeleted { get; private set; }
 
-        private Order(Guid id, string uniqCode, int customerId, int addressId, OrderStatus status, decimal totalCost, DateTime createdAt, Guid ownerId)
+        private Order(
+            Guid id,
+            string uniqCode,
+            int customerId,
+            int addressId,
+            ServiceType serviceType,
+            OrderStatus status,
+            decimal totalCost,
+            decimal totalWeight,
+            string description,
+            DateTime createdAt,
+            Guid ownerId,
+            PaymentMethods paymentMethods)
         {
             Id = id;
             UniqCode = uniqCode;
             CustomerId = customerId;
             AddressId = addressId;
+            ServiceType = serviceType;
             Status = status;
             TotalCost = totalCost;
+            TotalWeight = totalWeight;
+            Description = description;
             CreatedAt = createdAt;
             OwnerId = ownerId;
+            PaymentMethods = paymentMethods;
         }
 
-        public static Order Create(int customerId, CustomerAddress address, string uniqCode, Guid ownerId)
+        public static Order Create(int customerId, CustomerAddress address, ServiceType serviceType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
         {
             var order = new Order(
                 Guid.NewGuid(),
                 uniqCode,
                 customerId,
                 address.Id,
+                serviceType,
                 OrderStatus.Pending,
                 0,
+                0,
+                description,
                 DateTime.UtcNow,
-                ownerId);
+                ownerId,
+                paymentMethods
+                );
 
             order.Address = address;
             return order;
         }
 
-        public static Order Create(Customer customer, CustomerAddress address, string uniqCode, Guid ownerId)
+        public static Order Create(Customer customer, CustomerAddress address, ServiceType serviceType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
         {
             var order = new Order(
                 Guid.NewGuid(),
                 uniqCode,
                 customer.Id,
                 address.Id,
+                serviceType,
                 OrderStatus.Pending,
                 0,
+                0,
+                description,
                 DateTime.UtcNow,
-                ownerId);
+                ownerId,
+                paymentMethods);
 
             order.Customer = customer;
             order.Address = address;
@@ -93,12 +125,14 @@ namespace Midas.Core.Orders
         {
             _orderItems.Remove(orderItem);
             RecalculateTotalCost();
+            RecalculateTotalWeight();
         }
 
         public void AddOrderItem(OrderItem orderItem)
         {
             _orderItems.Add(orderItem);
             RecalculateTotalCost();
+            RecalculateTotalWeight();
         }
 
         public void RecalculateTotalCost()
@@ -115,8 +149,32 @@ namespace Midas.Core.Orders
                 throw new ArgumentException("Tracking number cannot be empty", nameof(trackingNumber));
 
             TrackingNumber = trackingNumber;
-            
+
+
             this.Status = OrderStatus.Processing;
+        }
+        public void ChangePaymentMethods(PaymentMethods newPaymentMethods)
+        {
+            PaymentMethods = newPaymentMethods;
+        }
+        public void RecalculateTotalWeight()
+        {
+            TotalWeight = 0;
+            foreach (var item in _orderItems)
+            {
+                if (item.ProductVariant?.Product != null)
+                {
+                    TotalWeight += item.Quantity * item.ProductVariant.Product.Weight;
+                }
+            }
+        }
+        public void ChangeServiceType(ServiceType newServiceType)
+        {
+            ServiceType = newServiceType;
+        }
+        public void SetTotalWeight(decimal weight)
+        {
+            TotalWeight = weight;
         }
     }
 }

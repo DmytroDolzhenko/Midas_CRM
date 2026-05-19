@@ -47,7 +47,7 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
                 PropertyNameCaseInsensitive = true
             };
 
-            var response = await _httpClient.PostAsJsonAsync("https://api.novaposhta.ua/v2.0/json/", requestBody, ct);
+            var response = await _httpClient.PostAsJsonAsync("https://api.novaposhta.ua/v2.0/json/", requestBody, jsonOptions, ct);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<NovaPoshtaApiResponse<TResponse>>(jsonOptions, ct);
