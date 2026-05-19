@@ -5,12 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Orders.Commands;
 using Midas.Core.Orders;
+using Midas.Core.Enums;
 
 namespace Midas.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OrderController(ISender sender, IGetQueries<Order, Guid> getQueries) : ControllerBase
+    public class OrderController(
+        ISender sender,
+        IGetQueries<Order, Guid> getQueries,
+        IOrderQueries orderQueries) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrders(CancellationToken cancellationToken)
@@ -39,6 +43,32 @@ namespace Midas.Api.Controllers
                 return NotFound();
             }
 
+            return Ok(OrderDto.FromDomain(order));
+        }
+
+        [HttpGet("by-customer/{customerId:int}")]
+        public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrdersByCustomer(int customerId, CancellationToken cancellationToken)
+        {
+            var orders = await orderQueries.GetOrderByCustomerAsync(customerId, cancellationToken);
+
+            return Ok(orders.Select(o => OrderDto.FromDomain(o!)).ToList());
+        }
+
+        [HttpGet("by-status/{orderStatus:int}")]
+        public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrdersByStatus(OrderStatus orderStatus, CancellationToken cancellationToken)
+        {
+            var orders = await orderQueries.GetOrderByStatusAsync(orderStatus, cancellationToken);
+            return Ok(orders.Select(o => OrderDto.FromDomain(o!)).ToList());
+        }
+
+        [HttpGet("by-uniqCode/{uniqCode}")]
+        public async Task<ActionResult<OrderDto>> GetOrderByUniqCodeAsync(string uniqCode, CancellationToken cancellationToken)
+        {
+            var order = await orderQueries.GetOrderByUniqCodeAsync(uniqCode, cancellationToken);
+            if (order is null)
+            {
+                return NotFound();
+            }
             return Ok(OrderDto.FromDomain(order));
         }
 

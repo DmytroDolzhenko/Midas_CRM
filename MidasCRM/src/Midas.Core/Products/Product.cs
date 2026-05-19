@@ -16,6 +16,7 @@ namespace Midas.Core.Products
 
         public string Name { get; private set; }
         public string Description { get; private set; }
+        public decimal Weight { get; private set; }
 
         public int ProductCategoryId { get; private set; }
         public ProductCategory ProductCategory { get; private set; } = null!;
@@ -35,6 +36,7 @@ namespace Midas.Core.Products
             int warehouseId,
             string name,
             string description,
+            decimal weight,
             int productCategoryId,
             DateTime createdAt,
             Guid ownerId)
@@ -43,6 +45,7 @@ namespace Midas.Core.Products
             WarehouseId = warehouseId;
             Name = name;
             Description = description;
+            Weight = weight;
             ProductCategoryId = productCategoryId;
             CreatedAt = createdAt;
             OwnerId = ownerId;
@@ -52,6 +55,7 @@ namespace Midas.Core.Products
             int warehouseId,
             string name,
             string description,
+            decimal weight,
             int productCategoryId,
             Guid ownerId)
         {
@@ -60,6 +64,7 @@ namespace Midas.Core.Products
                 warehouseId,
                 name,
                 description,
+                weight,
                 productCategoryId,
                 DateTime.UtcNow,
                 ownerId);
@@ -67,10 +72,12 @@ namespace Midas.Core.Products
 
         public void Update(
             string name,
-            string description)
+            string description,
+            decimal weight)
         {
             Name = name;
             Description = description;
+            Weight = weight;
         }
 
         public void UpdateCategory(int productCategoryId)

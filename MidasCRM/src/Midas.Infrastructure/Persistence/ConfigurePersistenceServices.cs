@@ -2,7 +2,6 @@ using Application.Common.Interfaces;
 using CloudinaryDotNet;
 using Infrastructure.Persistence.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +12,7 @@ using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Infrastructure.Persistence.Queries;
 using Midas.Infrastructure.Persistence.Repositories;
 using Midas.Infrastructure.Persistence.Services;
+using Midas.Infrastructure.Persistence.Services.NovaPoshta;
 using Npgsql;
 
 namespace Infrastructure.Persistence
@@ -48,13 +48,16 @@ namespace Infrastructure.Persistence
             services.AddScoped<ApplicationDbContextInitialiser>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-            services.Configure<Midas.Infrastructure.Persistence.Services.CloudinaryConfiguration>(
-            configuration.GetSection("Cloudinary"));
+            services.AddScoped<IUniqCodeGenerator, UniqCodeGenerator>();
+            services.Configure<Midas.Infrastructure.Persistence.Services.CloudinaryConfiguration>(configuration.GetSection("Cloudinary"));
             services.AddScoped<IFileService, CloudinaryService>();
+            services.AddScoped<IEncryptionService, AesEncryptionService>();
+            services.AddScoped<IIntegrationStateService, HmacIntegrationStateService>();
 
             services.AddScoped<IAuthorizationHandler, NotDeletedHandler>();
 
             services.AddRepositories();
+            services.AddIntegrationProviders(configuration);
         }
 
         private static void AddRepositories(this IServiceCollection services)
@@ -62,8 +65,27 @@ namespace Infrastructure.Persistence
             services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
             services.AddScoped(typeof(IGetQueries<,>), typeof(GetQueries<,>));
 
+            services.AddScoped<IOrderQueries, OrderQueries>();
+            services.AddScoped<IProductVariantQueries, ProductVariantQueries>();
+
+            services.AddHttpClient<INovaPoshtaClient, NovaPoshtaClient>();
+
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<ApplicationDbContext>());
+        }
+
+        private static void AddIntegrationProviders(this IServiceCollection services, IConfiguration configuration)
+        {
+            var configuredProviders = configuration.GetSection("Integration:Providers").Get<List<OAuthProviderSettings>>()
+                ?? [];
+
+            foreach (var providerSettings in configuredProviders.Where(x => x.Enabled))
+            {
+                services.AddScoped<IIntegrationProvider>(sp =>
+                    new GenericOAuthIntegrationProvider(
+                        new HttpClient(),
+                        providerSettings));
+            }
         }
     }
 }

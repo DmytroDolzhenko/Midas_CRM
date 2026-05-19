@@ -13,6 +13,7 @@ namespace Midas.Core.Orders
     {
         public Guid Id { get; }
         public string UniqCode { get; private set; }
+        public string? TrackingNumber { get; private set; }
 
         public int CustomerId { get; private set; }
         public Customer Customer { get; private set; } = null!;
@@ -45,11 +46,11 @@ namespace Midas.Core.Orders
             OwnerId = ownerId;
         }
 
-        public static Order Create(int customerId, CustomerAddress address, Guid ownerId)
+        public static Order Create(int customerId, CustomerAddress address, string uniqCode, Guid ownerId)
         {
             var order = new Order(
                 Guid.NewGuid(),
-                Guid.NewGuid().ToString(),
+                uniqCode,
                 customerId,
                 address.Id,
                 OrderStatus.Pending,
@@ -61,11 +62,11 @@ namespace Midas.Core.Orders
             return order;
         }
 
-        public static Order Create(Customer customer, CustomerAddress address, Guid ownerId)
+        public static Order Create(Customer customer, CustomerAddress address, string uniqCode, Guid ownerId)
         {
             var order = new Order(
                 Guid.NewGuid(),
-                Guid.NewGuid().ToString(),
+                uniqCode,
                 customer.Id,
                 address.Id,
                 OrderStatus.Pending,
@@ -107,6 +108,15 @@ namespace Midas.Core.Orders
             {
                 TotalCost += item.Quantity * item.UnitPrice;
             }
+        }
+        public void SetTrackingNumber(string trackingNumber)
+        {
+            if (string.IsNullOrWhiteSpace(trackingNumber))
+                throw new ArgumentException("Tracking number cannot be empty", nameof(trackingNumber));
+
+            TrackingNumber = trackingNumber;
+            
+            this.Status = OrderStatus.Processing;
         }
     }
 }

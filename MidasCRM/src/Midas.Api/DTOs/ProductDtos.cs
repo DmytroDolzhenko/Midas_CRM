@@ -9,6 +9,7 @@ namespace Api.Dtos
         int WarehouseId,
         string Name,
         string Description,
+        decimal Weight,
         int ProductCategoryId,
         DateTime CreatedAt,
         bool IsDeleted,
@@ -21,6 +22,7 @@ namespace Api.Dtos
                 product.WarehouseId,
                 product.Name,
                 product.Description,
+                product.Weight,
                 product.ProductCategoryId,
                 product.CreatedAt,
                 product.IsDeleted,
@@ -36,12 +38,14 @@ namespace Api.Dtos
         int WarehouseId,
         string Name,
         string Description,
+        decimal Weight,
         int ProductCategoryId
     );
 
     public record UpdateProductDto(
         string Name,
-        string Description
+        string Description,
+        decimal Weight
     );
 
     public record UpdateProductCategoryDto(
@@ -55,4 +59,18 @@ namespace Api.Dtos
     public record DeleteProductDto(
         bool IsDeleted
     );
+
+    //one click
+    public class CreateProductWithVariantDto
+    {
+        public int WarehouseId { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public decimal Weight { get; set; }
+        public int ProductCategoryId { get; set; }
+
+        public List<IFormFile> Images { get; set; } = new();
+
+        public List<CreateProductVariantDto> Variants { get; set; } = new();
+    }
 }

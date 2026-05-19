@@ -20,6 +20,7 @@ namespace Midas.Core.OrderItems
         public Guid OwnerId { get; private set; }
         public bool IsDeleted { get; private set; }
 
+
         private OrderItem(int id, Guid orderId, int productVariantId, int quantity, decimal unitPrice, decimal costPriceSnapshot, Guid ownerId)
         {
             Id = id;

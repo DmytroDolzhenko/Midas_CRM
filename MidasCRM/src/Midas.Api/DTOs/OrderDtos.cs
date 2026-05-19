@@ -12,6 +12,7 @@ namespace Api.Dtos
         decimal TotalCost,
         DateTime CreatedAt,
         Guid OwnerId,
+        string? TrackingNumber,
         IReadOnlyCollection<OrderItemDto> OrderItems,
         bool IsDeleted
     )
@@ -26,6 +27,7 @@ namespace Api.Dtos
                 order.TotalCost,
                 order.CreatedAt,
                 order.OwnerId,
+                order.TrackingNumber,
                 order.OrderItems.Select(OrderItemDto.FromDomain).ToList(),
                 order.IsDeleted
             );

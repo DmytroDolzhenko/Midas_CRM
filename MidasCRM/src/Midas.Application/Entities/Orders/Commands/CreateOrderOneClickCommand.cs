@@ -6,6 +6,7 @@ using Midas.Application.Common.Messaging;
 using Midas.Core.Contacts;
 using Midas.Core.CustomerAddresses;
 using Midas.Core.Customers;
+using Midas.Core.Enums;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
 using Midas.Core.ProductVariants;
@@ -34,6 +35,7 @@ namespace Midas.Application.Entities.Orders.Commands
         IEntityRepository<Customer> customerRepository,
         IEntityRepository<Order> orderRepository,
         IGetQueries<ProductVariant, int> productVariantQueries,
+        IUniqCodeGenerator uniqCodeGenerator,
         ICurrentUserService currentUserService)
         : IRequestHandler<CreateOrderOneClickCommand, Order>
     {
@@ -59,7 +61,12 @@ namespace Midas.Application.Entities.Orders.Commands
                 request.PostDepartmentNumber,
                 currentUserId);
 
-            var order = Order.Create(customer, address, currentUserId);
+            var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(
+                currentUserId,
+                DateTime.UtcNow,
+                cancellationToken);
+
+            var order = Order.Create(customer, address, uniqCode, currentUserId);
 
             foreach (var item in request.Items)
             {
@@ -68,6 +75,8 @@ namespace Midas.Application.Entities.Orders.Commands
                 {
                     throw new Exception($"Product variant with id {item.ProductVariantId} not found.");
                 }
+
+                productVariant.UpdateStatus(ProductVariantStatus.InOrder);
 
                 var orderItem = OrderItem.Create(
                     order.Id,

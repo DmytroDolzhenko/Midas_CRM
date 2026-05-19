@@ -3,18 +3,34 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.ProductVariants.Commands;
+using Midas.Core.Enums;
 using Midas.Core.ProductVariants;
 
 namespace Midas.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductVariantController(ISender sender, IGetQueries<ProductVariant, int> getQueries) : ControllerBase
+    public class ProductVariantController(
+        ISender sender,
+        IProductVariantQueries productVariantQueries,
+        IGetQueries<ProductVariant, int> getQueries) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ProductVariantDto>>> GetProductVariants(CancellationToken cancellationToken)
         {
             var variants = await getQueries.GetAllAsync(cancellationToken);
+            return Ok(variants.Select(ProductVariantDto.FromDomain));
+        }
+        [HttpGet("available")]
+        public async Task<ActionResult<IReadOnlyList<ProductVariantDto>>> GetAvailableProductVariants([FromQuery] ProductVariantStatus status, CancellationToken cancellationToken)
+        {
+            var variants = await productVariantQueries.GetAvailableProductVariantsAsync(status, cancellationToken);
+
+            if (variants is null || !variants.Any())
+            {
+                return NotFound();
+            }
+
             return Ok(variants.Select(ProductVariantDto.FromDomain));
         }
 
@@ -36,7 +52,6 @@ namespace Midas.Api.Controllers
             var command = new CreateProductVariantCommand
             {
                 ProductId = request.ProductId,
-                UniqCode = request.UniqCode,
                 Color = request.Color,
                 Size = request.Size,
                 Quantity = request.Quantity,

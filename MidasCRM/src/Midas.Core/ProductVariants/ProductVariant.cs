@@ -53,13 +53,13 @@ namespace Midas.Core.ProductVariants
 
         public static ProductVariant Create(
             int productId,
-            string uniqCode,
             string color,
             string size,
             int stockQuantity,
             decimal costPrice,
             decimal sellPrice,
             ProductVariantStatus status,
+            string uniqCode,
             Guid ownerId)
         {
             return new ProductVariant(

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Midas.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260515131549_UserIntegration")]
+    partial class UserIntegration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -423,10 +426,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("total_cost");
 
-                    b.Property<string>("TrackingNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("tracking_number");
-
                     b.Property<string>("UniqCode")
                         .IsRequired()
                         .HasColumnType("text")
@@ -669,10 +668,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<int>("WarehouseId")
                         .HasColumnType("integer")
                         .HasColumnName("warehouse_id");
-
-                    b.Property<decimal>("Weight")
-                        .HasColumnType("numeric")
-                        .HasColumnName("weight");
 
                     b.HasKey("Id")
                         .HasName("pk_product");
