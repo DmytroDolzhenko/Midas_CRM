@@ -20,7 +20,7 @@ namespace Midas.Api.Modules.Validators.PaymentsDtoValidators
                 .Must(method =>
                     method == PaymentMethods.FullPayment
                     || method == PaymentMethods.AfterPayment
-                    || method == PaymentMethods.PartialPayment)
+                    || method == PaymentMethods.Sender)
                 .WithMessage("Method is invalid");
         }
     }

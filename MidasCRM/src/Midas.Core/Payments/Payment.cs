@@ -44,5 +44,9 @@ namespace Midas.Core.Payments
         {
             IsDeleted = true;
         }
+        public void UpdateStatus(PaymentStatus status)
+        {
+            Status = status;
+        }
     }
 }

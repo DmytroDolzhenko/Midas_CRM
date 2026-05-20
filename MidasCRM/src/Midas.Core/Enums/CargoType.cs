@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Midas.Core.Enums
 {
-    public enum PaymentMethods
+    public enum CargoType
     {
-        FullPayment = 0,
-        AfterPayment = 1,
-        Sender = 2,
+        Cargo = 1,
+        Documents = 2,
+        Parcel = 3
     }
 }

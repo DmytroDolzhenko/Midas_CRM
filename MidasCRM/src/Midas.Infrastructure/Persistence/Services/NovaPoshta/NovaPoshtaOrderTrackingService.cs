@@ -12,6 +12,7 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
         public async Task SyncStatusesAsync(CancellationToken ct)
         {
             var orders = await context.Orders
+                .Include(o => o.Payments)
                 .Where(o =>
                     !string.IsNullOrWhiteSpace(o.TrackingNumber) &&
                     o.Status != OrderStatus.Cancelled &&
@@ -43,6 +44,11 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
                     if (mappedStatus != order.Status)
                     {
                         order.UpdateStatus(mappedStatus);
+
+                        if (mappedStatus == OrderStatus.Delivered || mappedStatus == OrderStatus.Received)
+                        {
+                            order.CompleteAllPayments();
+                        }
                     }
                 }
             }

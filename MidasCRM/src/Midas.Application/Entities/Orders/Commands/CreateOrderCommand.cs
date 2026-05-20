@@ -15,6 +15,7 @@ namespace Midas.Application.Entities.Orders.Commands
         public required int PostDepartmentNumber { get; init; }
         public required string Description { get; init; }
         public required ServiceType ServiceType { get; init; }
+        public required CargoType CargoType { get; init; }
         public required PaymentMethods PaymentMethods { get; init; }
     }
 
@@ -42,7 +43,7 @@ namespace Midas.Application.Entities.Orders.Commands
                 DateTime.UtcNow,
                 cancellationToken);
 
-            var order = Order.Create(request.CustomerId, address, request.ServiceType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
+            var order = Order.Create(request.CustomerId, address, request.ServiceType, request.CargoType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
 
             order.RecalculateTotalWeight();
 

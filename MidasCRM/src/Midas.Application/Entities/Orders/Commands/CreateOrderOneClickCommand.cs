@@ -10,6 +10,7 @@ using Midas.Core.Customers;
 using Midas.Core.Enums;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
+using Midas.Core.Payments;
 using Midas.Core.ProductVariants;
 
 namespace Midas.Application.Entities.Orders.Commands
@@ -25,6 +26,7 @@ namespace Midas.Application.Entities.Orders.Commands
         public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
         public required ServiceType ServiceType { get; init; }
+        public required CargoType CargoType { get; init; }
         public required string Description { get; init; }
         //public string NovaPoshtaCityRef { get; init; }
         //public string NovaPoshtaWarehouseRef { get; init; }
@@ -90,7 +92,7 @@ namespace Midas.Application.Entities.Orders.Commands
                 DateTime.UtcNow,
                 cancellationToken);
 
-            var order = Order.Create(customer, address, request.ServiceType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
+            var order = Order.Create(customer, address, request.ServiceType, request.CargoType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
 
             foreach (var item in request.Items)
             {
@@ -115,6 +117,8 @@ namespace Midas.Application.Entities.Orders.Commands
 
                 order.AddOrderItem(orderItem);
             }
+
+            var payment = Payment.Create(order.Id, order.TotalCost, request.PaymentMethods, currentUserId);
 
             //order.RecalculateTotalWeight();
             order.SetTotalWeight(calculatedTotalWeight);

@@ -43,6 +43,7 @@ namespace Api.Dtos
         int CustomerId,
         CreateCustomerAddressDto Address,
         ServiceType ServiceType,
+        CargoType CargoType,
         PaymentMethods PaymentMethods,
         string Description
     );
@@ -51,6 +52,7 @@ namespace Api.Dtos
         CreateOneClickCustomerDto Customer,
         CreateOneClickAddressDto Address,
         ServiceType ServiceType,
+        CargoType CargoType,
         string Description,
         IReadOnlyCollection<CreateOneClickOrderItemDto> Items,
         PaymentMethods PaymentMethods

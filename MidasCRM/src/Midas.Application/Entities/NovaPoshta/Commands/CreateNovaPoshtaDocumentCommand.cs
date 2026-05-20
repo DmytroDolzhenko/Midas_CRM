@@ -60,15 +60,36 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
 
                 var deptNumber = order.Address.PostDepartmentNumber;
                 var deptNumberText = deptNumber.ToString();
-                var deptQuery = $"№{deptNumberText}";
 
-                var warehouse = await context.NovaPoshtaWarehouses
-                    .AsNoTracking()
-                    .Where(x => x.CityRef == city.Ref)
-                    .OrderBy(x => x.Number)
-                    .FirstOrDefaultAsync(x =>
-                        x.Number == deptNumberText
-                        || x.Description.Contains(deptQuery), ct);
+                NovaPoshtaWarehouse? warehouse = null;
+
+                bool isBranchDelivery = order.ServiceType == ServiceType.WarehouseWarehouse;
+
+                if (isBranchDelivery)
+                {
+
+                    var exactBranchDesc = $"Відділення №{deptNumberText}";
+                    var exactQuerySpace = $"№{deptNumberText} ";
+                    var exactQueryComma = $"№{deptNumberText},";
+
+                    warehouse = await context.NovaPoshtaWarehouses
+                        .AsNoTracking()
+                        .Where(x => x.CityRef == city.Ref)
+                        .Where(x => !x.Description.ToLower().Contains("поштомат"))
+                        .FirstOrDefaultAsync(x =>
+                            x.Number == deptNumberText ||
+                            x.Description.Contains(exactBranchDesc) ||
+                            x.Description.Contains(exactQuerySpace) ||
+                            x.Description.Contains(exactQueryComma), ct);
+                }
+                else
+                {
+                    warehouse = await context.NovaPoshtaWarehouses
+                        .AsNoTracking()
+                        .Where(x => x.CityRef == city.Ref)
+                        .Where(x => x.Description.ToLower().Contains("поштомат"))
+                        .FirstOrDefaultAsync(x => x.Number == deptNumberText, ct);
+                }
 
                 if (warehouse == null)
                 {
@@ -79,11 +100,28 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                         new GetNPWarehousesProperties(city.Ref),
                         ct);
 
-                    var fromApi = npWarehouses
-                        .OrderBy(x => x.Number)
-                        .FirstOrDefault(x =>
-                            x.Number == deptNumberText
-                            || x.Description.Contains(deptQuery));
+                    NovaPoshtaWarehouseDto? fromApi = null;
+
+                    if (isBranchDelivery)
+                    {
+                        var exactBranchDesc = $"Відділення №{deptNumberText}";
+                        var exactQuerySpace = $"№{deptNumberText} ";
+                        var exactQueryComma = $"№{deptNumberText},";
+
+                        fromApi = npWarehouses
+                            .Where(x => !x.Description.ToLower().Contains("поштомат"))
+                            .FirstOrDefault(x =>
+                                x.Number == deptNumberText ||
+                                x.Description.Contains(exactBranchDesc) ||
+                                x.Description.Contains(exactQuerySpace) ||
+                                x.Description.Contains(exactQueryComma));
+                    }
+                    else
+                    {
+                        fromApi = npWarehouses
+                            .Where(x => x.Description.ToLower().Contains("поштомат"))
+                            .FirstOrDefault(x => x.Number == deptNumberText);
+                    }
 
                     if (fromApi != null)
                     {
@@ -98,7 +136,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 }
 
                 if (warehouse == null)
-                    throw new Exception($"Не вдалося автоматично знайти відділення №{deptNumber} у місті '{order.Address.City}' в довіднику НП.");
+                    throw new Exception($"Не вдалося автоматично знайти {(isBranchDelivery ? "відділення" : "поштомат")} №{deptNumber} у місті '{order.Address.City}' в довіднику НП.");
 
                 order.Address.SetNovaPoshtaRefs(city.Ref, warehouse.Ref);
             }
@@ -160,12 +198,26 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 _ => "WarehouseWarehouse"
             };
 
+            string npPayerType = order.PaymentMethods switch
+            {
+                PaymentMethods.AfterPayment => "Recipient",
+                PaymentMethods.FullPayment => "Recipient",
+                _ => "Sender"
+            };
+            string npCargoType = order.CargoType switch
+            {
+                CargoType.Documents => "Documents",
+                CargoType.Cargo => "Cargo",
+                CargoType.Parcel => "Parcel",
+                _ => "Parcel"
+            };
+
             var npRequest = new NpCreateInternetDocumentProperties
             {
-                PayerType = order.PaymentMethods == PaymentMethods.AfterPayment ? "Recipient" : "Sender",
+                PayerType = npPayerType,
                 PaymentMethod = "Cash",
                 DateTime = DateTime.Now.ToString("dd.MM.yyyy"),
-                CargoType = "Parcel",
+                CargoType = npCargoType,
                 Sender = senderProfile.SenderRef,
                 CitySender = senderAddress.CityRef,
                 SenderAddress = senderAddress.AddressRef,

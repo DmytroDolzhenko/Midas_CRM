@@ -21,6 +21,7 @@ namespace Midas.Core.Orders
         public int AddressId { get; private set; }
         public CustomerAddress Address { get; private set; } = null!;
         public ServiceType ServiceType { get; private set; }
+        public CargoType CargoType { get; private set; }
 
         public OrderStatus Status { get; private set; }
         public decimal TotalCost { get; private set; }
@@ -47,6 +48,7 @@ namespace Midas.Core.Orders
             int customerId,
             int addressId,
             ServiceType serviceType,
+            CargoType cargoType,
             OrderStatus status,
             decimal totalCost,
             decimal totalWeight,
@@ -60,6 +62,7 @@ namespace Midas.Core.Orders
             CustomerId = customerId;
             AddressId = addressId;
             ServiceType = serviceType;
+            CargoType = cargoType;
             Status = status;
             TotalCost = totalCost;
             TotalWeight = totalWeight;
@@ -69,7 +72,7 @@ namespace Midas.Core.Orders
             PaymentMethods = paymentMethods;
         }
 
-        public static Order Create(int customerId, CustomerAddress address, ServiceType serviceType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
+        public static Order Create(int customerId, CustomerAddress address, ServiceType serviceType, CargoType cargoType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
         {
             var order = new Order(
                 Guid.NewGuid(),
@@ -77,6 +80,7 @@ namespace Midas.Core.Orders
                 customerId,
                 address.Id,
                 serviceType,
+                cargoType,
                 OrderStatus.Pending,
                 0,
                 0,
@@ -90,7 +94,7 @@ namespace Midas.Core.Orders
             return order;
         }
 
-        public static Order Create(Customer customer, CustomerAddress address, ServiceType serviceType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
+        public static Order Create(Customer customer, CustomerAddress address, ServiceType serviceType, CargoType cargoType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
         {
             var order = new Order(
                 Guid.NewGuid(),
@@ -98,6 +102,7 @@ namespace Midas.Core.Orders
                 customer.Id,
                 address.Id,
                 serviceType,
+                cargoType,
                 OrderStatus.Pending,
                 0,
                 0,
@@ -172,9 +177,20 @@ namespace Midas.Core.Orders
         {
             ServiceType = newServiceType;
         }
+        public void ChangeCargoType(CargoType newCargoType)
+        {
+            CargoType = newCargoType;
+        }
         public void SetTotalWeight(decimal weight)
         {
             TotalWeight = weight;
+        }
+        public void CompleteAllPayments()
+        {
+            foreach (var payment in _payments)
+            {
+                payment.UpdateStatus(PaymentStatus.Completed);
+            }
         }
     }
 }
