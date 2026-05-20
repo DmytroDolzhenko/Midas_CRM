@@ -121,6 +121,7 @@ export function App() {
   const [apiError, setApiError] = useState('')
   const [expenses, setExpenses] = useLocalStorage('midas-expenses-v1', [])
   const [operations, setOperations] = useLocalStorage('midas-operations-v2', [])
+  const [theme, setTheme] = useLocalStorage('midas-theme', 'light')
 
   async function loadServerData() {
     setIsLoading(true)
@@ -174,9 +175,7 @@ export function App() {
         sales: orders.length,
         customers: customers.length,
         products: products.length,
-        chats: 0,
         expensesCount: expenses.length,
-        unreadMessages: 0,
         revenue,
         grossProfit,
         expenses: totalExpenses,
@@ -230,14 +229,6 @@ export function App() {
       ],
     })
 
-    if (sale.expense > 0) {
-      addOperation({
-        type: 'Фінансова витрата',
-        description: `Додано витрату до продажу ${sale.code || 'новий продаж'}: ${sale.comment || 'без коментаря'}`,
-        amount: `${Number(sale.expense).toLocaleString('uk-UA')} грн`,
-      })
-    }
-
     await loadServerData()
     setPage('orders')
   }
@@ -266,24 +257,18 @@ export function App() {
     const createdProduct = await serverApi.products.create({
       warehouseId: normalizeId(product.warehouseId),
       name: product.name,
-      description: product.description || '',
+      description: product.description,
+      weight: Number(product.weight) || 0,
       productCategoryId: normalizeId(product.productCategoryId),
     })
 
     await serverApi.productVariants.create({
       productId: getValue(createdProduct, 'id', 'Id'),
-      uniqCode: product.sku || `PRD-${getValue(createdProduct, 'id', 'Id')}`,
       color: product.color || '-',
       size: product.size || '-',
       quantity: Number(product.stock) || 0,
       costPrice: Number(product.cost) || 0,
       sellPrice: Number(product.price) || 0,
-    })
-
-    addOperation({
-      type: 'Закупівля товару',
-      description: `Додано ${product.stock} ${product.unit} товару ${product.name} за собівартістю ${product.cost} грн`,
-      amount: `${(Number(product.stock) * Number(product.cost)).toLocaleString('uk-UA')} грн`,
     })
 
     await loadServerData()
@@ -327,7 +312,7 @@ export function App() {
   }
 
   return (
-    <AppShell activePage={page} user={user} onNavigate={setPage} onLogout={logout}>
+    <AppShell activePage={page} user={user} theme={theme} onThemeChange={setTheme} onNavigate={setPage} onLogout={logout}>
       {apiError && (
         <div className="api-error-banner">
           <span>{apiError}</span>

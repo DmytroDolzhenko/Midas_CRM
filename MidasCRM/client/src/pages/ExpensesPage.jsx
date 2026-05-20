@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Pagination } from '../components/Pagination.jsx'
 
 const categories = ['Загальні', 'Доставка', 'Пакування', 'Маркетинг', 'Оренда']
 const stores = ['Gorpcore', 'Основний склад', 'Шоурум Київ']
 const accounts = ['Наложка NovaPay (6782.43 грн.)', 'Monobank ФОП', 'Готівка']
+const PAGE_SIZE = 10
 
 export function ExpensesPage({ expenses, onCreate }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -12,6 +14,33 @@ export function ExpensesPage({ expenses, onCreate }) {
   const [store, setStore] = useState('Gorpcore')
   const [account, setAccount] = useState(accounts[0])
   const [date, setDate] = useState('2026-05-19')
+  const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [storeFilter, setStoreFilter] = useState('all')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [page, setPage] = useState(1)
+
+  const filteredExpenses = useMemo(
+    () =>
+      expenses.filter((expense) => {
+        const matchesSearch = `${expense.description ?? ''} ${expense.category ?? ''} ${expense.store ?? ''} ${expense.account ?? ''}`
+          .toLowerCase()
+          .includes(search.toLowerCase())
+        const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter
+        const matchesStore = storeFilter === 'all' || expense.store === storeFilter
+        const matchesDate = (!dateFrom || expense.date >= dateFrom) && (!dateTo || expense.date <= dateTo)
+
+        return matchesSearch && matchesCategory && matchesStore && matchesDate
+      }),
+    [categoryFilter, dateFrom, dateTo, expenses, search, storeFilter],
+  )
+  const paginatedExpenses = filteredExpenses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  function updateFilter(setter, value) {
+    setter(value)
+    setPage(1)
+  }
 
   function resetForm() {
     setAmount('')
@@ -54,6 +83,28 @@ export function ExpensesPage({ expenses, onCreate }) {
       </div>
 
       <section className="panel">
+        <div className="table-filter-grid">
+          <input
+            aria-label="Пошук витрат"
+            placeholder="Пошук за описом, категорією або рахунком"
+            value={search}
+            onChange={(event) => updateFilter(setSearch, event.target.value)}
+          />
+          <select value={categoryFilter} onChange={(event) => updateFilter(setCategoryFilter, event.target.value)}>
+            <option value="all">Усі категорії</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+          <select value={storeFilter} onChange={(event) => updateFilter(setStoreFilter, event.target.value)}>
+            <option value="all">Усі склади</option>
+            {stores.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+          <input type="date" value={dateFrom} onChange={(event) => updateFilter(setDateFrom, event.target.value)} />
+          <input type="date" value={dateTo} onChange={(event) => updateFilter(setDateTo, event.target.value)} />
+        </div>
         <div className="table-header expenses-table">
           <span>Дата</span>
           <span>Категорія</span>
@@ -61,7 +112,7 @@ export function ExpensesPage({ expenses, onCreate }) {
           <span>Склад/Магазин</span>
           <span>Сума</span>
         </div>
-        {expenses.length === 0 ? (
+        {filteredExpenses.length === 0 ? (
           <div className="expense-empty">
             <h2>Витрат поки немає</h2>
             <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
@@ -69,7 +120,7 @@ export function ExpensesPage({ expenses, onCreate }) {
             </button>
           </div>
         ) : (
-          expenses.map((expense) => (
+          paginatedExpenses.map((expense) => (
             <div className="table-row expenses-table" key={expense.id}>
               <span>{expense.date}</span>
               <strong>{expense.category}</strong>
@@ -79,6 +130,7 @@ export function ExpensesPage({ expenses, onCreate }) {
             </div>
           ))
         )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={filteredExpenses.length} onPageChange={setPage} />
       </section>
 
       {isModalOpen && (

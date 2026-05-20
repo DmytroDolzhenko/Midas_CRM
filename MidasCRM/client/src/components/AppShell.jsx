@@ -37,10 +37,11 @@ function SettingsIcon() {
   )
 }
 
-export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
+export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, onLogout, children }) {
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isAiOpen, setIsAiOpen] = useState(false)
   const [settingsTab, setSettingsTab] = useState('profile')
   const [integrations, setIntegrations] = useState(defaultIntegrations)
   const [settingsMessage, setSettingsMessage] = useState('')
@@ -67,10 +68,10 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-theme={theme}>
       <aside className="sidebar" aria-label="Головна навігація">
         <div className="brand">
-          <span className="brand-mark">M</span>
+          <span className="brand-mark"></span>
           <div>
             <strong>Midas CRM</strong>
             <span>Client workspace</span>
@@ -132,10 +133,13 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
 
           <div className="topbar-actions">
             <button className="secondary-button" type="button" onClick={() => onNavigate('createOrder')}>
-              + Додати продаж
+              Додати продаж
             </button>
             <button className="secondary-button" type="button" onClick={() => onNavigate('expenses')}>
-              + Додати витрату
+              Додати витрату
+            </button>
+            <button className="secondary-button ai-button" type="button" onClick={() => setIsAiOpen(true)}>
+              AI рекомендації
             </button>
             <button className="icon-button" type="button" aria-label="Налаштування" onClick={() => openSettings('profile')}>
               <SettingsIcon />
@@ -201,6 +205,13 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
                     <option value="off">Вимкнено</option>
                   </select>
                 </label>
+                <label className="field">
+                  <span>Тема</span>
+                  <select value={theme} onChange={(event) => onThemeChange(event.target.value)}>
+                    <option value="light">Світла</option>
+                    <option value="dark">Темна</option>
+                  </select>
+                </label>
               </div>
             )}
 
@@ -245,6 +256,39 @@ export function AppShell({ activePage, user, onNavigate, onLogout, children }) {
             </div>
             <div className="notifications-content">
               <p className="empty-state">Нових сповіщень немає</p>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {isAiOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setIsAiOpen(false)}>
+          <section className="small-modal" role="dialog" aria-modal="true" aria-labelledby="ai-title" onClick={(event) => event.stopPropagation()}>
+            <div className="settings-header">
+              <div>
+                <p className="eyebrow">AI</p>
+                <h2 id="ai-title">AI рекомендації</h2>
+              </div>
+              <button className="modal-close-button" type="button" onClick={() => setIsAiOpen(false)}>
+                ×
+              </button>
+            </div>
+            <div className="ai-recommendations">
+              <p>
+                Тут згодом AI аналізуватиме продажі, залишки, собівартість, маржу та витрати, щоб підказувати,
+                які товари варто докупити, які краще не тримати в запасі, де збільшити вкладення, а де зменшити ризик.
+              </p>
+              <ul>
+                <li>Рекомендувати товари з високою маржею та стабільними продажами.</li>
+                <li>Попереджати про позиції, які довго лежать на складі.</li>
+                <li>Показувати склади, де товару замало або забагато.</li>
+                <li>Порівнювати витрати з прибутком і підсвічувати слабкі місця.</li>
+              </ul>
+            </div>
+            <div className="settings-actions">
+              <button className="primary-button" type="button" onClick={() => setIsAiOpen(false)}>
+                Зрозуміло
+              </button>
             </div>
           </section>
         </div>

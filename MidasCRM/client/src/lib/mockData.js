@@ -100,44 +100,9 @@ export const initialOrders = [
   },
 ]
 
-export const initialChats = [
-  {
-    id: 1,
-    customer: 'Анна Коваль',
-    channel: 'Instagram',
-    unread: 2,
-    lastMessage: 'Чи є в наявності Midas Pro?',
-    time: '12:45',
-  },
-  {
-    id: 2,
-    customer: 'Олег Мельник',
-    channel: 'OLX',
-    unread: 0,
-    lastMessage: 'Дякую, очікую накладну.',
-    time: '11:20',
-  },
-  {
-    id: 3,
-    customer: 'Марія Шевченко',
-    channel: 'Instagram',
-    unread: 1,
-    lastMessage: 'Можна оформити доставку на завтра?',
-    time: '09:05',
-  },
-]
-
 export const initialOperations = [
   {
     id: 1,
-    createdAt: '2026-05-17 10:30',
-    type: 'Закупівля товару',
-    description: 'Додано 18 одиниць товару Кавомашина Midas Pro за собівартістю 3200 грн',
-    actor: 'admin@midas.test',
-    amount: '57 600 грн',
-  },
-  {
-    id: 2,
     createdAt: '2026-05-16 15:12',
     type: 'Фінансова витрата',
     description: 'Додано витрату на пакування та доставку продажу SALE-1008',

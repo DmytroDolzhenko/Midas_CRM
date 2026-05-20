@@ -54,7 +54,7 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
           value={`${periodStats.loss.toLocaleString('uk-UA')} грн`}
           hint="Зафіксовані витрати"
         />
-        <MetricCard label="Нові повідомлення" value={stats.unreadMessages} hint="Instagram, OLX та інші" />
+        <MetricCard label="Товари" value={stats.products} hint="Активні позиції на складах" />
       </div>
 
       <div className="insight-grid">
@@ -81,10 +81,6 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
           <div className="channel-summary">
             <span>Усього продажів</span>
             <strong>{sales.length}</strong>
-          </div>
-          <div className="channel-summary">
-            <span>Чатів з покупцями</span>
-            <strong>{stats.chats}</strong>
           </div>
           <div className="channel-summary">
             <span>Товарів</span>
