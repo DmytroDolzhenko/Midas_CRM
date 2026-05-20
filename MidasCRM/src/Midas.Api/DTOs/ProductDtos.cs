@@ -68,9 +68,6 @@ namespace Api.Dtos
         public string Description { get; set; } = null!;
         public decimal Weight { get; set; }
         public int ProductCategoryId { get; set; }
-
-        public List<IFormFile> Images { get; set; } = new();
-
         public List<CreateProductVariantDto> Variants { get; set; } = new();
     }
 }

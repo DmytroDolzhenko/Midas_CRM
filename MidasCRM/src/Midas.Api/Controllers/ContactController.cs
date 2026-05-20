@@ -12,7 +12,6 @@ namespace Midas.Api.Controllers
     [Route("api/[controller]")]
     public class ContactController(
         ISender sender,
-      //  ICurrentUserService currentUserService,
         IGetQueries<Contact, int> getQueries
         ) : ControllerBase
     {
@@ -42,7 +41,7 @@ namespace Midas.Api.Controllers
         {
             var input = new CreateContactCommand
             {
-                Value = request.Value
+                PhoneNumber = request.PhoneNumber
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -95,7 +94,7 @@ namespace Midas.Api.Controllers
             var input = new UpdateContactCommand
             {
                 Id = contact.Id,
-                Value = contact.Value
+                PhoneNumber = contact.PhoneNumber
             };
 
             var result = await sender.Send(input, cancellationToken);

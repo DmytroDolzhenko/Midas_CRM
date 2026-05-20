@@ -11,6 +11,7 @@ namespace Api.Dtos
         string Fathername,
         UserRole Role,
         string Email,
+        string PhoneNumber,
         bool IsApproved,
         DateTime? RegistrationDate
     )
@@ -23,6 +24,7 @@ namespace Api.Dtos
                 user.Fathername,
                 user.Role,
                 user.Email ?? string.Empty,
+                user.PhoneNumber,
                 user.IsApproved,
                 user.RegistrationDate
             );
@@ -32,6 +34,7 @@ namespace Api.Dtos
         string Surname,
         string Fathername,
         string Email,
+        string PhoneNumber,
         UserRole Role,
         bool IsApproved
     );
@@ -39,7 +42,8 @@ namespace Api.Dtos
         string Name,
         string Surname,
         string Fathername,
-        string Email
+        string Email,
+        string PhoneNumber
     );
     public record ApproveUserDto(
         bool IsApproved

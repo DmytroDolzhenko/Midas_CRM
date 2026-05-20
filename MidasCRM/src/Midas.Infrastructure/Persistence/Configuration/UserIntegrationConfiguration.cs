@@ -15,7 +15,7 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .HasMaxLength(100);
 
             builder.Property(x => x.EncryptedAccessToken)
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(x => x.CreatedAt)
                 .IsRequired();
@@ -23,7 +23,12 @@ namespace Midas.Infrastructure.Persistence.Configuration
             builder.HasIndex(x => new { x.UserId, x.Provider })
                 .IsUnique();
 
-            builder.ToTable("UserIntegration");
+            builder.HasOne(ui => ui.LogisticProfile)
+                .WithOne(lp => lp.UserIntegration)
+                .HasForeignKey<UserLogisticProfile>(lp => lp.UserIntegrationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.ToTable("UserIntegrations");
         }
     }
 }

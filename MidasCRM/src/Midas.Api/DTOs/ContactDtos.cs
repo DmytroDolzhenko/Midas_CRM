@@ -4,24 +4,24 @@ namespace Api.Dtos
 {
     public record ContactDto(
         int Id,
-        string Value,
+        string PhoneNumber,
         bool IsDeleted
     )
     {
         public static ContactDto FromDomain(Contact contact)
             => new(
                 contact.Id,
-                contact.Value,
+                contact.PhoneNumber,
                 contact.IsDeleted
             );
     }
 
     public record CreateContactDto(
-        string Value
+        string PhoneNumber
     );
 
     public record UpdateContactDto(
-        string Value
+        string PhoneNumber
     );
 
     public record DeleteContactDto(

@@ -39,6 +39,7 @@ namespace Midas.Api.Controllers
                 Surname = request.Surname,
                 Fathername = request.Fathername,
                 Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
                 Role = request.Role,
                 IsApproved = request.IsApproved
             };
@@ -56,7 +57,8 @@ namespace Midas.Api.Controllers
                 Name = request.Name,
                 Surname = request.Surname,
                 Fathername = request.Fathername,
-                Email = request.Email
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
             };
 
             var result = await sender.Send(command, cancellationToken);

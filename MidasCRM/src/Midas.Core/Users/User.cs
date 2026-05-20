@@ -8,20 +8,25 @@ namespace Midas.Core.Users
 {
     public class User : IdentityUser<Guid>, IEntity<Guid>
     {
-      //  public Guid Id { get; }
         public string Name { get; private set; }
         public string Surname { get; private set; }
         public string Fathername { get; private set; }
+       //public string PhoneNumber { get; private set; }
+
         public UserRole Role { get; private set; }
         public DateTime? RegistrationDate { get; private set; }
+
         public bool IsApproved { get; private set; }
         public bool IsDeleted { get; private set; }
+        //NOVA POSHTA
+
 
         private User(
             string name,
             string surname,
             string fathername,
             string email,
+            string phoneNumber,
             UserRole role,
             bool isApproved)
         {
@@ -30,6 +35,7 @@ namespace Midas.Core.Users
             Surname = surname;
             Fathername = fathername;
             Email = email;
+            PhoneNumber = phoneNumber;
             Role = role;
             RegistrationDate = DateTime.UtcNow;
             IsApproved = isApproved;
@@ -40,6 +46,7 @@ namespace Midas.Core.Users
             string surname,
             string fathername,
             string email,
+            string phoneNumber,
             UserRole role,
             bool isApproved)
         {
@@ -48,6 +55,7 @@ namespace Midas.Core.Users
                 surname,
                 fathername,
                 email,
+                phoneNumber,
                 role,
                 isApproved);
         }
@@ -56,12 +64,15 @@ namespace Midas.Core.Users
             string name,
             string surname,
             string fathername,
-            string email)
+            string email,
+            string phoneNumber
+            )
         {
             Name = name;
             Surname = surname;
             Fathername = fathername;
             Email = email;
+            PhoneNumber = phoneNumber;
         }
 
         public void ChangeRole(UserRole newRole)
@@ -79,6 +90,10 @@ namespace Midas.Core.Users
             NormalizedUserName = Email.ToUpper();
 
             PasswordHash = null;
+        }
+        public void ChangePhoneNumber(string newPhoneNumber)
+        {
+            PhoneNumber = newPhoneNumber;
         }
     }
 }

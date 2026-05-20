@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Core.UserIntegrations;
@@ -30,40 +31,26 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
         public async Task<bool> Handle(ConnectExternalServiceCommand request, CancellationToken ct)
         {
             var userId = request.UserId ?? _currentUser.UserId;
-            if (userId is null)
-            {
-                return false;
-            }
+            if (userId is null) return false;
 
             var provider = _providers.FirstOrDefault(p => p.ProviderName == request.Provider);
-            if (provider == null)
-            {
-                return false;
-            }
+            if (provider == null) return false;
 
             var tokens = await provider.ExchangeCodeAsync(request.Code);
+
             var integration = _context.UserIntegrations
                 .FirstOrDefault(x => x.UserId == userId.Value && x.Provider == request.Provider);
 
             if (integration is null)
             {
-                integration = new UserIntegration
-                {
-                    UserId = userId.Value,
-                    Provider = request.Provider,
-                    CreatedAt = DateTime.UtcNow
-                };
+                integration = UserIntegration.Create(userId.Value, request.Provider);
                 _context.UserIntegrations.Add(integration);
             }
 
-            integration.EncryptedAccessToken = _encryption.Encrypt(tokens.AccessToken);
-            integration.EncryptedRefreshToken = tokens.RefreshToken != null
-                ? _encryption.Encrypt(tokens.RefreshToken)
-                : null;
-            integration.ExpiresAt = tokens.ExpiresIn > 0
-                ? DateTime.UtcNow.AddSeconds(tokens.ExpiresIn)
-                : null;
-            integration.IsActive = true;
+            var encryptedAccess = _encryption.Encrypt(tokens.AccessToken);
+            var encryptedRefresh = tokens.RefreshToken != null ? _encryption.Encrypt(tokens.RefreshToken) : null;
+
+            integration.UpdateTokens(encryptedAccess, encryptedRefresh, tokens.ExpiresIn);
 
             await _context.SaveChangesAsync(ct);
             return true;
@@ -88,30 +75,34 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
 
         public async Task<bool> Handle(SaveStaticTokenCommand request, CancellationToken ct)
         {
-            if (_currentUser.UserId is null || string.IsNullOrWhiteSpace(request.Token))
-            {
-                return false;
-            }
+            if (_currentUser.UserId is null || string.IsNullOrWhiteSpace(request.Token)) return false;
 
             var userId = _currentUser.UserId.Value;
-            var integration = _context.UserIntegrations
-                .FirstOrDefault(x => x.UserId == userId && x.Provider == request.Provider);
+
+            // Завантажуємо разом з профілем, щоб перевірити наявність
+            var integration = await _context.UserIntegrations
+                .Include(x => x.LogisticProfile)
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == request.Provider, ct);
 
             if (integration is null)
             {
-                integration = new UserIntegration
-                {
-                    UserId = userId,
-                    Provider = request.Provider,
-                    CreatedAt = DateTime.UtcNow
-                };
+                integration = UserIntegration.Create(userId, request.Provider);
                 _context.UserIntegrations.Add(integration);
+
+                // Зберігаємо проміжний стан, щоб згенерувався числовий ID для integration.Id,
+                // який потрібен для зовнішнього ключа UserLogisticProfile
+                await _context.SaveChangesAsync(ct);
             }
 
-            integration.EncryptedAccessToken = _encryption.Encrypt(request.Token);
-            integration.EncryptedRefreshToken = null;
-            integration.ExpiresAt = null;
-            integration.IsActive = true;
+            if (integration.LogisticProfile == null)
+            {
+                // Використовуємо новий фабричний метод, щоб не ламати інкапсуляцію DDD
+                var emptyProfile = UserLogisticProfile.CreateEmpty(integration.Id);
+                _context.UserLogisticProfiles.Add(emptyProfile);
+            }
+
+            var encryptedToken = _encryption.Encrypt(request.Token);
+            integration.UpdateStaticToken(encryptedToken);
 
             await _context.SaveChangesAsync(ct);
             return true;

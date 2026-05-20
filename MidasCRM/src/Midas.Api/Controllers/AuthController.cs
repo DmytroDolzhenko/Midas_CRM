@@ -28,6 +28,7 @@ namespace Midas.Api.Controllers
                 request.Surname,
                 request.Fathername,
                 request.Email,
+                request.PhoneNumber,
                 UserRole.Operator,
                 false
                 );

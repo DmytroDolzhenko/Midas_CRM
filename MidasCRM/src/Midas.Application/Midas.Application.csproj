@@ -19,6 +19,7 @@
     <Folder Include="Common\Services\" />
     <Folder Include="Entities\Contacts\" />
     <Folder Include="Entities\Customers\" />
+    <Folder Include="Entities\NovaPoshta\Validators\" />
     <Folder Include="Entities\Users\" />
     <Folder Include="Entities\OrderSources\" />
     <Folder Include="Entities\ProductCategories\" />

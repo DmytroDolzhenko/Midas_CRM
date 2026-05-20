@@ -11,8 +11,8 @@ namespace Midas.Infrastructure.Persistence.Configuration
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-            builder.Property(x => x.Value)
-                .HasMaxLength(100)
+            builder.Property(x => x.PhoneNumber)
+                .HasMaxLength(13)
                 .IsRequired();
 
             builder.HasMany(x => x.Customers)

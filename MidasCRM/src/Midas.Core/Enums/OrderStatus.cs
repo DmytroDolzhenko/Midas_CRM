@@ -12,6 +12,8 @@ namespace Midas.Core.Enums
         Delivered = 3,
         Returned = 4,
         Received = 5,
-        Cancelled = 6
+        Cancelled = 6,
+        Deleted = 7,
+          
     }
 }

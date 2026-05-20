@@ -25,12 +25,13 @@ namespace Midas.Core.Products
         public bool IsDeleted { get; private set; }
         public Guid OwnerId { get; private set; }
 
+
         private readonly List<ProductVariant> _variants = new();
         public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
 
+
         private readonly List<ProductImage> _images = new();
         public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
-
         private Product(
             int id,
             int warehouseId,

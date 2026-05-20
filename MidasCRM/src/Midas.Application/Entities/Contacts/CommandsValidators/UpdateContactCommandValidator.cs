@@ -11,11 +11,11 @@ namespace Midas.Application.Entities.Contacts.CommandsValidators
                 .GreaterThan(0)
                 .WithMessage("Id must be greater than 0.");
 
-            RuleFor(x => x.Value)
+            RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .WithMessage("Value is required")
-                .MaximumLength(255)
-                .WithMessage("Value must be less than 255 characters");
+                .WithMessage("Phone number is required")
+                .MaximumLength(13)
+                .WithMessage("Phone number must be less than 255 characters");
         }
     }
 }

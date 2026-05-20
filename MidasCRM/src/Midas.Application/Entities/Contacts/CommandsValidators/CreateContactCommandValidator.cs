@@ -7,7 +7,7 @@ namespace Midas.Application.Entities.Contacts.CommandsValidators
     {
         public CreateContactCommandValidator()
         {
-            RuleFor(x => x.Value)
+            RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .WithMessage("Value is required")
                 .MaximumLength(255)
