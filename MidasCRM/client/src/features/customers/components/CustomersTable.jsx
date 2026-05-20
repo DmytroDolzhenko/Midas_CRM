@@ -1,6 +1,6 @@
 export function CustomersTable({ customers }) {
   return (
-    <section className="panel">
+    <section>
       <div className="table-header customers-table">
         <span>Ім’я</span>
         <span>Email</span>

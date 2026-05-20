@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
+import { Pagination } from '../components/Pagination.jsx'
 
 const statusTabs = ['Всі', 'Продано', 'Повернення']
 const quickFilters = ['Сьогодні', 'Вчора', 'Тиждень', '30 днів', 'Цей місяць', 'Минулий місяць', '3 місяці']
+const PAGE_SIZE = 10
 const statusNames = {
   0: 'Очікує',
   1: 'В обробці',
@@ -38,6 +40,9 @@ export function OrdersPage({ orders, onNavigate }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [minTotal, setMinTotal] = useState('')
+  const [maxTotal, setMaxTotal] = useState('')
+  const [page, setPage] = useState(1)
 
   const filteredOrders = useMemo(
     () => {
@@ -52,12 +57,16 @@ export function OrdersPage({ orders, onNavigate }) {
           (activeStatus === 'Повернення' && isReturn)
         const orderDate = order.date || ''
         const matchesDate = !orderDate || (orderDate >= dateFrom && orderDate <= dateTo)
+        const matchesTotal =
+          (!minTotal || Number(order.total) >= Number(minTotal)) &&
+          (!maxTotal || Number(order.total) <= Number(maxTotal))
 
-        return matchesSearch && matchesStatus && matchesDate
+        return matchesSearch && matchesStatus && matchesDate && matchesTotal
       })
     },
-    [activeStatus, dateFrom, dateTo, orders, search],
+    [activeStatus, dateFrom, dateTo, maxTotal, minTotal, orders, search],
   )
+  const paginatedOrders = filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const analytics = useMemo(() => {
     const total = filteredOrders.reduce((sum, order) => sum + Number(order.total), 0)
@@ -123,6 +132,7 @@ export function OrdersPage({ orders, onNavigate }) {
 
     setDateFrom(formatDate(start))
     setDateTo(formatDate(end))
+    setPage(1)
   }
 
   return (
@@ -135,7 +145,7 @@ export function OrdersPage({ orders, onNavigate }) {
                 key={tab}
                 type="button"
                 className={activeStatus === tab ? 'tab-button active' : 'tab-button'}
-                onClick={() => setActiveStatus(tab)}
+                onClick={() => { setActiveStatus(tab); setPage(1) }}
               >
                 {tab}
               </button>
@@ -159,10 +169,10 @@ export function OrdersPage({ orders, onNavigate }) {
             aria-label="Пошукова фраза"
             placeholder="Пошукова фраза"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => { setSearch(event.target.value); setPage(1) }}
           />
-          <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
-          <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+          <input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1) }} />
+          <input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1) }} />
           <button className="icon-button flat-icon-button" type="button" aria-label="Експорт" onClick={exportSales}>
             <ExportIcon />
           </button>
@@ -179,7 +189,7 @@ export function OrdersPage({ orders, onNavigate }) {
           <div className="inline-filter-panel">
             <label className="field">
               <span>Статус</span>
-              <select value={activeStatus} onChange={(event) => setActiveStatus(event.target.value)}>
+              <select value={activeStatus} onChange={(event) => { setActiveStatus(event.target.value); setPage(1) }}>
                 {statusTabs.map((tab) => (
                   <option key={tab}>{tab}</option>
                 ))}
@@ -187,7 +197,15 @@ export function OrdersPage({ orders, onNavigate }) {
             </label>
             <label className="field">
               <span>Пошук</span>
-              <input value={search} onChange={(event) => setSearch(event.target.value)} />
+              <input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} />
+            </label>
+            <label className="field">
+              <span>Сума від</span>
+              <input min="0" type="number" value={minTotal} onChange={(event) => { setMinTotal(event.target.value); setPage(1) }} />
+            </label>
+            <label className="field">
+              <span>Сума до</span>
+              <input min="0" type="number" value={maxTotal} onChange={(event) => { setMaxTotal(event.target.value); setPage(1) }} />
             </label>
           </div>
         )}
@@ -220,7 +238,7 @@ export function OrdersPage({ orders, onNavigate }) {
             </button>
           </div>
         ) : (
-          filteredOrders.map((order) => (
+          paginatedOrders.map((order) => (
             <div className="sales-layout-row" key={order.id}>
               <strong>{order.code}</strong>
               <span>{order.customer}</span>
@@ -232,6 +250,7 @@ export function OrdersPage({ orders, onNavigate }) {
             </div>
           ))
         )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={filteredOrders.length} onPageChange={setPage} />
       </section>
 
       {selectedOrder && (

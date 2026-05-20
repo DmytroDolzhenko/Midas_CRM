@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
+import { Pagination } from '../components/Pagination.jsx'
 
 const warehouses = ['Gorpcore', 'Основний склад', 'Шоурум Київ']
+const PAGE_SIZE = 8
 const stockFilters = [
   { id: 'all', label: 'всі' },
   { id: 'available', label: 'в наявності' },
@@ -31,12 +33,23 @@ export function ProductsPage({ products, onNavigate }) {
   const [warehouseList, setWarehouseList] = useState(warehouses)
   const [search, setSearch] = useState('')
   const [stockFilter, setStockFilter] = useState('all')
-  const [isPurchaseEnabled, setIsPurchaseEnabled] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [importFileName, setImportFileName] = useState('')
+  const [newWarehouseName, setNewWarehouseName] = useState('')
+  const [minCost, setMinCost] = useState('')
+  const [maxCost, setMaxCost] = useState('')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [page, setPage] = useState(1)
   const fileInputRef = useRef(null)
+
+  const visibleWarehouses = useMemo(
+    () => Array.from(new Set([...warehouseList, ...products.map((product) => product.warehouse).filter(Boolean)])),
+    [products, warehouseList],
+  )
 
   const filteredProducts = useMemo(
     () =>
@@ -48,31 +61,80 @@ export function ProductsPage({ products, onNavigate }) {
           stockFilter === 'all' ||
           (stockFilter === 'available' && product.stock > 0) ||
           (stockFilter === 'empty' && product.stock <= 0)
+        const matchesWarehouse = product.warehouse === warehouse
+        const matchesCost =
+          (!minCost || Number(product.cost) >= Number(minCost)) &&
+          (!maxCost || Number(product.cost) <= Number(maxCost))
+        const matchesPrice =
+          (!minPrice || Number(product.price) >= Number(minPrice)) &&
+          (!maxPrice || Number(product.price) <= Number(maxPrice))
 
-        return matchesSearch && matchesStock
+        return matchesSearch && matchesStock && matchesWarehouse && matchesCost && matchesPrice
       }),
-    [products, search, stockFilter],
+    [maxCost, maxPrice, minCost, minPrice, products, search, stockFilter, warehouse],
   )
 
+  const paginatedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   const totals = useMemo(() => {
-    const available = products.filter((product) => product.stock > 0)
-    const stockUnits = products.reduce((sum, product) => sum + Number(product.stock), 0)
-    const storedValue = products.reduce((sum, product) => sum + product.stock * product.cost, 0)
-    const possibleIncome = products.reduce((sum, product) => sum + product.stock * (product.price - product.cost), 0)
+    const warehouseProducts = products.filter((product) => product.warehouse === warehouse)
+    const available = warehouseProducts.filter((product) => product.stock > 0)
+    const stockUnits = warehouseProducts.reduce((sum, product) => sum + Number(product.stock), 0)
+    const storedValue = warehouseProducts.reduce((sum, product) => sum + product.stock * product.cost, 0)
+    const possibleIncome = warehouseProducts.reduce((sum, product) => sum + product.stock * (product.price - product.cost), 0)
 
     return {
-      total: products.length,
+      total: warehouseProducts.length,
       available: available.length,
       stockUnits,
       storedValue,
       possibleIncome,
     }
-  }, [products])
+  }, [products, warehouse])
+
+  function updateSearch(value) {
+    setSearch(value)
+    setPage(1)
+  }
+
+  function updateStockFilter(value) {
+    setStockFilter(value)
+    setPage(1)
+  }
+
+  function updateWarehouse(value) {
+    setWarehouse(value)
+    setPage(1)
+  }
 
   function addWarehouse() {
-    const nextWarehouseName = `Склад ${warehouseList.length + 1}`
+    setNewWarehouseName('')
+    setIsWarehouseModalOpen(true)
+  }
+
+  function saveWarehouse(event) {
+    event.preventDefault()
+    const nextWarehouseName = newWarehouseName.trim()
+
+    if (!nextWarehouseName) {
+      return
+    }
+
     setWarehouseList((currentWarehouses) => [...currentWarehouses, nextWarehouseName])
-    setWarehouse(nextWarehouseName)
+    updateWarehouse(nextWarehouseName)
+    setIsWarehouseModalOpen(false)
+  }
+
+  function renameWarehouse(index, name) {
+    const nextName = name.trimStart()
+
+    setWarehouseList((currentWarehouses) =>
+      currentWarehouses.map((item, itemIndex) => (itemIndex === index ? nextName : item)),
+    )
+
+    if (warehouseList[index] === warehouse) {
+      updateWarehouse(nextName)
+    }
   }
 
   function exportProducts() {
@@ -109,12 +171,12 @@ export function ProductsPage({ products, onNavigate }) {
     <section className="catalog-page">
       <div className="catalog-toolbar panel">
         <div className="warehouse-tabs">
-          {warehouseList.map((item) => (
+          {visibleWarehouses.map((item) => (
             <button
               key={item}
               type="button"
               className={warehouse === item ? 'warehouse-tab active' : 'warehouse-tab'}
-              onClick={() => setWarehouse(item)}
+              onClick={() => updateWarehouse(item)}
             >
               {item}
             </button>
@@ -127,7 +189,7 @@ export function ProductsPage({ products, onNavigate }) {
             aria-label="Пошукова фраза"
             placeholder="Пошукова фраза"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => updateSearch(event.target.value)}
           />
           <div className="radio-group">
             {stockFilters.map((filter) => (
@@ -136,7 +198,7 @@ export function ProductsPage({ products, onNavigate }) {
                   type="radio"
                   name="stock-filter"
                   checked={stockFilter === filter.id}
-                  onChange={() => setStockFilter(filter.id)}
+                onChange={() => updateStockFilter(filter.id)}
                 />
                 {filter.label}
               </label>
@@ -154,15 +216,31 @@ export function ProductsPage({ products, onNavigate }) {
           <div className="inline-filter-panel">
             <label className="field">
               <span>Поточний склад</span>
-              <select value={warehouse} onChange={(event) => setWarehouse(event.target.value)}>
-                {warehouseList.map((item) => (
+              <select value={warehouse} onChange={(event) => updateWarehouse(event.target.value)}>
+                {visibleWarehouses.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </select>
             </label>
             <label className="field">
               <span>Пошук</span>
-              <input value={search} onChange={(event) => setSearch(event.target.value)} />
+              <input value={search} onChange={(event) => updateSearch(event.target.value)} />
+            </label>
+            <label className="field">
+              <span>Собівартість від</span>
+              <input min="0" type="number" value={minCost} onChange={(event) => { setMinCost(event.target.value); setPage(1) }} />
+            </label>
+            <label className="field">
+              <span>Собівартість до</span>
+              <input min="0" type="number" value={maxCost} onChange={(event) => { setMaxCost(event.target.value); setPage(1) }} />
+            </label>
+            <label className="field">
+              <span>Ціна від</span>
+              <input min="0" type="number" value={minPrice} onChange={(event) => { setMinPrice(event.target.value); setPage(1) }} />
+            </label>
+            <label className="field">
+              <span>Ціна до</span>
+              <input min="0" type="number" value={maxPrice} onChange={(event) => { setMaxPrice(event.target.value); setPage(1) }} />
             </label>
           </div>
         )}
@@ -177,20 +255,10 @@ export function ProductsPage({ products, onNavigate }) {
       </div>
 
       <div className="inventory-actions panel">
-        <label className="switch-row">
-          <input
-            type="checkbox"
-            checked={isPurchaseEnabled}
-            onChange={(event) => setIsPurchaseEnabled(event.target.checked)}
-          />
-          <span />
-          Закупівля
-        </label>
         <button className="success-button" type="button" onClick={() => onNavigate('createProduct')}>
-          + Додати товар
+           Додати товар
         </button>
         <button className="primary-button" type="button" onClick={() => fileInputRef.current?.click()}>
-          <ExportIcon />
            Імпортувати
         </button>
         <input ref={fileInputRef} className="hidden-file-input" type="file" accept=".csv,.xlsx" onChange={handleImport} />
@@ -216,7 +284,7 @@ export function ProductsPage({ products, onNavigate }) {
           <span>Націнка</span>
         </div>
 
-        {filteredProducts.map((product) => {
+        {paginatedProducts.map((product) => {
           const markup = product.cost > 0 ? Math.round(((product.price - product.cost) / product.cost) * 100) : 0
 
           return (
@@ -246,6 +314,7 @@ export function ProductsPage({ products, onNavigate }) {
             </div>
           )
         })}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={filteredProducts.length} onPageChange={setPage} />
       </section>
 
       {editingProduct && (
@@ -283,6 +352,36 @@ export function ProductsPage({ products, onNavigate }) {
         </div>
       )}
 
+      {isWarehouseModalOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setIsWarehouseModalOpen(false)}>
+          <form className="small-modal" onSubmit={saveWarehouse} onClick={(event) => event.stopPropagation()}>
+            <div className="settings-header">
+              <div>
+                <p className="eyebrow">Warehouse</p>
+                <h2>Додати склад</h2>
+              </div>
+              <button className="modal-close-button" type="button" onClick={() => setIsWarehouseModalOpen(false)}>×</button>
+            </div>
+            <div className="settings-grid">
+              <label className="field">
+                <span>Назва складу</span>
+                <input
+                  autoFocus
+                  required
+                  value={newWarehouseName}
+                  placeholder="Наприклад: Склад Львів"
+                  onChange={(event) => setNewWarehouseName(event.target.value)}
+                />
+              </label>
+            </div>
+            <div className="settings-actions">
+              <button className="secondary-button" type="button" onClick={() => setIsWarehouseModalOpen(false)}>Скасувати</button>
+              <button className="primary-button" type="submit">Додати</button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {isSettingsOpen && (
         <div className="modal-backdrop" role="presentation" onClick={() => setIsSettingsOpen(false)}>
           <section className="small-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
@@ -296,19 +395,18 @@ export function ProductsPage({ products, onNavigate }) {
             <div className="settings-grid">
               <label className="field">
                 <span>Склад за замовчуванням</span>
-                <select value={warehouse} onChange={(event) => setWarehouse(event.target.value)}>
-                  {warehouseList.map((item) => (
+                <select value={warehouse} onChange={(event) => updateWarehouse(event.target.value)}>
+                  {visibleWarehouses.map((item) => (
                     <option key={item}>{item}</option>
                   ))}
                 </select>
               </label>
-              <label className="field">
-                <span>Режим закупівлі</span>
-                <select value={isPurchaseEnabled ? 'on' : 'off'} onChange={(event) => setIsPurchaseEnabled(event.target.value === 'on')}>
-                  <option value="on">Увімкнено</option>
-                  <option value="off">Вимкнено</option>
-                </select>
-              </label>
+              {warehouseList.map((item, index) => (
+                <label className="field" key={`${item}-${index}`}>
+                  <span>Назва складу #{index + 1}</span>
+                  <input value={item} onChange={(event) => renameWarehouse(index, event.target.value)} />
+                </label>
+              ))}
             </div>
             <div className="settings-actions">
               <button className="primary-button" type="button" onClick={() => setIsSettingsOpen(false)}>Зберегти</button>

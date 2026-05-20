@@ -38,6 +38,12 @@ export async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem('midas-user')
+      window.dispatchEvent(new Event('midas-auth-expired'))
+      throw new Error('Сесію завершено. Увійдіть знову.')
+    }
+
     let message = `API request failed: ${response.status}`
 
     try {
