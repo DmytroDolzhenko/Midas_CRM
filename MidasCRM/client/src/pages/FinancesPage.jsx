@@ -2,16 +2,16 @@ import { useMemo, useState } from 'react'
 import { Pagination } from '../components/Pagination.jsx'
 
 const categories = ['Загальні', 'Доставка', 'Пакування', 'Маркетинг', 'Оренда']
-const stores = ['Gorpcore', 'Основний склад', 'Шоурум Київ']
-const accounts = ['Наложка NovaPay (6782.43 грн.)', 'Monobank ФОП', 'Готівка']
+const stores = ['Основний склад']
+const accounts = ['NovaPay', 'Monobank', 'Готівка']
 const PAGE_SIZE = 10
 
-export function ExpensesPage({ expenses, onCreate }) {
+export function FinancesPage({ finances, onCreate }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('Загальні')
-  const [store, setStore] = useState('Gorpcore')
+  const [store, setStore] = useState('Основний склад')
   const [account, setAccount] = useState(accounts[0])
   const [date, setDate] = useState('2026-05-19')
   const [search, setSearch] = useState('')
@@ -21,21 +21,21 @@ export function ExpensesPage({ expenses, onCreate }) {
   const [dateTo, setDateTo] = useState('')
   const [page, setPage] = useState(1)
 
-  const filteredExpenses = useMemo(
+  const filteredFinances = useMemo(
     () =>
-      expenses.filter((expense) => {
-        const matchesSearch = `${expense.description ?? ''} ${expense.category ?? ''} ${expense.store ?? ''} ${expense.account ?? ''}`
+      finances.filter((finance) => {
+        const matchesSearch = `${finance.description ?? ''} ${finance.category ?? ''} ${finance.store ?? ''} ${finance.account ?? ''}`
           .toLowerCase()
           .includes(search.toLowerCase())
-        const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter
-        const matchesStore = storeFilter === 'all' || expense.store === storeFilter
-        const matchesDate = (!dateFrom || expense.date >= dateFrom) && (!dateTo || expense.date <= dateTo)
+        const matchesCategory = categoryFilter === 'all' || finance.category === categoryFilter
+        const matchesStore = storeFilter === 'all' || finance.store === storeFilter
+        const matchesDate = (!dateFrom || finance.date >= dateFrom) && (!dateTo || finance.date <= dateTo)
 
         return matchesSearch && matchesCategory && matchesStore && matchesDate
       }),
-    [categoryFilter, dateFrom, dateTo, expenses, search, storeFilter],
+    [categoryFilter, dateFrom, dateTo, finances, search, storeFilter],
   )
-  const paginatedExpenses = filteredExpenses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const paginatedFinances = filteredFinances.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function updateFilter(setter, value) {
     setter(value)
@@ -46,7 +46,7 @@ export function ExpensesPage({ expenses, onCreate }) {
     setAmount('')
     setDescription('')
     setCategory('Загальні')
-    setStore('Gorpcore')
+    setStore('Основний склад')
     setAccount(accounts[0])
     setDate('2026-05-19')
   }
@@ -56,7 +56,7 @@ export function ExpensesPage({ expenses, onCreate }) {
     resetForm()
   }
 
-  function saveExpense(status) {
+  function saveFinances(status) {
     onCreate({
       amount: Number(amount),
       description,
@@ -71,21 +71,21 @@ export function ExpensesPage({ expenses, onCreate }) {
 
   function handleSubmit(event) {
     event.preventDefault()
-    saveExpense('Додано')
+    saveFinances('Додано')
   }
 
   return (
     <section className="page-stack">
       <div className="crm-page-header">
         <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
-          + Додати витрату
+          Додати фінансову операцію
         </button>
       </div>
 
       <section className="panel">
         <div className="table-filter-grid">
           <input
-            aria-label="Пошук витрат"
+            aria-label="Пошук фінансових операцій"
             placeholder="Пошук за описом, категорією або рахунком"
             value={search}
             onChange={(event) => updateFilter(setSearch, event.target.value)}
@@ -112,25 +112,25 @@ export function ExpensesPage({ expenses, onCreate }) {
           <span>Склад/Магазин</span>
           <span>Сума</span>
         </div>
-        {filteredExpenses.length === 0 ? (
+        {filteredFinances.length === 0 ? (
           <div className="expense-empty">
-            <h2>Витрат поки немає</h2>
+            <h2>Фінансові операції поки немає</h2>
             <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
-              Додати першу витрату
+              Додати першу фінансову операцію
             </button>
           </div>
         ) : (
-          paginatedExpenses.map((expense) => (
-            <div className="table-row expenses-table" key={expense.id}>
-              <span>{expense.date}</span>
-              <strong>{expense.category}</strong>
-              <span>{expense.description}</span>
-              <span>{expense.store}</span>
-              <span>{Number(expense.amount).toLocaleString('uk-UA')} грн. {expense.status === 'Заплановано' ? '(план)' : ''}</span>
+          paginatedFinances.map((finance) => (
+            <div className="table-row expenses-table" key={finance.id}>
+              <span>{finance.date}</span>
+              <strong>{finance.category}</strong>
+              <span>{finance.description}</span>
+              <span>{finance.store}</span>
+              <span>{Number(finance.amount).toLocaleString('uk-UA')} грн. {finance.status === 'Заплановано' ? '(план)' : ''}</span>
             </div>
           ))
         )}
-        <Pagination page={page} pageSize={PAGE_SIZE} total={filteredExpenses.length} onPageChange={setPage} />
+        <Pagination page={page} pageSize={PAGE_SIZE} total={filteredFinances.length} onPageChange={setPage} />
       </section>
 
       {isModalOpen && (
@@ -198,7 +198,7 @@ export function ExpensesPage({ expenses, onCreate }) {
             </div>
 
             <div className="expense-modal-actions">
-              <button className="link-button" type="button" onClick={() => saveExpense('Заплановано')}>
+              <button className="link-button" type="button" onClick={() => saveFinances('Заплановано')}>
                 Запланувати витрату
               </button>
               <div>

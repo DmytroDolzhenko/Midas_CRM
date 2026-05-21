@@ -5,7 +5,7 @@ const navItems = [
   { id: 'dashboard', label: 'Головна' },
   { id: 'products', label: 'Товари' },
   { id: 'orders', label: 'Продажі' },
-  { id: 'expenses', label: 'Витрати' },
+  { id: 'finances', label: 'Фінанси' },
   { id: 'customers', label: 'Клієнти' },
   { id: 'operations', label: 'Історія' },
 ]
@@ -135,7 +135,7 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
             <button className="secondary-button" type="button" onClick={() => onNavigate('createOrder')}>
               Додати продаж
             </button>
-            <button className="secondary-button" type="button" onClick={() => onNavigate('expenses')}>
+            <button className="secondary-button" type="button" onClick={() => onNavigate('finances')}>
               Додати витрату
             </button>
             <button className="secondary-button ai-button" type="button" onClick={() => setIsAiOpen(true)}>
@@ -296,3 +296,4 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
     </div>
   )
 }
+
