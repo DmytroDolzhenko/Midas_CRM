@@ -4,10 +4,10 @@ using Midas.Core.Enums;
 
 namespace Api.Dtos
 {
-    public record CompanyDto(Guid Id, string Name, string? TaxNumber, DateTime CreatedAt, bool IsDeleted, IReadOnlyCollection<CompanyMemberDto> Members)
+    public record CompanyDto(Guid Id, string Name, string? TaxNumber, decimal Balance, DateTime CreatedAt, bool IsDeleted, IReadOnlyCollection<CompanyMemberDto> Members)
     {
         public static CompanyDto FromDomain(Company company)
-            => new(company.Id, company.Name, company.TaxNumber, company.CreatedAt, company.IsDeleted, company.Members.Select(CompanyMemberDto.FromDomain).ToList());
+            => new(company.Id, company.Name, company.TaxNumber, company.Balance, company.CreatedAt, company.IsDeleted, company.Members.Select(CompanyMemberDto.FromDomain).ToList());
     }
 
     public record CompanyMemberDto(int Id, Guid CompanyId, Guid UserId, CompanyRole Role, DateTime JoinedAtUtc)
@@ -15,6 +15,8 @@ namespace Api.Dtos
         public static CompanyMemberDto FromDomain(CompanyMember member)
             => new(member.Id, member.CompanyId, member.UserId, member.Role, member.JoinedAtUtc);
     }
+
+    public record CompanyBalanceDto(Guid CompanyId, decimal Balance);
 
     public record CreateCompanyDto(string Name, string? TaxNumber);
     public record UpdateCompanyDto(string Name, string? TaxNumber);

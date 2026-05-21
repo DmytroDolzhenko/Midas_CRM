@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Companies.Commands;
 using Midas.Core.Companies;
@@ -12,8 +13,12 @@ namespace Midas.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class CompanyController(ISender sender, IGetQueries<Company, Guid> getQueries) : ControllerBase
+    public class CompanyController(
+        ISender sender,
+        IGetQueries<Company, Guid> getQueries,
+        ICurrentUserService currentUserService) : ControllerBase
     {
+
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<CompanyDto>>> GetCompanies(CancellationToken cancellationToken)
         {
@@ -31,6 +36,24 @@ namespace Midas.Api.Controllers
             }
 
             return Ok(CompanyDto.FromDomain(company));
+        }
+
+        [HttpGet("balance")]
+        public async Task<ActionResult<CompanyBalanceDto>> GetCompanyBalance(CancellationToken cancellationToken)
+        {
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken);
+            if (companyId is null)
+            {
+                return Unauthorized();
+            }
+
+            var company = await getQueries.GetByIdAsync(companyId.Value, cancellationToken);
+            if (company is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new CompanyBalanceDto(company.Id, company.Balance));
         }
 
         [HttpPost]
@@ -53,5 +76,6 @@ namespace Midas.Api.Controllers
             var result = await sender.Send(new DeleteCompanyCommand { Id = id }, cancellationToken);
             return Ok(CompanyDto.FromDomain(result));
         }
+       
     }
 }

@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
-using Midas.Core.Contacts;
 using Midas.Core.Companies;
 using Midas.Core.CompanyMembers;
+using Midas.Core.Contacts;
 using Midas.Core.CustomerAddresses;
 using Midas.Core.Customers;
+using Midas.Core.FinancialOperations;
 using Midas.Core.NovaPoshta;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
@@ -21,11 +22,7 @@ using Midas.Core.UserIntegrations;
 using Midas.Core.Users;
 using Midas.Core.Warehouses;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence
 {
@@ -45,6 +42,7 @@ namespace Infrastructure.Persistence
         public DbSet<OrderItem> OrderItems { get; init; }
         public DbSet<Customer> Customers { get; init; }
         public DbSet<CustomerAddress> CustomerAddresses { get; init; }
+        public DbSet<FinancialOperation> FinancialOperations { get; init; }
         public DbSet<Contact> Contacts { get; init; }
         public DbSet<Company> Companies { get; init; }
         public DbSet<CompanyMember> CompanyMembers { get; init; }

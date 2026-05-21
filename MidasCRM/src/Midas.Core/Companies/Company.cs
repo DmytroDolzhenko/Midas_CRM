@@ -13,6 +13,7 @@ namespace Midas.Core.Companies
         public Guid CompanyId => Id;
         public string Name { get; private set; }
         public string? TaxNumber { get; private set; }
+        public decimal Balance { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
 
@@ -53,6 +54,25 @@ namespace Midas.Core.Companies
         public void MarkAsDeleted()
         {
             IsDeleted = true;
+        }
+        public void ApplyFinancialOperation(FinancialOperationType operationType, decimal amount)
+        {
+            if (amount <= 0)
+            {
+                throw new InvalidOperationException("Сума фінансової операції має бути більше 0.");
+            }
+
+            switch (operationType)
+            {
+                case FinancialOperationType.Accrual:
+                    Balance += amount;
+                    break;
+                case FinancialOperationType.WriteOff:
+                    Balance -= amount;
+                    break;
+                default:
+                    throw new InvalidOperationException("Невідомий тип фінансової операції.");
+            }
         }
         public void AddMember(Guid userId, CompanyRole role)
         {

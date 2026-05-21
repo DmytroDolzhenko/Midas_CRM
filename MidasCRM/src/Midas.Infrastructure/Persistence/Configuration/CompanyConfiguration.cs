@@ -17,6 +17,10 @@ namespace Midas.Infrastructure.Persistence.Configuration
             builder.Property(x => x.TaxNumber)
                 .HasMaxLength(50);
 
+            builder.Property(x => x.Balance)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+
             builder.Property(x => x.CreatedAt).IsRequired();
 
             builder.HasMany(x => x.Members)
