@@ -8,7 +8,7 @@ import { CreateOrderPage } from './pages/CreateOrderPage.jsx'
 import { ProductsPage } from './pages/ProductsPage.jsx'
 import { CreateProductPage } from './pages/CreateProductPage.jsx'
 import { CustomersPage } from './pages/CustomersPage.jsx'
-import { ExpensesPage } from './pages/ExpensesPage.jsx'
+import { FinancesPage } from './pages/FinancesPage.jsx'
 import { OperationsPage } from './pages/OperationsPage.jsx'
 import { LoginPage } from './pages/LoginPage.jsx'
 import { serverApi } from './lib/serverApi.js'
@@ -119,7 +119,7 @@ export function App() {
   const [warehouses, setWarehouses] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [apiError, setApiError] = useState('')
-  const [expenses, setExpenses] = useLocalStorage('midas-expenses-v1', [])
+  const [finances, setFinances] = useLocalStorage('midas-finances-v1', [])
   const [operations, setOperations] = useLocalStorage('midas-operations-v2', [])
   const [theme, setTheme] = useLocalStorage('midas-theme', 'light')
 
@@ -168,21 +168,21 @@ export function App() {
       const revenue = orders.reduce((sum, order) => sum + order.total, 0)
       const grossProfit = orders.reduce((sum, order) => sum + order.profit, 0)
       const saleExpenses = orders.reduce((sum, order) => sum + order.expense, 0)
-      const manualExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0)
+      const manualExpenses = finances.reduce((sum, finance) => sum + Number(finance.amount), 0)
       const totalExpenses = saleExpenses + manualExpenses
 
       return {
         sales: orders.length,
         customers: customers.length,
         products: products.length,
-        expensesCount: expenses.length,
+        expensesCount: finances.length,
         revenue,
         grossProfit,
         expenses: totalExpenses,
         loss: totalExpenses,
       }
     },
-    [customers.length, expenses, orders, products.length],
+    [customers.length, finances, orders, products.length],
   )
 
   function addOperation(operation) {
@@ -233,19 +233,19 @@ export function App() {
     setPage('orders')
   }
 
-  function addExpense(expense) {
-    setExpenses((currentExpenses) => [
+  function addFinances(finance) {
+    setFinances((currentFinances) => [
       {
-        ...expense,
+        ...finance,
         id: crypto.randomUUID(),
       },
-      ...currentExpenses,
+      ...currentFinances,
     ])
 
     addOperation({
       type: 'Фінансова витрата',
-      description: expense.description || 'Додано витрату',
-      amount: `${Number(expense.amount).toLocaleString('uk-UA')} грн`,
+      description: finance.description || 'Додано витрату',
+      amount: `${Number(finance.amount).toLocaleString('uk-UA')} грн`,
     })
   }
 
@@ -306,7 +306,7 @@ export function App() {
         onCreate={addProduct}
       />
     ),
-    expenses: <ExpensesPage expenses={expenses} onCreate={addExpense} />,
+    finances: <FinancesPage finances={finances} onCreate={addFinances} />,
     customers: <CustomersPage customers={customers} />,
     operations: <OperationsPage operations={operations} />,
   }
@@ -324,3 +324,4 @@ export function App() {
     </AppShell>
   )
 }
+
