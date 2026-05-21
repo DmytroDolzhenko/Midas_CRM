@@ -1,26 +1,26 @@
-﻿using Midas.Core.Products;
+using Midas.Core.Products;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Midas.Core.ProductImages
 {
-    public class ProductImage : IEntity<int>, IOwnedEntity
+    public class ProductImage : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; private set; }
         public string Url { get; private set; } = null!;
         public bool IsMain { get; private set; }
         public int ProductId { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
         public Product Product { get; private set; }
 
-        public static ProductImage Create(string url, int productId, Guid ownerId, bool isMain = false)
+        public static ProductImage Create(string url, int productId, Guid companyId, bool isMain = false)
         {
             return new ProductImage
             {
                 Url = url,
                 ProductId = productId,
-                OwnerId = ownerId,
+                CompanyId = companyId,
                 IsMain = isMain
             };
         }
@@ -28,3 +28,4 @@ namespace Midas.Core.ProductImages
         public void UnsetMain() => IsMain = false;
     }
 }
+

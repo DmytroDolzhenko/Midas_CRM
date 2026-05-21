@@ -184,6 +184,78 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Midas.Core.Companies.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("TaxNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("tax_number");
+
+                    b.HasKey("Id")
+                        .HasName("pk_company");
+
+                    b.ToTable("Company", (string)null);
+                });
+
+            modelBuilder.Entity("Midas.Core.CompanyMembers.CompanyMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
+                    b.Property<DateTime>("JoinedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at_utc");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("role");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_company_member");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_company_member_user_id");
+
+                    b.HasIndex("CompanyId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_company_member_company_id_user_id");
+
+                    b.ToTable("CompanyMember", (string)null);
+                });
+
             modelBuilder.Entity("Midas.Core.Contacts.Contact", b =>
                 {
                     b.Property<int>("Id")
@@ -193,13 +265,13 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -228,6 +300,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("city");
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer")
                         .HasColumnName("customer_id");
@@ -243,10 +319,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<string>("NovaPoshtaWarehouseRef")
                         .HasColumnType("text")
                         .HasColumnName("nova_poshta_warehouse_ref");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<int>("PostDepartmentNumber")
                         .HasColumnType("integer")
@@ -274,6 +346,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<int>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
@@ -292,10 +368,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<string>("Surname")
                         .IsRequired()
@@ -418,6 +490,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<decimal>("CostPriceSnapshot")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("cost_price_snapshot");
@@ -429,10 +505,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("integer")
@@ -467,6 +539,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
@@ -476,10 +552,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.HasKey("Id")
                         .HasName("pk_order_source");
@@ -502,6 +574,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("cargo_type");
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -518,10 +594,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<int>("PaymentMethods")
                         .HasColumnType("integer")
@@ -581,6 +653,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -597,10 +673,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -629,6 +701,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_public");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -637,6 +713,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_product_category");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_product_category_name");
 
                     b.ToTable("ProductCategory", (string)null);
                 });
@@ -650,15 +730,15 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<bool>("IsMain")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_main");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer")
@@ -673,8 +753,8 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_product_images");
 
-                    b.HasIndex("OwnerId")
-                        .HasDatabaseName("ix_product_images_owner_id");
+                    b.HasIndex("CompanyId")
+                        .HasDatabaseName("ix_product_images_company_id");
 
                     b.HasIndex("ProductId")
                         .HasDatabaseName("ix_product_images_product_id");
@@ -697,6 +777,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("color");
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<decimal>("CostPrice")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("cost_price");
@@ -704,10 +788,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer")
@@ -760,6 +840,10 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -780,11 +864,7 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
-
-                    b.Property<int>("ProductCategoryId")
+                    b.Property<int?>("ProductCategoryId")
                         .HasColumnType("integer")
                         .HasColumnName("product_category_id");
 
@@ -806,6 +886,25 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_product_warehouse_id");
 
                     b.ToTable("Product", (string)null);
+                });
+
+            modelBuilder.Entity("Midas.Core.Products.ProductCategoryLink", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    b.HasKey("ProductId", "CategoryId")
+                        .HasName("pk_product_category_link");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_product_category_link_category_id");
+
+                    b.ToTable("ProductCategoryLink", (string)null);
                 });
 
             modelBuilder.Entity("Midas.Core.UserIntegrations.Midas.Core.UserIntegrations.UserSenderAddress", b =>
@@ -859,9 +958,17 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
 
                     b.Property<string>("EncryptedAccessToken")
                         .HasColumnType("text")
@@ -885,16 +992,14 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("provider");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_user_integrations");
 
-                    b.HasIndex("UserId", "Provider")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_integrations_user_id_provider");
+                    b.HasIndex("CompanyId")
+                        .HasDatabaseName("ix_user_integrations_company_id");
+
+                    b.HasIndex("CreatedByUserId")
+                        .HasDatabaseName("ix_user_integrations_created_by_user_id");
 
                     b.ToTable("UserIntegrations", (string)null);
                 });
@@ -938,6 +1043,25 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_user_logistic_profiles_user_integration_id");
 
                     b.ToTable("UserLogisticProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("Midas.Core.UserProductCategories.UserProductCategory", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("ProductCategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_category_id");
+
+                    b.HasKey("UserId", "ProductCategoryId")
+                        .HasName("pk_user_product_category");
+
+                    b.HasIndex("ProductCategoryId")
+                        .HasDatabaseName("ix_user_product_category_product_category_id");
+
+                    b.ToTable("UserProductCategory", (string)null);
                 });
 
             modelBuilder.Entity("Midas.Core.Users.User", b =>
@@ -1067,15 +1191,15 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("name");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
 
                     b.HasKey("Id")
                         .HasName("pk_warehouse");
@@ -1138,6 +1262,27 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("Midas.Core.CompanyMembers.CompanyMember", b =>
+                {
+                    b.HasOne("Midas.Core.Companies.Company", "Company")
+                        .WithMany("Members")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_company_member_company_company_id");
+
+                    b.HasOne("Midas.Core.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_company_member_asp_net_users_user_id");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Midas.Core.CustomerAddresses.CustomerAddress", b =>
@@ -1244,11 +1389,9 @@ namespace Midas.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Midas.Core.Products.Product", b =>
                 {
-                    b.HasOne("Midas.Core.ProductCategories.ProductCategory", "ProductCategory")
+                    b.HasOne("Midas.Core.ProductCategories.ProductCategory", null)
                         .WithMany("Products")
                         .HasForeignKey("ProductCategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_product_product_category_product_category_id");
 
                     b.HasOne("Midas.Core.Warehouses.Warehouse", "Warehouse")
@@ -1258,9 +1401,28 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_product_warehouses_warehouse_id");
 
-                    b.Navigation("ProductCategory");
-
                     b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("Midas.Core.Products.ProductCategoryLink", b =>
+                {
+                    b.HasOne("Midas.Core.ProductCategories.ProductCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_category_link_product_categories_category_id");
+
+                    b.HasOne("Midas.Core.Products.Product", "Product")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_category_link_products_product_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Midas.Core.UserIntegrations.Midas.Core.UserIntegrations.UserSenderAddress", b =>
@@ -1275,6 +1437,27 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Navigation("UserLogisticProfile");
                 });
 
+            modelBuilder.Entity("Midas.Core.UserIntegrations.UserIntegration", b =>
+                {
+                    b.HasOne("Midas.Core.Companies.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_integrations_company_company_id");
+
+                    b.HasOne("Midas.Core.Users.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_integrations_user_created_by_user_id");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("CreatedByUser");
+                });
+
             modelBuilder.Entity("Midas.Core.UserIntegrations.UserLogisticProfile", b =>
                 {
                     b.HasOne("Midas.Core.UserIntegrations.UserIntegration", "UserIntegration")
@@ -1285,6 +1468,23 @@ namespace Midas.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_user_logistic_profiles_user_integrations_user_integration_id");
 
                     b.Navigation("UserIntegration");
+                });
+
+            modelBuilder.Entity("Midas.Core.UserProductCategories.UserProductCategory", b =>
+                {
+                    b.HasOne("Midas.Core.ProductCategories.ProductCategory", "ProductCategory")
+                        .WithMany("UserCategories")
+                        .HasForeignKey("ProductCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_product_category_product_category_product_category_id");
+
+                    b.Navigation("ProductCategory");
+                });
+
+            modelBuilder.Entity("Midas.Core.Companies.Company", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("Midas.Core.Contacts.Contact", b =>
@@ -1314,6 +1514,8 @@ namespace Midas.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Midas.Core.ProductCategories.ProductCategory", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("UserCategories");
                 });
 
             modelBuilder.Entity("Midas.Core.ProductVariants.ProductVariant", b =>
@@ -1324,6 +1526,8 @@ namespace Midas.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Midas.Core.Products.Product", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("ProductCategories");
 
                     b.Navigation("Variants");
                 });

@@ -9,7 +9,7 @@ namespace Midas.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductCategoryController(ISender sender, IGetQueries<ProductCategory, int> getQueries) : ControllerBase
+    public class ProductCategoryController(ISender sender, IGetQueries<ProductCategory, int> getQueries, IProductCategoryQueries productCategoryQueries) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ProductCategoryDto>>> GetProductCategories(CancellationToken cancellationToken)
@@ -49,6 +49,12 @@ namespace Midas.Api.Controllers
         {
             var result = await sender.Send(new DeleteProductCategoryCommand { Id = id }, cancellationToken);
             return Ok(ProductCategoryDto.FromDomain(result));
+        }
+        [HttpGet("available")]
+        public async Task<ActionResult<IReadOnlyList<ProductCategoryDto>>> GetAvailableProductCategories(CancellationToken cancellationToken)
+        {
+            var categories = await productCategoryQueries.GetAvailableCategoryAsync(cancellationToken);
+            return Ok(categories.Select(ProductCategoryDto.FromDomain));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Midas.Core.Orders;
 using Midas.Core.ProductImages;
@@ -28,9 +28,10 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(pi => pi.OwnerId);
+            builder.HasIndex(pi => pi.CompanyId);
 
             builder.HasIndex(pi => pi.ProductId);
         }
     }
 }
+

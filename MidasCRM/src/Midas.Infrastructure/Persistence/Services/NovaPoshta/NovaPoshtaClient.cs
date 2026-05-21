@@ -2,6 +2,8 @@
 using Midas.Application.Common.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -11,6 +13,7 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
 {
     public class NovaPoshtaClient : INovaPoshtaClient
     {
+        private const int MaxRetryAttempts = 3;
         private readonly HttpClient _httpClient;
         private readonly IApplicationDbContext _context;
         private readonly IEncryptionService _encryption;
@@ -21,15 +24,15 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
             _encryption = encryption;
         }
         public async Task<List<TResponse>> ExecuteAsync<TRequest, TResponse>(
-            Guid userId,
+            Guid companyId,
             string modelName,
             string calledMethod,
             TRequest properties,
             CancellationToken ct)
         {
             var integration = await _context.UserIntegrations
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == "novaposhta", ct)
-                ?? throw new Exception("Nova Poshta integration not found for this user.");
+                .FirstOrDefaultAsync(x => x.CompanyId == companyId && x.Provider == "novaposhta", ct)
+                ?? throw new Exception("Nova Poshta integration not found for this company.");
 
             string apiKey = _encryption.Decrypt(integration.EncryptedAccessToken);
 
@@ -47,10 +50,32 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
                 PropertyNameCaseInsensitive = true
             };
 
-            var response = await _httpClient.PostAsJsonAsync("https://api.novaposhta.ua/v2.0/json/", requestBody, jsonOptions, ct);
-            response.EnsureSuccessStatusCode();
+            NovaPoshtaApiResponse<TResponse>? result = null;
+            Exception? lastException = null;
 
-            var result = await response.Content.ReadFromJsonAsync<NovaPoshtaApiResponse<TResponse>>(jsonOptions, ct);
+            for (var attempt = 1; attempt <= MaxRetryAttempts; attempt++)
+            {
+                try
+                {
+                    using var response = await _httpClient.PostAsJsonAsync(string.Empty, requestBody, jsonOptions, ct);
+                    response.EnsureSuccessStatusCode();
+
+                    result = await response.Content.ReadFromJsonAsync<NovaPoshtaApiResponse<TResponse>>(jsonOptions, ct);
+                    lastException = null;
+                    break;
+                }
+                catch (Exception ex) when (IsTransient(ex) && attempt < MaxRetryAttempts)
+                {
+                    lastException = ex;
+                    var backoff = TimeSpan.FromSeconds(Math.Pow(2, attempt));
+                    await Task.Delay(backoff, ct);
+                }
+            }
+
+            if (lastException is not null && result is null)
+            {
+                throw new Exception("Nova Poshta request failed after retries.", lastException);
+            }
 
             if (result == null || !result.Success)
             {
@@ -60,6 +85,11 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
 
             return result.Data;
         }
+
+        private static bool IsTransient(Exception ex)
+            => ex is HttpRequestException
+            || ex is IOException
+            || ex is TaskCanceledException;
     }
     public class NovaPoshtaApiResponse<T>
     {

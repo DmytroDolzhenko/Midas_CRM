@@ -22,9 +22,9 @@ namespace Midas.Application.Entities.Products.CommandsValidators
                 .MaximumLength(500)
                 .WithMessage("Description must be less than 500 characters");
 
-            RuleFor(x => x.ProductCategoryId)
-                .GreaterThan(0)
-                .WithMessage("ProductCategoryId must be greater than 0");
+            RuleFor(x => x.ProductCategoryIds)
+                .NotEmpty()
+                .WithMessage("ProductCategoryIds must not be empty");
         }
     }
 }

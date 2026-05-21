@@ -8,9 +8,14 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
+using Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 namespace Infrastructure.Persistence.Services
 {
-    public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
+    public class CurrentUserService(
+        IHttpContextAccessor httpContextAccessor,
+        ApplicationDbContext dbContext) : ICurrentUserService
     {
         public Guid? UserId
         {
@@ -22,6 +27,19 @@ namespace Infrastructure.Persistence.Services
 
                 return Guid.TryParse(userIdClaim, out var id) ? id : null;
             }
+        }
+
+        public async Task<Guid?> GetCompanyIdAsync(CancellationToken cancellationToken)
+        {
+            if (UserId is null)
+            {
+                return null;
+            }
+
+            return await dbContext.Set<Midas.Core.CompanyMembers.CompanyMember>()
+                .Where(x => x.UserId == UserId.Value)
+                .Select(x => (Guid?)x.CompanyId)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

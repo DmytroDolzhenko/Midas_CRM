@@ -13,7 +13,7 @@ namespace Api.Dtos
         decimal TotalCost,
         string Description,
         DateTime CreatedAt,
-        Guid OwnerId,
+        Guid CompanyId,
         string? TrackingNumber,
         IReadOnlyCollection<OrderItemDto> OrderItems,
         PaymentMethods PaymentMethods,
@@ -31,7 +31,7 @@ namespace Api.Dtos
                 order.TotalCost,
                 order.Description,
                 order.CreatedAt,
-                order.OwnerId,
+                order.CompanyId,
                 order.TrackingNumber,
                 order.OrderItems.Select(OrderItemDto.FromDomain).ToList(),
                 order.PaymentMethods,
@@ -99,3 +99,4 @@ namespace Api.Dtos
         OrderStatus Status
     );
 }
+

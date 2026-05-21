@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Midas.Core.Products
 {
-    public class Product : IEntity<int>, IOwnedEntity
+    public class Product : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; }
 
@@ -18,13 +18,12 @@ namespace Midas.Core.Products
         public string Description { get; private set; }
         public decimal Weight { get; private set; }
 
-        public int ProductCategoryId { get; private set; }
-        public ProductCategory ProductCategory { get; private set; } = null!;
-
         public DateTime CreatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
 
+        private readonly List<ProductCategoryLink> _productCategories = new();
+        public IReadOnlyList<ProductCategoryLink> ProductCategories => _productCategories.AsReadOnly();
 
         private readonly List<ProductVariant> _variants = new();
         public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
@@ -38,18 +37,16 @@ namespace Midas.Core.Products
             string name,
             string description,
             decimal weight,
-            int productCategoryId,
             DateTime createdAt,
-            Guid ownerId)
+            Guid companyId)
         {
             Id = id;
             WarehouseId = warehouseId;
             Name = name;
             Description = description;
             Weight = weight;
-            ProductCategoryId = productCategoryId;
             CreatedAt = createdAt;
-            OwnerId = ownerId;
+            CompanyId = companyId;
         }
 
         public static Product Create(
@@ -57,18 +54,23 @@ namespace Midas.Core.Products
             string name,
             string description,
             decimal weight,
-            int productCategoryId,
-            Guid ownerId)
+            IEnumerable<int> productCategoryIds,
+            Guid companyId)
         {
-            return new Product(
+            var product = new Product(
                 0,
                 warehouseId,
                 name,
                 description,
                 weight,
-                productCategoryId,
                 DateTime.UtcNow,
-                ownerId);
+                companyId);
+
+            foreach (var productCategory in productCategoryIds)
+            {
+                product.AddCategory(productCategory);
+            }
+            return product;
         }
 
         public void Update(
@@ -81,9 +83,26 @@ namespace Midas.Core.Products
             Weight = weight;
         }
 
-        public void UpdateCategory(int productCategoryId)
+        public void UpdateCategory(int productCategoryId, int newProductCategoryId)
         {
-            ProductCategoryId = productCategoryId;
+            var editingCategory = _productCategories.FirstOrDefault(c => c.CategoryId == productCategoryId);
+            if (editingCategory != null)
+            {
+                _productCategories.Remove(editingCategory);
+            }
+
+            var newCategory = _productCategories.FirstOrDefault(c => c.CategoryId == newProductCategoryId);
+            if (newCategory == null)
+            {
+                _productCategories.Add(ProductCategoryLink.Create(Id, newProductCategoryId));
+            }
+        }
+        public void AddCategory(int productCategoryId)
+        {
+            if (!_productCategories.Any(c => c.CategoryId == productCategoryId))
+            {
+                _productCategories.Add(ProductCategoryLink.Create(Id, productCategoryId));
+            }
         }
 
         public void MarkAsDeleted()
@@ -104,7 +123,8 @@ namespace Midas.Core.Products
                 foreach (var img in _images) img.UnsetMain();
             }
 
-            _images.Add(ProductImage.Create(url, Id, OwnerId, isMain));
+            _images.Add(ProductImage.Create(url, Id, CompanyId, isMain));
         }
     }
 }
+

@@ -15,7 +15,7 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(x => x.OwnerId).IsRequired();
+            builder.Property(x => x.CompanyId).IsRequired();
 
             builder.HasMany(x => x.Products)
                 .WithOne(x => x.Warehouse)
@@ -26,3 +26,4 @@ namespace Midas.Infrastructure.Persistence.Configuration
         }
     }
 }
+

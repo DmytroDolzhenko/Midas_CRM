@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
@@ -20,13 +20,14 @@ namespace Midas.Application.Entities.Warehouses.Commands
     {
         public async Task<Warehouse> Handle(CreateWarehouseCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken)
             ?? throw new UnauthorizedAccessException("User context is missing.");
 
-            var warehouse = Warehouse.Create(request.Name, currentUserId);
+            var warehouse = Warehouse.Create(request.Name, companyId);
             await warehouseRepository.AddAsync(warehouse, cancellationToken);
             return warehouse;
         }
     }
 }
+
 

@@ -22,17 +22,18 @@ namespace Midas.Application.Entities.Customers.Commands
     {
         public async Task<Customer> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
-            var contact = Contact.Create(request.ContactValue, currentUserId);
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
+            var contact = Contact.Create(request.ContactValue, companyId);
             var customer = Customer.Create(
                 request.Name,
                 request.Surname,
                 contact,
                 request.Email,
-                currentUserId);
+                companyId);
 
             await repository.AddAsync(customer, cancellationToken);
             return customer;
         }
     }
 }
+

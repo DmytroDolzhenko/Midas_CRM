@@ -4,7 +4,7 @@ using System;
 
 namespace Midas.Core.Payments
 {
-    public class Payment : IEntity<Guid>, IOwnedEntity
+    public class Payment : IEntity<Guid>, ICompanyOwnedEntity
     {
         public Guid Id { get; }
         public Guid OrderId { get; private set; }
@@ -14,10 +14,10 @@ namespace Midas.Core.Payments
         public PaymentMethods Method { get; private set; }
         public PaymentStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        private Payment(Guid id, Guid orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt, Guid ownerId)
+        private Payment(Guid id, Guid orderId, decimal amount, PaymentMethods method, PaymentStatus status, DateTime createdAt, Guid companyId)
         {
             Id = id;
             OrderId = orderId;
@@ -25,10 +25,10 @@ namespace Midas.Core.Payments
             Method = method;
             Status = status;
             CreatedAt = createdAt;
-            OwnerId = ownerId;
+            CompanyId = companyId;
         }
 
-        public static Payment Create(Guid orderId, decimal amount, PaymentMethods method, Guid ownerId)
+        public static Payment Create(Guid orderId, decimal amount, PaymentMethods method, Guid companyId)
         {
             return new Payment(
                 Guid.NewGuid(),
@@ -37,7 +37,7 @@ namespace Midas.Core.Payments
                 method,
                 PaymentStatus.Pending,
                 DateTime.UtcNow,
-                ownerId);
+                companyId);
         }
 
         public void MarkAsDeleted()
@@ -50,3 +50,4 @@ namespace Midas.Core.Payments
         }
     }
 }
+

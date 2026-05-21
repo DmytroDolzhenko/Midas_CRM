@@ -1,6 +1,7 @@
 using Api.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Customers.Commands;
 using Midas.Core.Customers;
@@ -14,14 +15,16 @@ namespace Midas.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<CustomerDto>>> GetCustomers(CancellationToken cancellationToken)
         {
-            var customers = await getQueries.GetAllAsync(cancellationToken);
+            var customers = await getQueries.GetAllAsync(cancellationToken,
+                query => query.Include(c => c.Contact));
             return Ok(customers.Select(CustomerDto.FromDomain));
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<CustomerDto>> GetCustomerById(int id, CancellationToken cancellationToken)
         {
-            var customer = await getQueries.GetByIdAsync(id, cancellationToken);
+            var customer = await getQueries.GetByIdAsync(id, cancellationToken,
+                query => query.Include(c => c.Contact));
             if (customer is null)
             {
                 return NotFound();

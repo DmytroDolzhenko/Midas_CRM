@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.DTO.NovaPoshta.Requests;
 using Midas.Application.DTOs.NovaPoshta;
@@ -15,25 +16,31 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
     {
         private readonly IApplicationDbContext _context;
         private readonly INovaPoshtaClient _npClient;
+        private readonly ILogger<NovaPoshtaSyncService> _logger;
 
-        public NovaPoshtaSyncService(IApplicationDbContext context, INovaPoshtaClient npClient)
+        public NovaPoshtaSyncService(
+            IApplicationDbContext context,
+            INovaPoshtaClient npClient,
+            ILogger<NovaPoshtaSyncService> logger)
         {
             _context = context;
             _npClient = npClient;
+            _logger = logger;
         }
 
-        public async Task SyncAllDataAsync(Guid systemUserId, CancellationToken ct)
+        public async Task SyncAllDataAsync(Guid systemCompanyId, CancellationToken ct)
         {
-            // 1. СИНХРОНІЗАЦІЯ МІСТ
+            _logger.LogInformation("Nova Poshta sync started for company {CompanyId}", systemCompanyId);
+
             var npCities = await _npClient.ExecuteAsync<GetAddressCitiesRequest, NpCityItem>(
-                systemUserId, "Address", "getCities", new GetAddressCitiesRequest(), ct);
+                systemCompanyId, "Address", "getCities", new GetAddressCitiesRequest(), ct);
+            _logger.LogInformation("Received {Count} cities from Nova Poshta API", npCities?.Count ?? 0);
 
             if (npCities != null && npCities.Any())
             {
-                // Очищаємо стару таблицю міст (простий варіант без BulkExtensions)
                 await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"nova_poshta_cities\"", ct);
+                _logger.LogInformation("Truncated nova_poshta_cities");
 
-                // Заливати будемо пачками по 2000 штук, щоб EF Core не з'їв усю пам'ять
                 var cityEntities = npCities.Select(c => NovaPoshtaCity.Create(
                     c.Ref, c.Description, c.SettlementTypeDescription, c.AreaDescription)).ToList();
 
@@ -42,17 +49,38 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
                     await _context.NovaPoshtaCities.AddRangeAsync(batch, ct);
                     await _context.SaveChangesAsync(ct);
                 }
+                _logger.LogInformation("Inserted {Count} cities into DB", cityEntities.Count);
             }
 
-            // 2. СИНХРОНІЗАЦІЯ СКЛАДІВ
-            var npWarehouses = await _npClient.ExecuteAsync<GetWarehousesRequest, NpWarehouseItem>(
-                systemUserId, "Address", "getWarehouses", new GetWarehousesRequest(), ct);
+            var allWarehouses = new List<NpWarehouseItem>();
+            var page = 1;
 
-            if (npWarehouses != null && npWarehouses.Any())
+            while (true)
             {
-                // Очищаємо стару таблицю складів
+                var pageResult = await _npClient.ExecuteAsync<GetWarehousesRequest, NpWarehouseItem>(
+                    systemCompanyId,
+                    "Address",
+                    "getWarehouses",
+                    new GetWarehousesRequest(Page: page.ToString(), Limit: "500"),
+                    ct);
+
+                if (pageResult == null || pageResult.Count == 0)
+                {
+                    break;
+                }
+
+                allWarehouses.AddRange(pageResult);
+                _logger.LogInformation("Loaded warehouses page {Page}, count {Count}", page, pageResult.Count);
+                page++;
+            }
+
+            _logger.LogInformation("Received total {Count} warehouses from Nova Poshta API", allWarehouses.Count);
+
+            if (allWarehouses.Any())
+            {
                 await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"nova_poshta_warehouses\"", ct);
-                var warehouseEntities = npWarehouses.Select(w => NovaPoshtaWarehouse.Create(
+                _logger.LogInformation("Truncated nova_poshta_warehouses");
+                var warehouseEntities = allWarehouses.Select(w => NovaPoshtaWarehouse.Create(
                     w.Ref, w.CityRef, w.Description, w.Number, w.WarehouseIndex, w.TypeOfWarehouse)).ToList();
 
                 foreach (var batch in warehouseEntities.Chunk(2000))
@@ -60,7 +88,10 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
                     await _context.NovaPoshtaWarehouses.AddRangeAsync(batch, ct);
                     await _context.SaveChangesAsync(ct);
                 }
+                _logger.LogInformation("Inserted {Count} warehouses into DB", warehouseEntities.Count);
             }
+
+            _logger.LogInformation("Nova Poshta sync finished for company {CompanyId}", systemCompanyId);
         }
     }
 }

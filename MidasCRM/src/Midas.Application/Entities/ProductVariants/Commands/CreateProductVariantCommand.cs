@@ -28,11 +28,11 @@ namespace Midas.Application.Entities.ProductVariants.Commands
     {
         public async Task<ProductVariant> Handle(CreateProductVariantCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
             var product = await productQueries.GetByIdAsync(
                 request.ProductId,
                 cancellationToken,
-                query => query.Include(x => x.ProductCategory));
+                query => query.Include(x => x.ProductCategories));
 
             if (product is null)
             {
@@ -54,10 +54,11 @@ namespace Midas.Application.Entities.ProductVariants.Commands
                 request.SellPrice,
                 Core.Enums.ProductVariantStatus.Available,
                 uniqCode,
-                currentUserId);
+                companyId);
 
             await repository.AddAsync(productVariant, cancellationToken);
             return productVariant;
         }
     }
 }
+

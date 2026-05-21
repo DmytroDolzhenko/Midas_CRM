@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Midas.Core.Orders
 {
-    public class Order : IEntity<Guid>, IOwnedEntity
+    public class Order : IEntity<Guid>, ICompanyOwnedEntity
     {
         public Guid Id { get; }
         public string UniqCode { get; private set; }
@@ -29,7 +29,7 @@ namespace Midas.Core.Orders
         public string Description { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
         public PaymentMethods PaymentMethods { get; private set; }
 
 
@@ -54,7 +54,7 @@ namespace Midas.Core.Orders
             decimal totalWeight,
             string description,
             DateTime createdAt,
-            Guid ownerId,
+            Guid companyId,
             PaymentMethods paymentMethods)
         {
             Id = id;
@@ -68,11 +68,11 @@ namespace Midas.Core.Orders
             TotalWeight = totalWeight;
             Description = description;
             CreatedAt = createdAt;
-            OwnerId = ownerId;
+            CompanyId = companyId;
             PaymentMethods = paymentMethods;
         }
 
-        public static Order Create(int customerId, CustomerAddress address, ServiceType serviceType, CargoType cargoType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
+        public static Order Create(int customerId, CustomerAddress address, ServiceType serviceType, CargoType cargoType, string uniqCode, Guid companyId, PaymentMethods paymentMethods, string description)
         {
             var order = new Order(
                 Guid.NewGuid(),
@@ -86,7 +86,7 @@ namespace Midas.Core.Orders
                 0,
                 description,
                 DateTime.UtcNow,
-                ownerId,
+                companyId,
                 paymentMethods
                 );
 
@@ -94,7 +94,7 @@ namespace Midas.Core.Orders
             return order;
         }
 
-        public static Order Create(Customer customer, CustomerAddress address, ServiceType serviceType, CargoType cargoType, string uniqCode, Guid ownerId, PaymentMethods paymentMethods, string description)
+        public static Order Create(Customer customer, CustomerAddress address, ServiceType serviceType, CargoType cargoType, string uniqCode, Guid companyId, PaymentMethods paymentMethods, string description)
         {
             var order = new Order(
                 Guid.NewGuid(),
@@ -108,7 +108,7 @@ namespace Midas.Core.Orders
                 0,
                 description,
                 DateTime.UtcNow,
-                ownerId,
+                companyId,
                 paymentMethods);
 
             order.Customer = customer;
@@ -145,7 +145,7 @@ namespace Midas.Core.Orders
             TotalCost = 0;
             foreach (var item in _orderItems)
             {
-                TotalCost += item.Quantity * item.UnitPrice;
+                TotalCost += item.Quantity * item.CostPriceSnapshot;
             }
         }
         public void SetTrackingNumber(string trackingNumber)
@@ -194,3 +194,4 @@ namespace Midas.Core.Orders
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.DTOs.NovaPoshta;
 using System;
@@ -21,10 +21,10 @@ namespace Midas.Application.Entities.NovaPoshta
 
         public async Task<List<NovaPoshtaWarehouseDto>> Handle(GetNPWarehousesQuery request, CancellationToken ct)
         {
-            var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
+            var companyId = await _currentUser.GetCompanyIdAsync(ct) ?? throw new UnauthorizedAccessException();
 
             return await _npClient.ExecuteAsync<GetNPWarehousesProperties, NovaPoshtaWarehouseDto>(
-                userId,
+                companyId,
                 "Address",
                 "getWarehouses",
                 new GetNPWarehousesProperties(request.WarehouseRef),

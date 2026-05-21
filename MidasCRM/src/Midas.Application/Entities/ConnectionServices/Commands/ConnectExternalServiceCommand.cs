@@ -32,6 +32,11 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
         {
             var userId = request.UserId ?? _currentUser.UserId;
             if (userId is null) return false;
+            var companyId = await _context.CompanyMembers
+                .Where(x => x.UserId == userId.Value)
+                .Select(x => (Guid?)x.CompanyId)
+                .FirstOrDefaultAsync(ct);
+            if (companyId is null) return false;
 
             var provider = _providers.FirstOrDefault(p => p.ProviderName == request.Provider);
             if (provider == null) return false;
@@ -39,11 +44,11 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
             var tokens = await provider.ExchangeCodeAsync(request.Code);
 
             var integration = _context.UserIntegrations
-                .FirstOrDefault(x => x.UserId == userId.Value && x.Provider == request.Provider);
+                .FirstOrDefault(x => x.CompanyId == companyId.Value && x.Provider == request.Provider);
 
             if (integration is null)
             {
-                integration = UserIntegration.Create(userId.Value, request.Provider);
+                integration = UserIntegration.Create(companyId.Value, userId.Value, request.Provider);
                 _context.UserIntegrations.Add(integration);
             }
 
@@ -78,15 +83,20 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
             if (_currentUser.UserId is null || string.IsNullOrWhiteSpace(request.Token)) return false;
 
             var userId = _currentUser.UserId.Value;
+            var companyId = await _context.CompanyMembers
+                .Where(x => x.UserId == userId)
+                .Select(x => (Guid?)x.CompanyId)
+                .FirstOrDefaultAsync(ct);
+            if (companyId is null) return false;
 
             // Завантажуємо разом з профілем, щоб перевірити наявність
             var integration = await _context.UserIntegrations
                 .Include(x => x.LogisticProfile)
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == request.Provider, ct);
+                .FirstOrDefaultAsync(x => x.CompanyId == companyId.Value && x.Provider == request.Provider, ct);
 
             if (integration is null)
             {
-                integration = UserIntegration.Create(userId, request.Provider);
+                integration = UserIntegration.Create(companyId.Value, userId, request.Provider);
                 _context.UserIntegrations.Add(integration);
 
                 // Зберігаємо проміжний стан, щоб згенерувався числовий ID для integration.Id,

@@ -21,15 +21,16 @@ namespace Midas.Application.Entities.Payments.Commands
     {
         public async Task<Payment> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
             var payment = Payment.Create(
                 request.OrderId,
                 request.Amount,
                 request.Method,
-                currentUserId);
+                companyId);
 
             await repository.AddAsync(payment, cancellationToken);
             return payment;
         }
     }
 }
+

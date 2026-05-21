@@ -15,10 +15,7 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.HasMany(x => x.Products)
-                .WithOne(x => x.ProductCategory)
-                .HasForeignKey(x => x.ProductCategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => x.Name).IsUnique();
 
             builder.ToTable("ProductCategory");
         }

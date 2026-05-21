@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Midas.Core.ProductVariants
 {
-    public class ProductVariant : IEntity<int>, IOwnedEntity
+    public class ProductVariant : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; }
 
@@ -20,7 +20,7 @@ namespace Midas.Core.ProductVariants
         public decimal CostPrice { get; private set; }
         public decimal SellPrice { get; private set; }
         public ProductVariantStatus Status { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
         public bool IsDeleted { get; private set; }
 
         private readonly List<OrderItem> _orderItems = new();
@@ -36,7 +36,7 @@ namespace Midas.Core.ProductVariants
             decimal costPrice,
             decimal sellPrice,
             ProductVariantStatus status,
-            Guid ownerId
+            Guid companyId
             )
         {
             Id = id;
@@ -48,7 +48,7 @@ namespace Midas.Core.ProductVariants
             CostPrice = costPrice;
             SellPrice = sellPrice;
             Status = status;
-            OwnerId = ownerId;
+            CompanyId = companyId;
         }
 
         public static ProductVariant Create(
@@ -60,7 +60,7 @@ namespace Midas.Core.ProductVariants
             decimal sellPrice,
             ProductVariantStatus status,
             string uniqCode,
-            Guid ownerId)
+            Guid companyId)
         {
             return new ProductVariant(
                 0,
@@ -72,7 +72,7 @@ namespace Midas.Core.ProductVariants
                 costPrice,
                 sellPrice,
                 ProductVariantStatus.Available,
-                ownerId
+                companyId
                 );
         }
 
@@ -107,3 +107,4 @@ namespace Midas.Core.ProductVariants
         }
     }
 }
+

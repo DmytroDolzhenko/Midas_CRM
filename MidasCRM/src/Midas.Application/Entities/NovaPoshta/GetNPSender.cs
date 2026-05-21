@@ -1,4 +1,4 @@
-п»їusing MediatR;
+using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.DTO.NovaPoshta;
 using System;
@@ -16,11 +16,11 @@ namespace Midas.Application.Entities.NovaPoshta
     {
         public async Task<List<NpSenderDto>> Handle(GetNpSendersQuery request, CancellationToken ct)
         {
-            var userId = currentUserService.UserId ?? throw new Exception("РљРѕСЂРёСЃС‚СѓРІР°С‡ РЅРµ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРёР№");
+            var companyId = await currentUserService.GetCompanyIdAsync(ct) ?? throw new Exception("Користувач не авторизований");
 
-            // Р—Р°РїРёС‚СѓС”РјРѕ РєРѕРЅС‚СЂР°РіРµРЅС‚С–РІ Р· С‚РёРїРѕРј "Sender" (Р’С–РґРїСЂР°РІРЅРёРє)
+            // Запитуємо контрагентів з типом "Sender" (Відправник)
             var result = await npClient.ExecuteAsync<GetCounterpartiesRequest, NpCounterpartyItem>(
-                userId,
+                companyId,
                 "Counterparty",
                 "getCounterparties",
                 new GetCounterpartiesRequest("Sender"),
@@ -32,3 +32,4 @@ namespace Midas.Application.Entities.NovaPoshta
         }
     }
 }
+

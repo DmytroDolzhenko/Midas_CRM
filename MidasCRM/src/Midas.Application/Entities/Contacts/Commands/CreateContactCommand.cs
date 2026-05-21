@@ -19,10 +19,11 @@ namespace Midas.Application.Entities.Contacts.Commands
     {
         public async Task<Contact> Handle(CreateContactCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
-            var contact = Contact.Create(request.PhoneNumber, currentUserId);
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
+            var contact = Contact.Create(request.PhoneNumber, companyId);
             await repository.AddAsync(contact, cancellationToken);
             return contact;
         }
     }
 }
+

@@ -29,7 +29,7 @@ namespace Midas.Application.Entities.Customers.Commands
                 throw new Exception($"Customer with id {request.Id} not found.");
             }
 
-            var contact = Contact.Create(request.ContactValue, customer.OwnerId);
+            var contact = Contact.Create(request.ContactValue, customer.CompanyId);
             customer.Update(
                 request.Name,
                 request.Surname,
@@ -41,3 +41,4 @@ namespace Midas.Application.Entities.Customers.Commands
         }
     }
 }
+

@@ -43,7 +43,6 @@ namespace Infrastructure.Persistence
             }
 
             services.AddHttpContextAccessor();
-            //services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddScoped<ApplicationDbContextInitialiser>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -75,8 +74,14 @@ namespace Infrastructure.Persistence
             services.AddScoped<IOrderQueries, OrderQueries>();
             services.AddScoped<IProductVariantQueries, ProductVariantQueries>();
             services.AddScoped<ICustomerQueries, CustomerQueries>();
+            services.AddScoped<IProductCategoryQueries, ProductCategoryQueries>();
 
-            services.AddHttpClient<INovaPoshtaClient, NovaPoshtaClient>();
+
+            services.AddHttpClient<INovaPoshtaClient, NovaPoshtaClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.novaposhta.ua/v2.0/json/");
+                client.Timeout = TimeSpan.FromMinutes(5);
+            });
 
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<ApplicationDbContext>());

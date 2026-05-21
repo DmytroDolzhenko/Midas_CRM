@@ -14,7 +14,7 @@ namespace Midas.Infrastructure.Persistence.Services
             string color,
             CancellationToken cancellationToken)
         {
-            var categoryPart = GetFirstThree(product.ProductCategory?.Name);
+            var categoryPart = GetFirstThree(product.ProductCategories.FirstOrDefault()?.Category?.Name);
             var namePart = GetFirstThree(product.Name);
             var sizePart = (size ?? string.Empty).Trim().ToUpperInvariant();
             var colorPart = GetFirstThree(color);
@@ -33,7 +33,7 @@ namespace Midas.Infrastructure.Persistence.Services
         }
 
         public async Task<string> GenerateOrderCodeAsync(
-            Guid ownerId,
+            Guid companyId,
             DateTime createdAtUtc,
             CancellationToken cancellationToken)
         {
@@ -42,7 +42,7 @@ namespace Midas.Infrastructure.Persistence.Services
             var datePart = createdAtUtc.ToString("yyyyMMdd");
 
             var countForDay = await dbContext.Orders.CountAsync(
-                x => x.OwnerId == ownerId && x.CreatedAt >= dayStart && x.CreatedAt < dayEnd,
+                x => x.CompanyId == companyId && x.CreatedAt >= dayStart && x.CreatedAt < dayEnd,
                 cancellationToken);
 
             var nextNumber = countForDay + 1;
@@ -79,3 +79,4 @@ namespace Midas.Infrastructure.Persistence.Services
         }
     }
 }
+

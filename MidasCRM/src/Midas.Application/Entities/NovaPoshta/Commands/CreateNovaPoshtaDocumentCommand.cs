@@ -1,4 +1,4 @@
-п»їusing MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
@@ -42,12 +42,12 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                         .ThenInclude(c => c.Contact));
 
             if (order == null)
-                throw new Exception("Р—Р°РјРѕРІР»РµРЅРЅСЏ РЅРµ Р·РЅР°Р№РґРµРЅРѕ");
+                throw new Exception("Замовлення не знайдено");
 
             if (order.Address == null)
-                throw new Exception("РЈ Р·Р°РјРѕРІР»РµРЅРЅС– РІС–РґСЃСѓС‚РЅСЏ Р°РґСЂРµСЃР° РґРѕСЃС‚Р°РІРєРё");
+                throw new Exception("У замовленні відсутня адреса доставки");
 
-            var userId = currentUserService.UserId ?? throw new Exception("РљРѕСЂРёСЃС‚СѓРІР°С‡ РЅРµ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРёР№");
+            var companyId = await currentUserService.GetCompanyIdAsync(ct) ?? throw new Exception("Користувач не авторизований");
 
             if (order.Address.NovaPoshtaCityRef is null || order.Address.NovaPoshtaWarehouseRef is null)
             {
@@ -56,7 +56,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                     .FirstOrDefaultAsync(x => x.Description.ToLower() == order.Address.City.ToLower(), ct);
 
                 if (city == null)
-                    throw new Exception($"РќРµ РІРґР°Р»РѕСЃСЏ Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ Р·РЅР°Р№С‚Рё РјС–СЃС‚Рѕ '{order.Address.City}' Сѓ РґРѕРІС–РґРЅРёРєСѓ РќРѕРІРѕС— РџРѕС€С‚Рё.");
+                    throw new Exception($"Не вдалося автоматично знайти місто '{order.Address.City}' у довіднику Нової Пошти.");
 
                 var deptNumber = order.Address.PostDepartmentNumber;
                 var deptNumberText = deptNumber.ToString();
@@ -64,37 +64,39 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 NovaPoshtaWarehouse? warehouse = null;
 
                 bool isBranchDelivery = order.ServiceType == ServiceType.WarehouseWarehouse;
+                // Strict lookup by city_ref + department number (prevents matching 85 instead of 8).
+                warehouse = await context.NovaPoshtaWarehouses
+                    .AsNoTracking()
+                    .Where(x => x.CityRef == city.Ref && x.Number == deptNumberText)
+                    .FirstOrDefaultAsync(ct);
 
-                if (isBranchDelivery)
+                if (warehouse == null && isBranchDelivery)
                 {
-
-                    var exactBranchDesc = $"Р’С–РґРґС–Р»РµРЅРЅСЏ в„–{deptNumberText}";
-                    var exactQuerySpace = $"в„–{deptNumberText} ";
-                    var exactQueryComma = $"в„–{deptNumberText},";
+                    var exactBranchDesc = $"Відділення №{deptNumberText}";
+                    var exactQuerySpace = $"№{deptNumberText} ";
+                    var exactQueryComma = $"№{deptNumberText},";
 
                     warehouse = await context.NovaPoshtaWarehouses
                         .AsNoTracking()
                         .Where(x => x.CityRef == city.Ref)
-                        .Where(x => !x.Description.ToLower().Contains("РїРѕС€С‚РѕРјР°С‚"))
+                        .Where(x => !x.Description.ToLower().Contains("поштомат"))
                         .FirstOrDefaultAsync(x =>
-                            x.Number == deptNumberText ||
                             x.Description.Contains(exactBranchDesc) ||
                             x.Description.Contains(exactQuerySpace) ||
                             x.Description.Contains(exactQueryComma), ct);
                 }
-                else
+                else if (warehouse == null)
                 {
                     warehouse = await context.NovaPoshtaWarehouses
                         .AsNoTracking()
                         .Where(x => x.CityRef == city.Ref)
-                        .Where(x => x.Description.ToLower().Contains("РїРѕС€С‚РѕРјР°С‚"))
+                        .Where(x => x.Description.ToLower().Contains("поштомат"))
                         .FirstOrDefaultAsync(x => x.Number == deptNumberText, ct);
                 }
-
                 if (warehouse == null)
                 {
                     var npWarehouses = await npClient.ExecuteAsync<GetNPWarehousesProperties, NovaPoshtaWarehouseDto>(
-                        userId,
+                        companyId,
                         "Address",
                         "getWarehouses",
                         new GetNPWarehousesProperties(city.Ref),
@@ -104,12 +106,12 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
 
                     if (isBranchDelivery)
                     {
-                        var exactBranchDesc = $"Р’С–РґРґС–Р»РµРЅРЅСЏ в„–{deptNumberText}";
-                        var exactQuerySpace = $"в„–{deptNumberText} ";
-                        var exactQueryComma = $"в„–{deptNumberText},";
+                        var exactBranchDesc = $"Відділення №{deptNumberText}";
+                        var exactQuerySpace = $"№{deptNumberText} ";
+                        var exactQueryComma = $"№{deptNumberText},";
 
                         fromApi = npWarehouses
-                            .Where(x => !x.Description.ToLower().Contains("РїРѕС€С‚РѕРјР°С‚"))
+                            .Where(x => !x.Description.ToLower().Contains("поштомат"))
                             .FirstOrDefault(x =>
                                 x.Number == deptNumberText ||
                                 x.Description.Contains(exactBranchDesc) ||
@@ -119,7 +121,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                     else
                     {
                         fromApi = npWarehouses
-                            .Where(x => x.Description.ToLower().Contains("РїРѕС€С‚РѕРјР°С‚"))
+                            .Where(x => x.Description.ToLower().Contains("поштомат"))
                             .FirstOrDefault(x => x.Number == deptNumberText);
                     }
 
@@ -136,30 +138,30 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 }
 
                 if (warehouse == null)
-                    throw new Exception($"РќРµ РІРґР°Р»РѕСЃСЏ Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ Р·РЅР°Р№С‚Рё {(isBranchDelivery ? "РІС–РґРґС–Р»РµРЅРЅСЏ" : "РїРѕС€С‚РѕРјР°С‚")} в„–{deptNumber} Сѓ РјС–СЃС‚С– '{order.Address.City}' РІ РґРѕРІС–РґРЅРёРєСѓ РќРџ.");
+                    throw new Exception($"Не вдалося автоматично знайти {(isBranchDelivery ? "відділення" : "поштомат")} №{deptNumber} у місті '{order.Address.City}' в довіднику НП.");
 
                 order.Address.SetNovaPoshtaRefs(city.Ref, warehouse.Ref);
             }
 
             if (order.Address.NovaPoshtaCityRef is null || order.Address.NovaPoshtaWarehouseRef is null)
-                throw new Exception("Р”Р»СЏ Р°РґСЂРµСЃРё Р·Р°РјРѕРІР»РµРЅРЅСЏ РЅРµ Р·Р°РїРѕРІРЅРµРЅРѕ Nova Poshta city/warehouse refs");
+                throw new Exception("Для адреси замовлення не заповнено Nova Poshta city/warehouse refs");
 
             if (order.Customer is null || order.Customer.Contact is null)
-                throw new Exception("РЈ Р·Р°РјРѕРІР»РµРЅРЅС– РІС–РґСЃСѓС‚РЅС– РґР°РЅС– РѕС‚СЂРёРјСѓРІР°С‡Р° (Customer/Contact)");
+                throw new Exception("У замовленні відсутні дані отримувача (Customer/Contact)");
 
             var integration = await context.UserIntegrations
                 .Include(x => x.LogisticProfile)
                 .ThenInclude(lp => lp.SenderAddresses)
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == "novaposhta", ct);
+                .FirstOrDefaultAsync(x => x.CompanyId == companyId && x.Provider == "novaposhta", ct);
 
             if (integration == null)
-                throw new Exception("Р†РЅС‚РµРіСЂР°С†С–СЏ Р· РќРѕРІРѕСЋ РџРѕС€С‚РѕСЋ РЅРµ РЅР°Р»Р°С€С‚РѕРІР°РЅР°");
+                throw new Exception("Інтеграція з Новою Поштою не налаштована");
 
             var senderProfile = integration.LogisticProfile
-                ?? throw new Exception("РџСЂРѕС„С–Р»СЊ РІС–РґРїСЂР°РІРЅРёРєР° РќРѕРІРѕС— РџРѕС€С‚Рё РЅРµ Р·Р°РїРѕРІРЅРµРЅРѕ");
+                ?? throw new Exception("Профіль відправника Нової Пошти не заповнено");
 
             var senderAddress = senderProfile.SenderAddresses.FirstOrDefault()
-                ?? throw new Exception("РќРµ Р·РЅР°Р№РґРµРЅРѕ Р¶РѕРґРЅРѕС— Р°РґСЂРµСЃРё РІС–РґРїСЂР°РІРЅРёРєР° Сѓ РїСЂРѕС„С–Р»С– Р»РѕРіС–СЃС‚РёРєРё");
+                ?? throw new Exception("Не знайдено жодної адреси відправника у профілі логістики");
 
             var counterpartyProperties = new
             {
@@ -173,7 +175,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
             };
 
             var counterpartyResponse = await npClient.ExecuteAsync<object, NpCreateCounterpartyResult>(
-                userId,
+                companyId,
                 "Counterparty",
                 "save",
                 counterpartyProperties,
@@ -182,12 +184,12 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
             var cpData = counterpartyResponse.FirstOrDefault();
 
             if (cpData == null)
-                throw new Exception("РќРµ РІРґР°Р»РѕСЃСЏ СЃС‚РІРѕСЂРёС‚Рё РєРѕРЅС‚СЂР°РіРµРЅС‚Р° РІ РќРѕРІС–Р№ РџРѕС€С‚С–. Р’С–РґРїРѕРІС–РґСЊ РїРѕСЂРѕР¶РЅСЏ.");
+                throw new Exception("Не вдалося створити контрагента в Новій Пошті. Відповідь порожня.");
 
             string recipientRef = cpData.Ref;
 
             string contactRecipientRef = cpData.ContactPerson?.Data?.FirstOrDefault()?.Ref
-                ?? throw new Exception("РќРѕРІР° РџРѕС€С‚Р° РЅРµ РїРѕРІРµСЂРЅСѓР»Р° РєРѕРЅС‚Р°РєС‚РЅСѓ РѕСЃРѕР±Сѓ РґР»СЏ СЃС‚РІРѕСЂРµРЅРѕРіРѕ РєРѕРЅС‚СЂР°РіРµРЅС‚Р°.");
+                ?? throw new Exception("Нова Пошта не повернула контактну особу для створеного контрагента.");
 
             string npServiceType = order.ServiceType switch
             {
@@ -230,20 +232,20 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 RecipientsPhone = order.Customer.Contact.PhoneNumber,
                 Weight = order.TotalWeight > 0 ? order.TotalWeight : 1m,
                 Cost = order.TotalCost <= 0 ? 1m : order.TotalCost,
-                Description = string.IsNullOrWhiteSpace(order.Description) ? $"Р—Р°РјРѕРІР»РµРЅРЅСЏ {order.UniqCode}" : order.Description,
+                Description = string.IsNullOrWhiteSpace(order.Description) ? $"Замовлення {order.UniqCode}" : order.Description,
                 SeatsAmount = "1",
                 ServiceType = npServiceType
             };
 
             var response = await npClient.ExecuteAsync<NpCreateInternetDocumentProperties, NpCreateInternetDocumentResult>(
-                userId,
+                companyId,
                 "InternetDocument",
                 "save",
                 npRequest,
                 ct);
 
             var createdDocument = response.FirstOrDefault()
-                ?? throw new Exception("РќРѕРІР° РџРѕС€С‚Р° РЅРµ РїРѕРІРµСЂРЅСѓР»Р° РґР°РЅС– СЃС‚РІРѕСЂРµРЅРѕС— РўРўРќ");
+                ?? throw new Exception("Нова Пошта не повернула дані створеної ТТН");
 
             order.SetTrackingNumber(createdDocument.IntDocNumber);
             await context.SaveChangesAsync(ct);

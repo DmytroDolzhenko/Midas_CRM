@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Midas.Core.Companies;
+using Midas.Core.Users;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,7 +9,9 @@ namespace Midas.Core.UserIntegrations
     public class UserIntegration : IEntity<int>
     {
         public int Id { get; private set; }
-        public Guid UserId { get; private set; }
+        public Guid CompanyId { get; private set; }
+        public Company Company { get; private set; } = null!;
+        //public Guid UserId { get; private set; }
         public string Provider { get; private set; } = null!;
         public string? EncryptedAccessToken { get; private set; } = null!;
         public string? EncryptedRefreshToken { get; private set; }
@@ -15,6 +19,8 @@ namespace Midas.Core.UserIntegrations
         public bool IsActive { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public UserLogisticProfile? LogisticProfile { get; private set; }
+        public Guid CreatedByUserId { get; private set; }
+        public User CreatedByUser { get; private set; } = null!;
 
         private UserIntegration() { }
 
@@ -22,11 +28,12 @@ namespace Midas.Core.UserIntegrations
         {
             LogisticProfile = profile;
         }
-        public static UserIntegration Create(Guid userId, string provider)
+        public static UserIntegration Create(Guid commanyId, Guid createdByUserId, string provider)
         {
             return new UserIntegration
             {
-                UserId = userId,
+                CompanyId = commanyId,
+                CreatedByUserId = createdByUserId,
                 Provider = provider,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true

@@ -9,6 +9,9 @@ namespace Midas.Application.DTO.NovaPoshta.Requests
     public record NpCityItem(string Ref, string Description, string SettlementTypeDescription, string AreaDescription);
 
     // Для складів
-    public record GetWarehousesRequest(string CityRef = "");
+    public record GetWarehousesRequest(
+        string CityRef = "",
+        string Page = "1",
+        string Limit = "500");
     public record NpWarehouseItem(string Ref, string CityRef, string Description, string Number, string WarehouseIndex, string TypeOfWarehouse);
 }
