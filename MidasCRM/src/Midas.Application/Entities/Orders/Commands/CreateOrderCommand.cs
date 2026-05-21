@@ -27,7 +27,7 @@ namespace Midas.Application.Entities.Orders.Commands
     {
         public async Task<Order> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken)
                     ?? throw new UnauthorizedAccessException();
 
             var address = Midas.Core.CustomerAddresses.CustomerAddress.Create(
@@ -36,14 +36,14 @@ namespace Midas.Application.Entities.Orders.Commands
                 request.City,
                 request.PostalCode,
                 request.PostDepartmentNumber,
-                currentUserId);
+                companyId);
 
             var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(
-                currentUserId,
+                companyId,
                 DateTime.UtcNow,
                 cancellationToken);
 
-            var order = Order.Create(request.CustomerId, address, request.ServiceType, request.CargoType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
+            var order = Order.Create(request.CustomerId, address, request.ServiceType, request.CargoType, uniqCode, companyId, request.PaymentMethods, request.Description);
 
             order.RecalculateTotalWeight();
 
@@ -52,3 +52,4 @@ namespace Midas.Application.Entities.Orders.Commands
         }
     }
 }
+

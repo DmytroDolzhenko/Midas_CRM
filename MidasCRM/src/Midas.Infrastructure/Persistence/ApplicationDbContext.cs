@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Core.Contacts;
+using Midas.Core.Companies;
+using Midas.Core.CompanyMembers;
 using Midas.Core.CustomerAddresses;
 using Midas.Core.Customers;
 using Midas.Core.NovaPoshta;
@@ -14,6 +16,7 @@ using Midas.Core.ProductCategories;
 using Midas.Core.ProductImages;
 using Midas.Core.Products;
 using Midas.Core.ProductVariants;
+using Midas.Core.UserProductCategories;
 using Midas.Core.UserIntegrations;
 using Midas.Core.Users;
 using Midas.Core.Warehouses;
@@ -34,6 +37,8 @@ namespace Infrastructure.Persistence
         public DbSet<ProductVariant> ProductVariants { get; init; }
         public DbSet<Product> Products { get; init; }
         public DbSet<ProductCategory> ProductCategories { get; init; }
+        public DbSet<UserProductCategory> UserProductCategories { get; init; }
+        public DbSet<ProductCategoryLink> ProductCategoryLinks { get; init; }
         public DbSet<Payment> Payments { get; init; }
         public DbSet<Order> Orders { get; init; }
         public DbSet<OrderSource> OrderSources { get; init; }
@@ -41,12 +46,14 @@ namespace Infrastructure.Persistence
         public DbSet<Customer> Customers { get; init; }
         public DbSet<CustomerAddress> CustomerAddresses { get; init; }
         public DbSet<Contact> Contacts { get; init; }
+        public DbSet<Company> Companies { get; init; }
+        public DbSet<CompanyMember> CompanyMembers { get; init; }
         public DbSet<ProductImage> ProductImages { get; init; }
         public DbSet<UserIntegration> UserIntegrations { get; init; }
         public DbSet<NovaPoshtaCity> NovaPoshtaCities { get; set; } = null!;
         public DbSet<NovaPoshtaWarehouse> NovaPoshtaWarehouses { get; set; } = null!;
-        public DbSet<UserLogisticProfile> UserLogisticProfiles { get; set; } = null!;
 
+        public DbSet<UserLogisticProfile> UserLogisticProfiles { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

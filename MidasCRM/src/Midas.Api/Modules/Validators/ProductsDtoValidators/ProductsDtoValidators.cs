@@ -23,9 +23,9 @@ namespace Midas.Api.Modules.Validators.ProductsDtoValidators
                 .MaximumLength(500)
                 .WithMessage("Description must be less than 500 characters");
 
-            RuleFor(x => x.ProductCategoryId)
-                .GreaterThan(0)
-                .WithMessage("Product Category Id must be greater than 0");
+            RuleFor(x => x.ProductCategoryIds)
+                .NotEmpty()
+                .WithMessage("Product Category Ids must not be empty");
         }
     }
 

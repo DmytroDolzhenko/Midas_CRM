@@ -5,7 +5,7 @@ namespace Api.Dtos
     public record WarehouseDto(
         int Id,
         string Name,
-        Guid OwnerId,
+        Guid CompanyId,
         IReadOnlyCollection<ProductDto> Products
     )
     {
@@ -13,7 +13,7 @@ namespace Api.Dtos
             => new(
                 warehouse.Id,
                 warehouse.Name,
-                warehouse.OwnerId,
+                warehouse.CompanyId,
                 warehouse.Products.Select(ProductDto.FromDomain).ToList()
             );
     }
@@ -36,3 +36,4 @@ namespace Api.Dtos
         int ProductId
     );
 }
+

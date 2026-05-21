@@ -21,6 +21,7 @@ namespace Midas.Infrastructure.Persistence.Queries
         public Task<Customer?> GetCustomerByEmailAsync(string email, CancellationToken cancellationToken)
         {
             return _context.Customers
+                .Include(c => c.Contact)
                 .FirstOrDefaultAsync(c => c.Email == email, cancellationToken);
         }
     }

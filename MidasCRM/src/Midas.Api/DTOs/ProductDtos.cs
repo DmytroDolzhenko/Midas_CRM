@@ -3,14 +3,14 @@ using Midas.Core.Products;
 
 namespace Api.Dtos
 {
-   
+
     public record ProductDto(
         int Id,
         int WarehouseId,
         string Name,
         string Description,
         decimal Weight,
-        int ProductCategoryId,
+        IEnumerable<int> CategoryIds,
         DateTime CreatedAt,
         bool IsDeleted,
         IEnumerable<ProductImageDto> Images
@@ -23,7 +23,7 @@ namespace Api.Dtos
                 product.Name,
                 product.Description,
                 product.Weight,
-                product.ProductCategoryId,
+                product.ProductCategories.Select(pc => pc.CategoryId),
                 product.CreatedAt,
                 product.IsDeleted,
                 product.Images.Select(img => new ProductImageDto(
@@ -39,7 +39,7 @@ namespace Api.Dtos
         string Name,
         string Description,
         decimal Weight,
-        int ProductCategoryId
+        List<int> ProductCategoryIds
     );
 
     public record UpdateProductDto(
@@ -49,7 +49,8 @@ namespace Api.Dtos
     );
 
     public record UpdateProductCategoryDto(
-        int ProductCategoryId
+        int ProductCategoryId,
+        int NewProductCategoryId
     );
 
     public record ChangeWarehouseDto(
@@ -60,14 +61,13 @@ namespace Api.Dtos
         bool IsDeleted
     );
 
-    //one click
     public class CreateProductWithVariantDto
     {
         public int WarehouseId { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public decimal Weight { get; set; }
-        public int ProductCategoryId { get; set; }
+        public List<int> ProductCategoryIds { get; set; } = new();
         public List<CreateProductVariantDto> Variants { get; set; } = new();
     }
 }

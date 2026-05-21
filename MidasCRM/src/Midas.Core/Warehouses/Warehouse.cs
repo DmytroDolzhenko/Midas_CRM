@@ -4,24 +4,24 @@ using System.Collections.Generic;
 
 namespace Midas.Core.Warehouses
 {
-    public class Warehouse : IEntity<int>, IOwnedEntity
+    public class Warehouse : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; }
         public string Name { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
 
         private readonly List<Product> _products = new();
         public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
 
-        public Warehouse(string name, Guid ownerId)
+        public Warehouse(string name, Guid companyId)
         {
             Name = name;
-            OwnerId = ownerId;
+            CompanyId = companyId;
         }
 
-        public static Warehouse Create(string name, Guid ownerId)
+        public static Warehouse Create(string name, Guid companyId)
         {
-            return new Warehouse(name, ownerId);
+            return new Warehouse(name, companyId);
         }
 
         public void Update(string name)
@@ -29,9 +29,9 @@ namespace Midas.Core.Warehouses
             Name = name;
         }
 
-        public void ChangeOwner(Guid newOwnerId)
+        public void ChangeCompany(Guid newCompanyId)
         {
-            OwnerId = newOwnerId;
+            CompanyId = newCompanyId;
         }
 
         public void AddProduct(Product product)
@@ -45,3 +45,4 @@ namespace Midas.Core.Warehouses
         }
     }
 }
+

@@ -13,6 +13,8 @@ namespace Midas.Application.Entities.Products.Commands
     {
         public required int Id { get; init; }
         public required int ProductCategoryId { get; init; }
+        public required int NewProductCategoryId { get; init; }
+
     }
 
     public class UpdateProductCategoryCommandHandler
@@ -26,7 +28,7 @@ namespace Midas.Application.Entities.Products.Commands
             {
                 throw new Exception($"Product with id {request.Id} not found.");
             }
-            product.UpdateCategory(request.ProductCategoryId);
+            product.UpdateCategory(request.ProductCategoryId, request.NewProductCategoryId);
             await repository.UpdateAsync(product, cancellationToken);
             return product;
         }

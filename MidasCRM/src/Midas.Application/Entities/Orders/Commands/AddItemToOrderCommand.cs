@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
@@ -65,7 +65,7 @@ namespace Midas.Application.Entities.Orders.Commands
                     request.Quantity,
                     productVariant.CostPrice,
                     productVariant.SellPrice,
-                    order.OwnerId);
+                    order.CompanyId);
                 order.AddOrderItem(orderItem);
             }
 
@@ -78,3 +78,4 @@ namespace Midas.Application.Entities.Orders.Commands
         }
     }
 }
+

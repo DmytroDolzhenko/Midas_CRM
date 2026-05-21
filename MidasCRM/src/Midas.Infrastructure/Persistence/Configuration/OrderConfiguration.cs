@@ -25,7 +25,7 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .IsRequired()
                 .HasColumnType("decimal(18,2)");
 
-            builder.Property(x => x.OwnerId).IsRequired();
+            builder.Property(x => x.CompanyId).IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired();
 
             builder.HasMany(x => x.OrderItems)
@@ -42,3 +42,4 @@ namespace Midas.Infrastructure.Persistence.Configuration
         }
     }
 }
+

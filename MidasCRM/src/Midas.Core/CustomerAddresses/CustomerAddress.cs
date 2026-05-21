@@ -6,7 +6,7 @@ using Midas.Core.Orders;
 
 namespace Midas.Core.CustomerAddresses
 {
-    public class CustomerAddress : IEntity<int>, IOwnedEntity
+    public class CustomerAddress : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; }
         public int CustomerId { get; private set; }
@@ -19,7 +19,7 @@ namespace Midas.Core.CustomerAddresses
         public int PostalCode { get; private set; }
         public int PostDepartmentNumber { get; private set; }
 
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
         public bool IsDeleted { get; private set; }
 
 
@@ -32,14 +32,14 @@ namespace Midas.Core.CustomerAddresses
             string city,
             int postalCode,
             int postDepartmentNumber,
-            Guid ownerId)
+            Guid companyId)
         {
             Id = id;
             CustomerId = customerId;
             City = city;
             PostalCode = postalCode;
             PostDepartmentNumber = postDepartmentNumber;
-            OwnerId = ownerId;
+            CompanyId = companyId;
         }
 
         public static CustomerAddress Create(
@@ -48,7 +48,7 @@ namespace Midas.Core.CustomerAddresses
             string city,
             int postalCode,
             int postDepartmentNumber,
-            Guid ownerId)
+            Guid companyId)
         {
             return new CustomerAddress(
                 id,
@@ -56,7 +56,7 @@ namespace Midas.Core.CustomerAddresses
                 city,
                 postalCode,
                 postDepartmentNumber,
-                ownerId);
+                companyId);
         }
 
         public static CustomerAddress Create(
@@ -64,7 +64,7 @@ namespace Midas.Core.CustomerAddresses
             string city,
             int postalCode,
             int postDepartmentNumber,
-            Guid ownerId)
+            Guid companyId)
         {
             var address = new CustomerAddress(
                 0,
@@ -72,7 +72,7 @@ namespace Midas.Core.CustomerAddresses
                 city,
                 postalCode,
                 postDepartmentNumber,
-                ownerId);
+                companyId);
 
             address.Customer = customer;
             return address;
@@ -107,3 +107,4 @@ namespace Midas.Core.CustomerAddresses
         }
     }
 }
+

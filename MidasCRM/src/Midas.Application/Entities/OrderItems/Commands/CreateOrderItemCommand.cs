@@ -22,17 +22,18 @@ namespace Midas.Application.Entities.OrderItems.Commands
     {
         public async Task<OrderItem> Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
             var orderItem = OrderItem.Create(
                 request.OrderId,
                 request.ProductVariantId,
                 request.Quantity,
                 request.UnitPrice,
                 request.CostPriceSnapshot,
-                currentUserId);
+                companyId);
 
             await repository.AddAsync(orderItem, cancellationToken);
             return orderItem;
         }
     }
 }
+

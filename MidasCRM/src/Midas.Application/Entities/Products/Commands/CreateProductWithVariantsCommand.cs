@@ -17,7 +17,7 @@ namespace Midas.Application.Entities.Products.Commands
         public string Description { get; init; } = null!;
         public decimal Weight { get; init; }
         public int WarehouseId { get; init; }
-        public int ProductCategoryId { get; init; }
+        public List<int> ProductCategoryIds { get; init; } = new();
         public List<CreateVariantCommandItem> Variants { get; init; } = new();
     }
     public class CreateVariantCommandItem
@@ -40,15 +40,15 @@ namespace Midas.Application.Entities.Products.Commands
     {
         public async Task<Product> Handle(CreateProductWithVariantsCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
 
             var product = Product.Create(
                 request.WarehouseId,
                 request.Name,
                 request.Description,
                 request.Weight,
-                request.ProductCategoryId,
-                currentUserId);
+                request.ProductCategoryIds,
+                companyId);
 
             await productRepository.AddAsync(product, cancellationToken);
 
@@ -65,7 +65,7 @@ namespace Midas.Application.Entities.Products.Commands
                     variant.SellPrice,
                     ProductVariantStatus.Available,
                     await uniqCodeGenerator.GenerateProductVariantCodeAsync(product, variant.Size, variant.Color, cancellationToken),
-                    currentUserId);
+                    companyId);
 
                 await variantRepository.AddAsync(productVariant, cancellationToken);
             }
@@ -76,3 +76,4 @@ namespace Midas.Application.Entities.Products.Commands
         }
     }
 }
+

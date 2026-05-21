@@ -10,34 +10,6 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            /*            logger.LogInformation("Nova Poshta order tracking worker started.");
-
-                        // Перший запуск відбудеться через 20 секунд після старту додатку
-                        await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
-
-                        while (!stoppingToken.IsCancellationRequested)
-                        {
-                            try
-                            {
-                                using var scope = serviceProvider.CreateScope();
-                                var trackingService = scope.ServiceProvider.GetRequiredService<OrderTrackingService>();
-
-                                logger.LogInformation("Starting Nova Poshta order status sync...");
-                                await trackingService.SyncStatusesAsync(stoppingToken);
-                                logger.LogInformation("Nova Poshta order statuses sync completed.");
-
-                                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
-                            }
-                            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-                            {
-                                break;
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.LogError(ex, "Error occurred during Nova Poshta order statuses sync.");
-                                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-                            }
-                        }*/
             logger.LogInformation("Nova Poshta order tracking worker started.");
 
             while (!stoppingToken.IsCancellationRequested)

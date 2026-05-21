@@ -20,13 +20,17 @@ namespace Midas.Infrastructure.Persistence.Configuration
             builder.Property(x => x.CreatedAt)
                 .IsRequired();
 
-            builder.HasIndex(x => new { x.UserId, x.Provider })
-                .IsUnique();
-
-            builder.HasOne(ui => ui.LogisticProfile)
-                .WithOne(lp => lp.UserIntegration)
-                .HasForeignKey<UserLogisticProfile>(lp => lp.UserIntegrationId)
+            builder.HasOne(x => x.Company)
+                .WithMany()
+                .HasForeignKey(x => x.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(x => x.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
 
             builder.ToTable("UserIntegrations");
         }

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
@@ -18,7 +18,7 @@ namespace Midas.Application.Entities.Products.Commands
         public required string Name { get; init; }
         public required string Description { get; init; } 
         public required decimal Weight { get; init; }
-        public required int ProductCategoryId { get; init; }
+        public required List<int> ProductCategoryIds { get; init; } = new();
         public required DateTime CreatedAt { get; init; }
     }
     public class CreateProductCommandHandler
@@ -31,21 +31,17 @@ namespace Midas.Application.Entities.Products.Commands
     {
         public async Task<Product> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken)
+                ?? throw new UnauthorizedAccessException();
             var warehouse = await warehouseQueries.GetByIdAsync(request.WarehouseId, cancellationToken);
             if (warehouse == null)
             {
                 throw new Exception($"Warehouse with id {request.WarehouseId} not found");
             }
 
-            if(warehouse.OwnerId != currentUserService.UserId)
+            if(warehouse.CompanyId != companyId)
             {
                 throw new UnauthorizedAccessException("You are not the owner of this warehouse");
-            }
-
-            var category = await productCategoryQueries.GetByIdAsync(request.ProductCategoryId, cancellationToken);
-            if(category == null)
-            {
-                throw new Exception("Category not found");
             }
 
             var product = Product.Create(
@@ -53,8 +49,8 @@ namespace Midas.Application.Entities.Products.Commands
                 request.Name,
                 request.Description,
                 request.Weight,
-                category.Id,
-                currentUserService.UserId ?? throw new UnauthorizedAccessException());
+                request.ProductCategoryIds,
+                companyId);
 
             await repositories.AddAsync(product, cancellationToken);
             await warehouseRepositories.UpdateAsync(warehouse, cancellationToken);
@@ -62,3 +58,4 @@ namespace Midas.Application.Entities.Products.Commands
         }
     }
 }
+

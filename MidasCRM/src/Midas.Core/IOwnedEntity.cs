@@ -1,7 +1,8 @@
 namespace Midas.Core
 {
-    public interface IOwnedEntity
+    public interface ICompanyOwnedEntity
     {
-        Guid OwnerId { get; }
+        Guid CompanyId { get; }
     }
 }
+

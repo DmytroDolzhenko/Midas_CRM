@@ -18,10 +18,11 @@ namespace Midas.Application.Entities.OrderSources.Commands
     {
         public async Task<OrderSource> Handle(CreateOrderSourceCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
-            var orderSource = OrderSource.Create(0, request.Name, currentUserId);
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
+            var orderSource = OrderSource.Create(0, request.Name, companyId);
             await repository.AddAsync(orderSource, cancellationToken);
             return orderSource;
         }
     }
 }
+

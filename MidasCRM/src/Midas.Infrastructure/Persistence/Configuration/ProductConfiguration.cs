@@ -21,7 +21,6 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .IsRequired()
                 .HasMaxLength(500);
 
-            builder.Property(x => x.ProductCategoryId).IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired();
 
             builder.HasOne(x => x.Warehouse)
@@ -29,10 +28,10 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .HasForeignKey(x => x.WarehouseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.ProductCategory)
-                .WithMany(x => x.Products)
-                .HasForeignKey(x => x.ProductCategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.ProductCategories)
+                .WithOne(x => x.Product)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(x => x.Variants)
                 .WithOne(x => x.Product)

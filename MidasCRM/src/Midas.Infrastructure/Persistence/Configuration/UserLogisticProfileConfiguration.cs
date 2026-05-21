@@ -17,6 +17,11 @@ namespace Midas.Infrastructure.Persistence.Configuration
             builder.Property(x => x.ContactSenderRef).IsRequired().HasMaxLength(36);
             builder.Property(x => x.SendersPhone).IsRequired().HasMaxLength(20);
 
+            builder.HasOne(lp => lp.UserIntegration)
+                .WithOne(lp => lp.LogisticProfile)
+                .HasForeignKey<UserLogisticProfile>(lp => lp.UserIntegrationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(lp => lp.SenderAddresses)
                 .WithOne(sa => sa.UserLogisticProfile)
                 .HasForeignKey(sa => sa.UserLogisticProfileId)

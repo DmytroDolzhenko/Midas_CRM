@@ -21,7 +21,7 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
 
             if (!orders.Any()) return;
 
-            var groupedOrders = orders.GroupBy(o => o.OwnerId);
+            var groupedOrders = orders.GroupBy(o => o.CompanyId);
 
             foreach (var group in groupedOrders)
             {
@@ -66,3 +66,4 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
         };
     }
 }
+

@@ -11,8 +11,9 @@ namespace Midas.Application.Common.Interfaces
             CancellationToken cancellationToken);
 
         Task<string> GenerateOrderCodeAsync(
-            Guid ownerId,
+            Guid companyId,
             DateTime createdAtUtc,
             CancellationToken cancellationToken);
     }
 }
+

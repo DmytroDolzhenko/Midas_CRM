@@ -7,7 +7,7 @@ using Midas.Core.Orders;
 
 namespace Midas.Core.Customers
 {
-    public class Customer : IEntity<int>, IOwnedEntity
+    public class Customer : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; }
         public string Name { get; private set; }
@@ -18,7 +18,7 @@ namespace Midas.Core.Customers
 
         public string Email { get; private set; }
         public bool IsDeleted { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Guid CompanyId { get; private set; }
 
 
         private readonly List<CustomerAddress> _addresses = new();
@@ -34,7 +34,7 @@ namespace Midas.Core.Customers
             string surname,
             int contactId,
             string email,
-            Guid ownerId)
+            Guid companyId)
         {
             Id = id;
             Name = name;
@@ -42,7 +42,7 @@ namespace Midas.Core.Customers
            // Contact = contact;
             ContactId = contactId;
             Email = email;
-            OwnerId = ownerId;
+            CompanyId = companyId;
         }
 
         public static Customer Create(
@@ -50,7 +50,7 @@ namespace Midas.Core.Customers
             string surname,
             Contact contact,
             string email,
-            Guid ownerId)
+            Guid companyId)
         {
             var customer = new Customer(
                 0,
@@ -58,7 +58,7 @@ namespace Midas.Core.Customers
                 surname,
                 contact.Id,
                 email,
-                ownerId);
+                companyId);
 
             customer.Contact = contact;
             return customer;
@@ -82,3 +82,4 @@ namespace Midas.Core.Customers
         }
     }
 }
+

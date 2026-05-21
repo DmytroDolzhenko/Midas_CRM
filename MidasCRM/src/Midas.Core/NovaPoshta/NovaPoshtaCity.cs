@@ -7,12 +7,11 @@ namespace Midas.Core.NovaPoshta
     public class NovaPoshtaCity : IEntity<int>
     {
         public int Id { get; private set; }
-        public string Ref { get; private set; } = null!;          // GUID від НП (напр. "db5c888c-...")
-        public string Description { get; private set; } = null!;  // Назва українською (напр. "Київ")
-        public string SettlementTypeDescription { get; private set; } = null!; // "м.", "смт.", "с."
-        public string AreaDescription { get; private set; } = null!; // Область (напр. "Київська")
+        public string Ref { get; private set; } = null!;
+        public string Description { get; private set; } = null!;
+        public string SettlementTypeDescription { get; private set; } = null!;
+        public string AreaDescription { get; private set; } = null!;
 
-        // Створюємо зручне обчислювальне поле для випадаючих списків (Пошуку)
         public string SearchName => $"{SettlementTypeDescription} {Description} ({AreaDescription} обл.)";
 
         private NovaPoshtaCity() { }

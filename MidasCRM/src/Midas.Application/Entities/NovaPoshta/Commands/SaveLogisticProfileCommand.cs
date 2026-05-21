@@ -1,4 +1,4 @@
-п»їusing MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.DTO.NovaPoshta;
@@ -22,32 +22,32 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
     {
         public async Task<bool> Handle(SaveLogisticProfileCommand request, CancellationToken ct)
         {
-            var userId = currentUserService.UserId ?? throw new Exception("РљРѕСЂРёСЃС‚СѓРІР°С‡ РЅРµ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРёР№");
+            var companyId = await currentUserService.GetCompanyIdAsync(ct) ?? throw new Exception("Користувач не авторизований");
 
             var integration = await context.UserIntegrations
                 .Include(x => x.LogisticProfile)
                 .ThenInclude(lp => lp.SenderAddresses)
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == "novaposhta", ct);
+                .FirstOrDefaultAsync(x => x.CompanyId == companyId && x.Provider == "novaposhta", ct);
 
             if (integration == null)
-                throw new Exception("РЎРїРѕС‡Р°С‚РєСѓ РґРѕРґР°Р№С‚Рµ API-РєР»СЋС‡ РќРѕРІРѕС— РџРѕС€С‚Рё");
+                throw new Exception("Спочатку додайте API-ключ Нової Пошти");
 
             var cleanPhone = new string(request.SendersPhone.Where(char.IsDigit).ToArray());
             if (cleanPhone.StartsWith("0")) cleanPhone = "38" + cleanPhone;
 
             var counterparties = await npClient.ExecuteAsync<GetCounterpartiesRequest, NpCounterpartyItem>(
-                userId, "Counterparty", "getCounterparties", new GetCounterpartiesRequest("Sender"), ct);
+                companyId, "Counterparty", "getCounterparties", new GetCounterpartiesRequest("Sender"), ct);
 
             if (counterparties == null || !counterparties.Any())
-                throw new Exception("РќРµ Р·РЅР°Р№РґРµРЅРѕ Р¶РѕРґРЅРѕРіРѕ РІС–РґРїСЂР°РІРЅРёРєР° РґР»СЏ С†СЊРѕРіРѕ API-РєР»СЋС‡Р° РІ РќРѕРІС–Р№ РџРѕС€С‚С–.");
+                throw new Exception("Не знайдено жодного відправника для цього API-ключа в Новій Пошті.");
 
             var senderRef = counterparties.First().Ref;
 
             var contacts = await npClient.ExecuteAsync<GetContactPersonsRequest, NpContactPersonItem>(
-                userId, "Counterparty", "getCounterpartyContactPersons", new GetContactPersonsRequest(senderRef), ct);
+                companyId, "Counterparty", "getCounterpartyContactPersons", new GetContactPersonsRequest(senderRef), ct);
 
             if (contacts == null || !contacts.Any())
-                throw new Exception("РЈ РІР°С€РѕРјСѓ Р°РєР°СѓРЅС‚С– РќРѕРІРѕС— РџРѕС€С‚Рё РЅРµ Р·РЅР°Р№РґРµРЅРѕ РєРѕРЅС‚Р°РєС‚РЅРёС… РѕСЃС–Р±.");
+                throw new Exception("У вашому акаунті Нової Пошти не знайдено контактних осіб.");
 
             var contactSenderRef = contacts.First().Ref;
 
@@ -56,7 +56,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 .FirstOrDefaultAsync(x => x.Description.ToLower() == request.CityName.ToLower(), ct);
 
             if (city == null)
-                throw new Exception($"РњС–СЃС‚Рѕ '{request.CityName}' РЅРµ Р·РЅР°Р№РґРµРЅРѕ. РћРЅРѕРІС–С‚СЊ РґРѕРІС–РґРЅРёРє РќРџ Р°Р±Рѕ РїРµСЂРµРІС–СЂС‚Рµ РЅР°Р·РІСѓ.");
+                throw new Exception($"Місто '{request.CityName}' не знайдено. Оновіть довідник НП або перевірте назву.");
 
             var warehouseQuery = request.WarehouseQuery.Trim().ToLower();
             var digitsOnly = new string(warehouseQuery.Where(char.IsDigit).ToArray());
@@ -73,7 +73,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
             if (warehouse == null)
             {
                 var npWarehouses = await npClient.ExecuteAsync<GetNPWarehousesProperties, NovaPoshtaWarehouseDto>(
-                    userId,
+                    companyId,
                     "Address",
                     "getWarehouses",
                     new GetNPWarehousesProperties(city.Ref),
@@ -99,11 +99,11 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
             }
 
             if (warehouse == null)
-                throw new Exception($"Р’С–РґРґС–Р»РµРЅРЅСЏ '{request.WarehouseQuery}' Сѓ РјС–СЃС‚С– '{request.CityName}' РЅРµ Р·РЅР°Р№РґРµРЅРѕ.");
+                throw new Exception($"Відділення '{request.WarehouseQuery}' у місті '{request.CityName}' не знайдено.");
 
             var profile = integration.LogisticProfile;
             if (profile == null)
-                throw new Exception("РџСЂРѕС„С–Р»СЊ Р»РѕРіС–СЃС‚РёРєРё РЅРµ С–РЅС–С†С–Р°Р»С–Р·РѕРІР°РЅРѕ.");
+                throw new Exception("Профіль логістики не ініціалізовано.");
 
             profile.Update(senderRef, contactSenderRef, cleanPhone);
 
@@ -131,3 +131,6 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
         }
     }
 }
+
+
+

@@ -44,7 +44,7 @@ namespace Midas.Api.Controllers
                 Name = request.Name,
                 Description = request.Description,
                 Weight = request.Weight,
-                ProductCategoryId = request.ProductCategoryId,
+                ProductCategoryIds = request.ProductCategoryIds,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -75,11 +75,12 @@ namespace Midas.Api.Controllers
         }
 
         [HttpPatch("{id:int}/category")]
-        public async Task<ActionResult<ProductDto>> UpdateProductCategory(int id, [FromBody] UpdateProductCategoryDto request, CancellationToken cancellationToken)
+        public async Task<ActionResult<ProductDto>> UpdateProductCategory(int id, int newCategoryId, [FromBody] UpdateProductCategoryDto request, CancellationToken cancellationToken)
         {
             var command = new UpdateProductCategoryCommand
             {
                 Id = id,
+                NewProductCategoryId = newCategoryId,
                 ProductCategoryId = request.ProductCategoryId
             };
 
@@ -146,7 +147,7 @@ namespace Midas.Api.Controllers
                 Description = request.Description,
                 WarehouseId = request.WarehouseId,
                 Weight = request.Weight,
-                ProductCategoryId = request.ProductCategoryId,
+                ProductCategoryIds = request.ProductCategoryIds,
 
                 Variants = request.Variants
                 .Select(v => new CreateVariantCommandItem

@@ -7,5 +7,6 @@ namespace Midas.Application.Common.Interfaces
     public interface ICurrentUserService
     {
         Guid? UserId { get; }
+        Task<Guid?> GetCompanyIdAsync(CancellationToken cancellationToken);
     }
 }

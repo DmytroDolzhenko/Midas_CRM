@@ -52,7 +52,7 @@ namespace Midas.Application.Entities.Orders.Commands
     {
         public async Task<Order> Handle(CreateOrderOneClickCommand request, CancellationToken cancellationToken)
         {
-            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken) ?? throw new UnauthorizedAccessException();
 
             decimal calculatedTotalWeight = 0;
 
@@ -66,14 +66,14 @@ namespace Midas.Application.Entities.Orders.Commands
             }
             else
             {
-                var contact = Contact.Create(request.CustomerContactValue, currentUserId);
+                var contact = Contact.Create(request.CustomerContactValue, companyId);
 
                 customer = Customer.Create(
                     request.CustomerName,
                     request.CustomerSurname,
                     contact,
                     request.CustomerEmail,
-                    currentUserId);
+                    companyId);
 
                 await customerRepository.AddAsync(customer, cancellationToken);
             }
@@ -83,16 +83,16 @@ namespace Midas.Application.Entities.Orders.Commands
                 request.City,
                 request.PostalCode,
                 request.PostDepartmentNumber,
-                currentUserId);
+                companyId);
 
             //address.SetNovaPoshtaRefs(request.NovaPoshtaCityRef, request.NovaPoshtaWarehouseRef);
 
             var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(
-                currentUserId,
+                companyId,
                 DateTime.UtcNow,
                 cancellationToken);
 
-            var order = Order.Create(customer, address, request.ServiceType, request.CargoType, uniqCode, currentUserId, request.PaymentMethods, request.Description);
+            var order = Order.Create(customer, address, request.ServiceType, request.CargoType, uniqCode, companyId, request.PaymentMethods, request.Description);
 
             foreach (var item in request.Items)
             {
@@ -113,12 +113,12 @@ namespace Midas.Application.Entities.Orders.Commands
                     item.Quantity,
                     productVariant.CostPrice,
                     productVariant.SellPrice,
-                    currentUserId);
+                    companyId);
 
                 order.AddOrderItem(orderItem);
             }
 
-            var payment = Payment.Create(order.Id, order.TotalCost, request.PaymentMethods, currentUserId);
+            var payment = Payment.Create(order.Id, order.TotalCost, request.PaymentMethods, companyId);
 
             //order.RecalculateTotalWeight();
             order.SetTotalWeight(calculatedTotalWeight);
@@ -128,3 +128,4 @@ namespace Midas.Application.Entities.Orders.Commands
         }
     }
 }
+
