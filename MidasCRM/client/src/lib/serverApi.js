@@ -12,6 +12,17 @@ export const serverApi = {
       })
     },
   },
+  companies: {
+    getBalance(options = {}) {
+      return apiRequest('/Company/balance', options)
+    },
+    create(company) {
+      return apiRequest('/Company', {
+        method: 'POST',
+        body: company,
+      })
+    },
+  },
   products: {
     getAll() {
       return apiRequest('/Product')

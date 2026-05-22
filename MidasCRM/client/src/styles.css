@@ -1234,6 +1234,11 @@ input, textarea, select { color-scheme: light; }
   box-shadow: var(--shadow);
 }
 .login-card h1 { margin: 4px 0 0; font-size: 30px; }
+.create-company-subtitle {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
 .form-error {
   margin: 0;
   color: var(--danger);

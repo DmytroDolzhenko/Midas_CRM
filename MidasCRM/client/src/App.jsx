@@ -11,6 +11,7 @@ import { CustomersPage } from './pages/CustomersPage.jsx'
 import { FinancesPage } from './pages/FinancesPage.jsx'
 import { OperationsPage } from './pages/OperationsPage.jsx'
 import { LoginPage } from './pages/LoginPage.jsx'
+import { CreateCompanyPage } from './pages/CreateCompanyPage.jsx'
 import { serverApi } from './lib/serverApi.js'
 
 function formatDateTime(date) {
@@ -124,6 +125,10 @@ export function App() {
   const [finances, setFinances] = useLocalStorage('midas-finances-v1', [])
   const [operations, setOperations] = useLocalStorage('midas-operations-v2', [])
   const [theme, setTheme] = useLocalStorage('midas-theme', 'light')
+  const [requiresCompany, setRequiresCompany] = useState(false)
+  const [isCheckingCompany, setIsCheckingCompany] = useState(false)
+  const [isCreatingCompany, setIsCreatingCompany] = useState(false)
+  const [companyError, setCompanyError] = useState('')
 
   async function loadServerData() {
     setIsLoading(true)
@@ -161,9 +166,45 @@ export function App() {
 
   useEffect(() => {
     if (user?.token) {
-      Promise.resolve().then(loadServerData)
+      Promise.resolve().then(async () => {
+        setIsCheckingCompany(true)
+        setCompanyError('')
+
+        try {
+          await serverApi.companies.getBalance({ handleUnauthorized: false })
+          setRequiresCompany(false)
+          await loadServerData()
+        } catch (error) {
+          if (error.status === 401) {
+            setRequiresCompany(true)
+            return
+          }
+
+          setApiError(error.message || 'Не вдалося перевірити доступ до компанії')
+        } finally {
+          setIsCheckingCompany(false)
+        }
+      })
+    } else {
+      setRequiresCompany(false)
+      setCompanyError('')
     }
   }, [user?.token])
+
+  async function createCompany(companyPayload) {
+    setIsCreatingCompany(true)
+    setCompanyError('')
+
+    try {
+      await serverApi.companies.create(companyPayload)
+      setRequiresCompany(false)
+      await loadServerData()
+    } catch (error) {
+      setCompanyError(error.message || 'Не вдалося створити компанію')
+    } finally {
+      setIsCreatingCompany(false)
+    }
+  }
 
   const stats = useMemo(
     () => {
@@ -283,6 +324,29 @@ export function App() {
 
   if (!user) {
     return <LoginPage onLogin={login} />
+  }
+
+  if (isCheckingCompany) {
+    return (
+      <main className="login-page">
+        <div className="login-card">
+          <h1>Перевірка доступу...</h1>
+          <p className="create-company-subtitle">Зачекайте, будь ласка. Перевіряємо участь у компанії.</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (requiresCompany) {
+    return (
+      <CreateCompanyPage
+        userEmail={user.email}
+        onCreateCompany={createCompany}
+        isSubmitting={isCreatingCompany}
+        error={companyError}
+        onLogout={logout}
+      />
+    )
   }
 
   const pages = {

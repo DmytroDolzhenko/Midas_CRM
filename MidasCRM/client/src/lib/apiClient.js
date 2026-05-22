@@ -34,26 +34,30 @@ export async function apiRequest(path, options = {}) {
       headers,
     })
   } catch {
-    throw new Error(`Не вдалося з'єднатися з сервером: ${API_URL}`)
+    throw new Error(`Unable to connect to server: ${API_URL}`)
   }
 
   if (!response.ok) {
-    if (response.status === 401) {
+    const handleUnauthorized = options.handleUnauthorized !== false
+
+    if (response.status === 401 && handleUnauthorized) {
       localStorage.removeItem('midas-user')
       window.dispatchEvent(new Event('midas-auth-expired'))
-      throw new Error('Сесію завершено. Увійдіть знову.')
+      throw new Error('Session expired. Please log in again.')
     }
 
     let message = `API request failed: ${response.status}`
 
     try {
-      const error = await response.clone().json()
-      message = error.message ?? error.Message ?? JSON.stringify(error)
+      const errorPayload = await response.clone().json()
+      message = errorPayload.message ?? errorPayload.Message ?? JSON.stringify(errorPayload)
     } catch {
       message = await response.text() || message
     }
 
-    throw new Error(message)
+    const error = new Error(message)
+    error.status = response.status
+    throw error
   }
 
   if (response.status === 204) {
