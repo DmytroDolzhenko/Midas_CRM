@@ -22,3 +22,15 @@ export async function loginRequest(credentials) {
     id: payload?.sub ?? payload?.nameid ?? payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
   }
 }
+
+export async function registerRequest(credentials) {
+  const response = await serverApi.auth.register(credentials)
+  const email = response.email ?? response.Email ?? credentials.email
+  const token = response.token ?? response.Token
+
+  return {
+    email,
+    name: email.split('@')[0] || 'manager',
+    token,
+  }
+}
