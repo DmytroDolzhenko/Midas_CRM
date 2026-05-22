@@ -8,7 +8,7 @@ const navItems = [
   { id: 'finances', label: 'Фінанси' },
   { id: 'customers', label: 'Клієнти' },
   { id: 'operations', label: 'Історія' },
-  { id: 'company', label: 'Company' },
+  { id: 'company', label: 'Компанія' },
 ]
 
 function BellIcon() {
@@ -95,7 +95,7 @@ export function AppShell({
         </div>
 
         <label className="field company-switcher-field">
-          <span>Active company</span>
+          <span>Поточна компанія</span>
           <select value={activeCompanyId ?? ''} onChange={(event) => onCompanyChange?.(event.target.value)}>
             {companies.map((company) => {
               const companyId = String(getValue(company, 'id', 'Id'))

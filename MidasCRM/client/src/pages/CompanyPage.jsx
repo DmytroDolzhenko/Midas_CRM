@@ -6,10 +6,10 @@ const OWNER_ROLE = 1
 const ADMIN_ROLE = 2
 
 const roleOptions = [
-  { value: 1, label: 'Owner' },
-  { value: 2, label: 'Admin' },
-  { value: 3, label: 'Manager' },
-  { value: 4, label: 'Warehouseman' },
+  { value: 1, label: 'Власник' },
+  { value: 2, label: 'Адміністратор' },
+  { value: 3, label: 'Менеджер' },
+  { value: 4, label: 'Складальник' },
 ]
 
 function getValue(item, camelKey, pascalKey) {
