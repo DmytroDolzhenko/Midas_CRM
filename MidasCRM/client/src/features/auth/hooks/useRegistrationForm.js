@@ -1,8 +1,9 @@
 import { useState } from 'react'
 
-export function useLoginForm(onLogin) {
+export function useRegistrationForm(onRegister) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
 
   async function submit(event) {
@@ -16,18 +17,26 @@ export function useLoginForm(onLogin) {
     setError('')
 
     try {
-      await onLogin({ email, password })
+      await onRegister({ email, password })
     } catch (error) {
-      setError(error.message || 'Не вдалося увійти в систему')
+      setError(error.message || 'Не вдалося зареєструватися')
     }
+
+    if (password !== confirmPassword) {
+      setError('Паролі не співпадають')
+      return
+    }
+
   }
 
   return {
     email,
     password,
+    confirmPassword,
     error,
     setEmail,
     setPassword,
+    setConfirmPassword,
     submit,
   }
 }

@@ -11,6 +11,7 @@ import { CustomersPage } from './pages/CustomersPage.jsx'
 import { FinancesPage } from './pages/FinancesPage.jsx'
 import { OperationsPage } from './pages/OperationsPage.jsx'
 import { LoginPage } from './pages/LoginPage.jsx'
+import { RegistrationPage } from './pages/RegistrationPage.jsx'
 import { CreateCompanyPage } from './pages/CreateCompanyPage.jsx'
 import { serverApi } from './lib/serverApi.js'
 

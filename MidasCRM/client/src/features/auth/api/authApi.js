@@ -11,3 +11,15 @@ export async function loginRequest(credentials) {
     token,
   }
 }
+
+export async function registerRequest(credentials) {
+  const response = await serverApi.auth.register(credentials)
+  const email = response.email ?? response.Email ?? credentials.email
+  const token = response.token ?? response.Token
+
+  return {
+    email,
+    name: email.split('@')[0] || 'manager',
+    token,
+  }
+}

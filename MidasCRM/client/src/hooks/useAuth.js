@@ -9,6 +9,11 @@ export function useAuth() {
     const nextUser = await loginRequest(credentials)
     setUser(nextUser)
   }
+  async function register(credentials) {
+    const nextUser = await registerRequest(credentials)
+    setUser(nextUser)
+  }
+
   function logout() {
     setUser(null)
   }
@@ -25,6 +30,7 @@ export function useAuth() {
   return {
     user,
     login,
+    register,
     logout,
   }
 }
