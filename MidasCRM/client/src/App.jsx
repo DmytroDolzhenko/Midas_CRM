@@ -356,25 +356,65 @@ export function App() {
       throw new Error('На сервері потрібні склад і категорія для створення товару')
     }
 
-    await serverApi.products.createWithVariants({
+    if (!product.variants?.length) {
+      throw new Error('Додайте хоча б один варіант товару')
+    }
+
+    const createdProduct = await serverApi.products.createWithVariants({
       warehouseId: normalizeId(product.warehouseId),
       name: product.name,
       description: product.description,
       weight: Number(product.weight) || 0,
       productCategoryIds: product.productCategoryIds.map(normalizeId),
-      variants: [
-        {
-          color: product.color || '-',
-          size: product.size || '-',
-          quantity: Number(product.stock) || 0,
-          costPrice: Number(product.cost) || 0,
-          sellPrice: Number(product.price) || 0,
-        },
-      ],
+      variants: product.variants.map((variant) => ({
+        color: variant.color || '-',
+        size: variant.size || '-',
+        quantity: Number(variant.quantity) || 0,
+        costPrice: Number(variant.costPrice) || 0,
+        sellPrice: Number(variant.sellPrice) || 0,
+      })),
     })
+
+    let uploadedCount = 0
+    let failedCount = 0
+    let mainImageResponse = null
+
+    if (product.images?.length) {
+      const uploadedImages = []
+
+      for (const imageFile of product.images) {
+        try {
+          const imageResponse = await serverApi.products.addImage(createdProduct.id, imageFile)
+          uploadedImages.push(imageResponse)
+          uploadedCount += 1
+        } catch {
+          failedCount += 1
+        }
+      }
+
+      const canSetMainImage =
+        Number.isInteger(product.mainImageIndex) &&
+        product.mainImageIndex >= 0 &&
+        product.mainImageIndex < uploadedImages.length
+
+      if (canSetMainImage) {
+        try {
+          mainImageResponse = await serverApi.products.setMainImage(createdProduct.id, uploadedImages[product.mainImageIndex].id)
+        } catch {
+          failedCount += 1
+        }
+      }
+    }
 
     await loadServerData()
     setPage('products')
+
+    return {
+      productId: createdProduct.id,
+      uploadedCount,
+      failedCount,
+      hasMainImage: Boolean(mainImageResponse),
+    }
   }
 
   async function createWarehouse(payload) {

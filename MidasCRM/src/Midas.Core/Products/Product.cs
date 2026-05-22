@@ -125,6 +125,23 @@ namespace Midas.Core.Products
 
             _images.Add(ProductImage.Create(url, Id, CompanyId, isMain));
         }
+
+        public ProductImage SetMainImage(int imageId)
+        {
+            var selectedImage = _images.FirstOrDefault(image => image.Id == imageId);
+            if (selectedImage == null)
+            {
+                throw new Exception($"Image with id {imageId} not found for product {Id}.");
+            }
+
+            foreach (var image in _images)
+            {
+                image.UnsetMain();
+            }
+
+            selectedImage.SetAsMain();
+            return selectedImage;
+        }
     }
 }
 

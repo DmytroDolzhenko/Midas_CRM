@@ -1,17 +1,17 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
 
-const categories = ['Р—Р°РіР°Р»СЊРЅС–', 'Р”РѕСЃС‚Р°РІРєР°', 'РџР°РєСѓРІР°РЅРЅСЏ', 'РњР°СЂРєРµС‚РёРЅРі', 'РћСЂРµРЅРґР°']
-const stores = ['РћСЃРЅРѕРІРЅРёР№ СЃРєР»Р°Рґ']
-const accounts = ['NovaPay', 'Monobank', 'Р“РѕС‚С–РІРєР°']
+const categories = ['Загальні', 'Доставка', 'Пакування', 'Маркетинг', 'Оренда']
+const stores = ['Основний склад']
+const accounts = ['NovaPay', 'Monobank', 'Готівка']
 const PAGE_SIZE = 10
 
 export function FinancesPage({ finances, onCreate }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('Р—Р°РіР°Р»СЊРЅС–')
-  const [store, setStore] = useState('РћСЃРЅРѕРІРЅРёР№ СЃРєР»Р°Рґ')
+  const [category, setCategory] = useState('Загальні')
+  const [store, setStore] = useState('Основний склад')
   const [account, setAccount] = useState(accounts[0])
   const [date, setDate] = useState('2026-05-19')
   const [search, setSearch] = useState('')
@@ -45,8 +45,8 @@ export function FinancesPage({ finances, onCreate }) {
   function resetForm() {
     setAmount('')
     setDescription('')
-    setCategory('Р—Р°РіР°Р»СЊРЅС–')
-    setStore('РћСЃРЅРѕРІРЅРёР№ СЃРєР»Р°Рґ')
+    setCategory('Загальні')
+    setStore('Основний склад')
     setAccount(accounts[0])
     setDate('2026-05-19')
   }
@@ -71,33 +71,33 @@ export function FinancesPage({ finances, onCreate }) {
 
   function handleSubmit(event) {
     event.preventDefault()
-    saveFinances('Р”РѕРґР°РЅРѕ')
+    saveFinances('Додано')
   }
 
   return (
     <section className="page-stack">
       <div className="crm-page-header">
         <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
-          Р”РѕРґР°С‚Рё С„С–РЅР°РЅСЃРѕРІСѓ РѕРїРµСЂР°С†С–СЋ
+          Додати фінансову операцію
         </button>
       </div>
 
       <section className="panel">
         <div className="table-filter-grid">
           <input
-            aria-label="РџРѕС€СѓРє С„С–РЅР°РЅСЃРѕРІРёС… РѕРїРµСЂР°С†С–Р№"
-            placeholder="РџРѕС€СѓРє Р·Р° РѕРїРёСЃРѕРј, РєР°С‚РµРіРѕСЂС–С”СЋ Р°Р±Рѕ СЂР°С…СѓРЅРєРѕРј"
+            aria-label="Пошук фінансових операцій"
+            placeholder="Пошук за описом, категорією або рахунком"
             value={search}
             onChange={(event) => updateFilter(setSearch, event.target.value)}
           />
           <select value={categoryFilter} onChange={(event) => updateFilter(setCategoryFilter, event.target.value)}>
-            <option value="all">РЈСЃС– РєР°С‚РµРіРѕСЂС–С—</option>
+            <option value="all">Усі категорії</option>
             {categories.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
           </select>
           <select value={storeFilter} onChange={(event) => updateFilter(setStoreFilter, event.target.value)}>
-            <option value="all">РЈСЃС– СЃРєР»Р°РґРё</option>
+            <option value="all">Усі склади</option>
             {stores.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
@@ -106,17 +106,17 @@ export function FinancesPage({ finances, onCreate }) {
           <input type="date" value={dateTo} onChange={(event) => updateFilter(setDateTo, event.target.value)} />
         </div>
         <div className="table-header expenses-table">
-          <span>Р”Р°С‚Р°</span>
-          <span>РљР°С‚РµРіРѕСЂС–СЏ</span>
-          <span>РћРїРёСЃ</span>
-          <span>РЎРєР»Р°Рґ/РњР°РіР°Р·РёРЅ</span>
-          <span>РЎСѓРјР°</span>
+          <span>Дата</span>
+          <span>Категорія</span>
+          <span>Опис</span>
+          <span>Склад/Магазин</span>
+          <span>Сума</span>
         </div>
         {filteredFinances.length === 0 ? (
           <div className="expense-empty">
-            <h2>Р¤С–РЅР°РЅСЃРѕРІС– РѕРїРµСЂР°С†С–С— РїРѕРєРё РЅРµРјР°С”</h2>
+            <h2>Фінансові операції поки немає</h2>
             <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
-              Р”РѕРґР°С‚Рё РїРµСЂС€Сѓ С„С–РЅР°РЅСЃРѕРІСѓ РѕРїРµСЂР°С†С–СЋ
+              Додати першу фінансову операцію
             </button>
           </div>
         ) : (
@@ -126,7 +126,7 @@ export function FinancesPage({ finances, onCreate }) {
               <strong>{finance.category}</strong>
               <span>{finance.description}</span>
               <span>{finance.store}</span>
-              <span>{Number(finance.amount).toLocaleString('uk-UA')} РіСЂРЅ. {finance.status === 'Р—Р°РїР»Р°РЅРѕРІР°РЅРѕ' ? '(РїР»Р°РЅ)' : ''}</span>
+              <span>{Number(finance.amount).toLocaleString('uk-UA')} грн. {finance.status === 'Заплановано' ? '(план)' : ''}</span>
             </div>
           ))
         )}
@@ -139,27 +139,27 @@ export function FinancesPage({ finances, onCreate }) {
             <div className="settings-header">
               <div>
                 <p className="eyebrow">Expense</p>
-                <h2>Р”РѕРґР°С‚Рё РІРёС‚СЂР°С‚Сѓ</h2>
+                <h2>Додати витрату</h2>
               </div>
               <button className="modal-close-button" type="button" onClick={closeModal}>
-                Г—
+                ×
               </button>
             </div>
 
             <div className="expense-form-grid">
               <label className="field">
-                <span>РЎСѓРјР° РІРёС‚СЂР°С‚Рё</span>
+                <span>Сума витрати</span>
                 <input
                   required
                   min="0"
                   type="number"
-                  placeholder="Р—Р°Р·РЅР°С‡С‚Рµ СЃСѓРјСѓ РІРёС‚СЂР°С‚Рё"
+                  placeholder="Зазначте суму витрати"
                   value={amount}
                   onChange={(event) => setAmount(event.target.value)}
                 />
               </label>
               <label className="field">
-                <span>РљР°С‚РµРіРѕСЂС–СЏ РІРёС‚СЂР°С‚</span>
+                <span>Категорія витрат</span>
                 <select value={category} onChange={(event) => setCategory(event.target.value)}>
                   {categories.map((item) => (
                     <option key={item}>{item}</option>
@@ -167,7 +167,7 @@ export function FinancesPage({ finances, onCreate }) {
                 </select>
               </label>
               <label className="field">
-                <span>РЎРєР»Р°Рґ/РњР°РіР°Р·РёРЅ</span>
+                <span>Склад/Магазин</span>
                 <select value={store} onChange={(event) => setStore(event.target.value)}>
                   {stores.map((item) => (
                     <option key={item}>{item}</option>
@@ -175,7 +175,7 @@ export function FinancesPage({ finances, onCreate }) {
                 </select>
               </label>
               <label className="field">
-                <span>РЎРїРёСЃР°С‚Рё Р· СЂР°С…СѓРЅРєСѓ</span>
+                <span>Списати з рахунку</span>
                 <select value={account} onChange={(event) => setAccount(event.target.value)}>
                   {accounts.map((item) => (
                     <option key={item}>{item}</option>
@@ -183,14 +183,14 @@ export function FinancesPage({ finances, onCreate }) {
                 </select>
               </label>
               <label className="field">
-                <span>Р”Р°С‚Р°</span>
+                <span>Дата</span>
                 <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
               </label>
               <label className="field span-2">
-                <span>РћРїРёСЃ РІРёС‚СЂР°С‚Рё</span>
+                <span>Опис витрати</span>
                 <textarea
                   rows="4"
-                  placeholder="РљРѕРјРµРЅС‚Р°СЂ РїРѕ С†С–Р№ РІРёС‚СЂР°С‚С–"
+                  placeholder="Коментар по цій витраті"
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />
@@ -198,15 +198,15 @@ export function FinancesPage({ finances, onCreate }) {
             </div>
 
             <div className="expense-modal-actions">
-              <button className="link-button" type="button" onClick={() => saveFinances('Р—Р°РїР»Р°РЅРѕРІР°РЅРѕ')}>
-                Р—Р°РїР»Р°РЅСѓРІР°С‚Рё РІРёС‚СЂР°С‚Сѓ
+              <button className="link-button" type="button" onClick={() => saveFinances('Заплановано')}>
+                Запланувати витрату
               </button>
               <div>
                 <button className="secondary-button" type="button" onClick={closeModal}>
-                  Р—Р°РєСЂРёС‚Рё
+                  Закрити
                 </button>
                 <button className="primary-button" type="submit">
-                  Р”РѕРґР°С‚Рё РІРёС‚СЂР°С‚Сѓ
+                  Додати витрату
                 </button>
               </div>
             </div>

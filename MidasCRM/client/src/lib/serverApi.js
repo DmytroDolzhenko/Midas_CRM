@@ -91,6 +91,20 @@ export const serverApi = {
         body: product,
       })
     },
+    addImage(productId, file) {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      return apiRequest(`/Product/${productId}/images`, {
+        method: 'POST',
+        body: formData,
+      })
+    },
+    setMainImage(productId, imageId) {
+      return apiRequest(`/Product/${productId}/images/${imageId}/main`, {
+        method: 'PATCH',
+      })
+    },
   },
   productVariants: {
     getAll() {

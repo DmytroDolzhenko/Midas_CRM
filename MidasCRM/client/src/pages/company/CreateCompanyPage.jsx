@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../../components/Button.jsx'
 import { Input } from '../../components/Input.jsx'
 
@@ -11,7 +11,7 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
     event.preventDefault()
 
     if (!name.trim()) {
-      setFormError('Р’РєР°Р¶С–С‚СЊ РЅР°Р·РІСѓ РєРѕРјРїР°РЅС–С—')
+      setFormError('Вкажіть назву компанії')
       return
     }
 
@@ -27,39 +27,39 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
     <main className="company-setup-page">
       <section className="company-setup-card">
         <div className="company-setup-copy">
-          <p className="eyebrow">РџРµСЂС€РёР№ Р·Р°РїСѓСЃРє</p>
-          <h1>РЎС‚РІРѕСЂС–С‚СЊ РєРѕРјРїР°РЅС–СЋ</h1>
+          <p className="eyebrow">Перший запуск</p>
+          <h1>Створіть компанію</h1>
           <p>
-            РљРѕРјРїР°РЅС–СЏ РѕР±КјС”РґРЅСѓС” С‚РѕРІР°СЂРё, РїСЂРѕРґР°Р¶С–, РєР»С–С”РЅС‚С–РІ С– С„С–РЅР°РЅСЃРё РІ РѕРґРЅРѕРјСѓ СЂРѕР±РѕС‡РѕРјСѓ РїСЂРѕСЃС‚РѕСЂС–.
-            РџС–СЃР»СЏ СЃС‚РІРѕСЂРµРЅРЅСЏ РІРё РѕРґСЂР°Р·Сѓ РїРµСЂРµР№РґРµС‚Рµ РґРѕ CRM.
+            Компанія обʼєднує товари, продажі, клієнтів і фінанси в одному робочому просторі.
+            Після створення ви одразу перейдете до CRM.
           </p>
           <div className="company-user-chip">{userEmail}</div>
         </div>
 
         <form className="company-setup-form" onSubmit={handleSubmit}>
           <Input
-            label="РќР°Р·РІР° РєРѕРјРїР°РЅС–С—"
+            label="Назва компанії"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="РќР°РїСЂРёРєР»Р°Рґ, Gachi Store"
+            placeholder="Наприклад, Gachi Store"
             required
           />
 
           <Input
-            label="РџРѕРґР°С‚РєРѕРІРёР№ РЅРѕРјРµСЂ"
+            label="Податковий номер"
             value={taxNumber}
             onChange={(event) => setTaxNumber(event.target.value)}
-            placeholder="РќРµРѕР±РѕРІКјСЏР·РєРѕРІРѕ"
+            placeholder="Необовʼязково"
           />
 
           {(formError || error) && <p className="form-error">{formError || error}</p>}
 
           <Button className="full-width" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'РЎС‚РІРѕСЂСЋС”РјРѕ...' : 'РЎС‚РІРѕСЂРёС‚Рё РєРѕРјРїР°РЅС–СЋ'}
+            {isSubmitting ? 'Створюємо...' : 'Створити компанію'}
           </Button>
 
           <Button className="full-width" type="button" variant="secondary" onClick={onLogout}>
-            Р’РёР№С‚Рё
+            Вийти
           </Button>
         </form>
       </section>

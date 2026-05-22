@@ -1,4 +1,4 @@
-using Api.Dtos;
+п»їusing Api.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -107,7 +107,7 @@ namespace Midas.Api.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest("Файл не вибрано або він порожній.");
+                return BadRequest("Р¤Р°Р№Р» РЅРµ РІРёР±СЂР°РЅРѕ Р°Р±Рѕ РІС–РЅ РїРѕСЂРѕР¶РЅС–Р№.");
             }
 
             var command = new AddImageToProductCommand
@@ -118,6 +118,19 @@ namespace Midas.Api.Controllers
 
             var result = await sender.Send(command, cancellationToken);
 
+            return Ok(ProductImageDto.FromDomainModel(result));
+        }
+
+        [HttpPatch("{id:int}/images/{imageId:int}/main")]
+        public async Task<ActionResult<ProductImageDto>> SetMainProductImage(int id, int imageId, CancellationToken cancellationToken)
+        {
+            var command = new SetMainProductImageCommand
+            {
+                ProductId = id,
+                ImageId = imageId
+            };
+
+            var result = await sender.Send(command, cancellationToken);
             return Ok(ProductImageDto.FromDomainModel(result));
         }
 
@@ -165,3 +178,4 @@ namespace Midas.Api.Controllers
         }
     }
 }
+

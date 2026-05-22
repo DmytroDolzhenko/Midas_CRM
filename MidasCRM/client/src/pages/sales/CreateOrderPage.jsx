@@ -1,23 +1,23 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '../../components/Button.jsx'
 
 const serviceTypes = [
-  { id: 0, label: 'Р”РІРµСЂС– - РґРІРµСЂС–' },
-  { id: 1, label: 'Р”РІРµСЂС– - СЃРєР»Р°Рґ' },
-  { id: 2, label: 'РЎРєР»Р°Рґ - СЃРєР»Р°Рґ' },
-  { id: 3, label: 'РЎРєР»Р°Рґ - РґРІРµСЂС–' },
+  { id: 0, label: 'Двері - двері' },
+  { id: 1, label: 'Двері - склад' },
+  { id: 2, label: 'Склад - склад' },
+  { id: 3, label: 'Склад - двері' },
 ]
 
 const cargoTypes = [
-  { id: 1, label: 'Р’Р°РЅС‚Р°Р¶' },
-  { id: 2, label: 'Р”РѕРєСѓРјРµРЅС‚Рё' },
-  { id: 3, label: 'РџРѕСЃРёР»РєР°' },
+  { id: 1, label: 'Вантаж' },
+  { id: 2, label: 'Документи' },
+  { id: 3, label: 'Посилка' },
 ]
 
 const paymentMethods = [
-  { id: 0, label: 'РџРѕРІРЅР° РѕРїР»Р°С‚Р°' },
-  { id: 1, label: 'РџС–СЃР»СЏРїР»Р°С‚Р°' },
-  { id: 2, label: 'РћРїР»Р°С‡СѓС” РІС–РґРїСЂР°РІРЅРёРє' },
+  { id: 0, label: 'Повна оплата' },
+  { id: 1, label: 'Післяплата' },
+  { id: 2, label: 'Оплачує відправник' },
 ]
 
 export function CreateOrderPage({ customers, products, onBack, onCreate }) {
@@ -26,7 +26,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   const [productId, setProductId] = useState(String(products[0]?.id ?? ''))
   const [customerId, setCustomerId] = useState(String(customers[0]?.id ?? ''))
   const [quantity, setQuantity] = useState(1)
-  const [city, setCity] = useState('РљРёС—РІ')
+  const [city, setCity] = useState('Київ')
   const [postalCode, setPostalCode] = useState(1)
   const [postDepartmentNumber, setPostDepartmentNumber] = useState(1)
   const [serviceType, setServiceType] = useState(2)
@@ -76,7 +76,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
         description: orderDescription,
       })
     } catch (submitError) {
-      setError(submitError.message || 'РќРµ РІРґР°Р»РѕСЃСЏ СЃС‚РІРѕСЂРёС‚Рё РїСЂРѕРґР°Р¶')
+      setError(submitError.message || 'Не вдалося створити продаж')
     } finally {
       setIsSubmitting(false)
     }
@@ -87,23 +87,23 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
       <div className="page-header">
         <div>
           <p className="eyebrow">Sales</p>
-          <h1>РќРѕРІРёР№ РїСЂРѕРґР°Р¶</h1>
+          <h1>Новий продаж</h1>
         </div>
-        <Button variant="secondary" onClick={onBack}>Р”Рѕ РїСЂРѕРґР°Р¶С–РІ</Button>
+        <Button variant="secondary" onClick={onBack}>До продажів</Button>
       </div>
 
       <form className="wide-form" onSubmit={handleSubmit}>
         <section className="panel form-section">
           <div className="form-grid-3">
             <label className="field span-2">
-              <span>РўРѕРІР°СЂ</span>
+              <span>Товар</span>
               <button className="product-picker-button" type="button" onClick={() => setIsProductPickerOpen(true)}>
-                <strong>{selectedProduct?.name ?? 'РћР±РµСЂС–С‚СЊ С‚РѕРІР°СЂ'}</strong>
-                <small>{selectedProduct ? `${selectedProduct.sku} В· ${selectedProduct.warehouse}` : 'Р’С–РґРєСЂРёС‚Рё РєР°С‚Р°Р»РѕРі С‚РѕРІР°СЂС–РІ'}</small>
+                <strong>{selectedProduct?.name ?? 'Оберіть товар'}</strong>
+                <small>{selectedProduct ? `${selectedProduct.sku} · ${selectedProduct.warehouse}` : 'Відкрити каталог товарів'}</small>
               </button>
             </label>
             <label className="field">
-              <span>РљР»С–С”РЅС‚</span>
+              <span>Клієнт</span>
               <select required value={selectedCustomerId} onChange={(event) => setCustomerId(event.target.value)}>
                 {customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>
@@ -113,16 +113,16 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
               </select>
             </label>
             <label className="field">
-              <span>РљС–Р»СЊРєС–СЃС‚СЊ</span>
+              <span>Кількість</span>
               <input min="1" type="number" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
             </label>
           </div>
 
           <div className="delivery-box">
-            <strong>РџР°СЂР°РјРµС‚СЂРё Р·Р°РјРѕРІР»РµРЅРЅСЏ</strong>
+            <strong>Параметри замовлення</strong>
             <div className="form-grid-3">
               <label className="field">
-                <span>РўРёРї СЃРµСЂРІС–СЃСѓ</span>
+                <span>Тип сервісу</span>
                 <select value={serviceType} onChange={(event) => setServiceType(Number(event.target.value))}>
                   {serviceTypes.map((item) => (
                     <option key={item.id} value={item.id}>{item.label}</option>
@@ -130,7 +130,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                 </select>
               </label>
               <label className="field">
-                <span>РўРёРї РІР°РЅС‚Р°Р¶Сѓ</span>
+                <span>Тип вантажу</span>
                 <select value={cargoType} onChange={(event) => setCargoType(Number(event.target.value))}>
                   {cargoTypes.map((item) => (
                     <option key={item.id} value={item.id}>{item.label}</option>
@@ -138,7 +138,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                 </select>
               </label>
               <label className="field">
-                <span>РћРїР»Р°С‚Р°</span>
+                <span>Оплата</span>
                 <select value={paymentMethod} onChange={(event) => setPaymentMethod(Number(event.target.value))}>
                   {paymentMethods.map((item) => (
                     <option key={item.id} value={item.id}>{item.label}</option>
@@ -146,25 +146,25 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                 </select>
               </label>
               <label className="field span-2">
-                <span>РћРїРёСЃ</span>
+                <span>Опис</span>
                 <textarea rows="3" value={description} onChange={(event) => setDescription(event.target.value)} placeholder={selectedProduct?.name ?? ''} />
               </label>
             </div>
           </div>
 
           <div className="delivery-box">
-            <strong>РђРґСЂРµСЃР° РґРѕСЃС‚Р°РІРєРё</strong>
+            <strong>Адреса доставки</strong>
             <div className="form-grid-3">
               <label className="field">
-                <span>РњС–СЃС‚Рѕ</span>
+                <span>Місто</span>
                 <input required maxLength="100" value={city} onChange={(event) => setCity(event.target.value)} />
               </label>
               <label className="field">
-                <span>РџРѕС€С‚РѕРІРёР№ РєРѕРґ</span>
+                <span>Поштовий код</span>
                 <input min="1" type="number" value={postalCode} onChange={(event) => setPostalCode(Number(event.target.value))} />
               </label>
               <label className="field">
-                <span>Р’С–РґРґС–Р»РµРЅРЅСЏ РќРџ</span>
+                <span>Відділення НП</span>
                 <input min="1" type="number" value={postDepartmentNumber} onChange={(event) => setPostDepartmentNumber(Number(event.target.value))} />
               </label>
             </div>
@@ -174,21 +174,21 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
         </section>
 
         <section className="panel summary-panel">
-          <h2>РџС–РґСЃСѓРјРѕРє РїСЂРѕРґР°Р¶Сѓ</h2>
+          <h2>Підсумок продажу</h2>
           <div className="summary-line">
-            <span>РўРѕРІР°СЂ</span>
+            <span>Товар</span>
             <strong>{selectedProduct?.name ?? '-'}</strong>
           </div>
           <div className="summary-line">
-            <span>РљС–Р»СЊРєС–СЃС‚СЊ</span>
+            <span>Кількість</span>
             <strong>{quantity}</strong>
           </div>
           <div className="summary-total">
-            <span>РћСЂС–С”РЅС‚РѕРІРЅР° СЃСѓРјР°</span>
-            <strong>{subtotal.toLocaleString('uk-UA')} РіСЂРЅ</strong>
+            <span>Орієнтовна сума</span>
+            <strong>{subtotal.toLocaleString('uk-UA')} грн</strong>
           </div>
           <Button className="full-width" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'РЎС‚РІРѕСЂРµРЅРЅСЏ...' : 'РЎС‚РІРѕСЂРёС‚Рё РїСЂРѕРґР°Р¶'}
+            {isSubmitting ? 'Створення...' : 'Створити продаж'}
           </Button>
         </section>
       </form>
@@ -199,21 +199,21 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
             <div className="settings-header">
               <div>
                 <p className="eyebrow">Catalog</p>
-                <h2>РћР±РµСЂС–С‚СЊ С‚РѕРІР°СЂ</h2>
+                <h2>Оберіть товар</h2>
               </div>
               <button className="modal-close-button" type="button" onClick={() => setIsProductPickerOpen(false)}>x</button>
             </div>
             <div className="product-picker-search">
-              <input value={productQuery} onChange={(event) => setProductQuery(event.target.value)} placeholder="РџРѕС€СѓРє Р·Р° РЅР°Р·РІРѕСЋ, Р°СЂС‚РёРєСѓР»РѕРј Р°Р±Рѕ СЃРєР»Р°РґРѕРј" />
+              <input value={productQuery} onChange={(event) => setProductQuery(event.target.value)} placeholder="Пошук за назвою, артикулом або складом" />
             </div>
             <div className="product-picker-list">
               {filteredProducts.map((product) => (
                 <button key={product.id} type="button" onClick={() => chooseProduct(product)}>
                   <span>
                     <strong>{product.name}</strong>
-                    <small>{product.sku} В· {product.category} В· {product.warehouse}</small>
+                    <small>{product.sku} · {product.category} · {product.warehouse}</small>
                   </span>
-                  <b>{product.price.toLocaleString('uk-UA')} РіСЂРЅ</b>
+                  <b>{product.price.toLocaleString('uk-UA')} грн</b>
                 </button>
               ))}
             </div>

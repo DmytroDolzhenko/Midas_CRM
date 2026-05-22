@@ -1,11 +1,11 @@
-﻿import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
 
 const PAGE_SIZE = 8
 const stockFilters = [
-  { id: 'all', label: 'РІСЃС–' },
-  { id: 'available', label: 'РІ РЅР°СЏРІРЅРѕСЃС‚С–' },
-  { id: 'empty', label: 'РЅРµРјР°С” РІ РЅР°СЏРІРЅРѕСЃС‚С–' },
+  { id: 'all', label: 'всі' },
+  { id: 'available', label: 'в наявності' },
+  { id: 'empty', label: 'немає в наявності' },
 ]
 
 function getValue(item, camelKey, pascalKey) {
@@ -122,7 +122,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
     event.preventDefault()
 
     if (!warehouseName.trim()) {
-      setWarehouseError('Р’РєР°Р¶С–С‚СЊ РЅР°Р·РІСѓ СЃРєР»Р°РґСѓ')
+      setWarehouseError('Вкажіть назву складу')
       return
     }
 
@@ -135,12 +135,12 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
       setEditingWarehouse(null)
       setWarehouseName('')
     } catch (error) {
-      setWarehouseError(error.message || 'РќРµ РІРґР°Р»РѕСЃСЏ Р·Р±РµСЂРµРіС‚Рё СЃРєР»Р°Рґ')
+      setWarehouseError(error.message || 'Не вдалося зберегти склад')
     }
   }
 
   function exportProducts() {
-    const header = ['РђСЂС‚РёРєСѓР»', 'РќР°Р·РІР°', 'РљР°С‚РµРіРѕСЂС–СЏ', 'Р”РѕСЃС‚СѓРїРЅРѕ', 'РЎРѕР±С–РІР°СЂС‚С–СЃС‚СЊ', 'Р¦С–РЅР° РїСЂРѕРґР°Р¶Сѓ']
+    const header = ['Артикул', 'Назва', 'Категорія', 'Доступно', 'Собівартість', 'Ціна продажу']
     const rows = filteredProducts.map((product) => [
       product.sku,
       product.name,
@@ -191,8 +191,8 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
 
         <div className="catalog-filters">
           <input
-            aria-label="РџРѕС€СѓРє С‚РѕРІР°СЂС–РІ"
-            placeholder="РџРѕС€СѓРє С‚РѕРІР°СЂС–РІ"
+            aria-label="Пошук товарів"
+            placeholder="Пошук товарів"
             value={search}
             onChange={(event) => updateSearch(event.target.value)}
           />
@@ -209,30 +209,30 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
               </label>
             ))}
           </div>
-          <button className="icon-button flat-icon-button" type="button" aria-label="Р•РєСЃРїРѕСЂС‚" onClick={exportProducts}>
+          <button className="icon-button flat-icon-button" type="button" aria-label="Експорт" onClick={exportProducts}>
             <ExportIcon />
           </button>
           <button className="secondary-button" type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>
-            Р¤С–Р»СЊС‚СЂ
+            Фільтр
           </button>
         </div>
 
         {isFilterOpen && (
           <div className="inline-filter-panel">
             <label className="field">
-              <span>РЎРѕР±С–РІР°СЂС‚С–СЃС‚СЊ РІС–Рґ</span>
+              <span>Собівартість від</span>
               <input min="0" type="number" value={minCost} onChange={(event) => { setMinCost(event.target.value); setPage(1) }} />
             </label>
             <label className="field">
-              <span>РЎРѕР±С–РІР°СЂС‚С–СЃС‚СЊ РґРѕ</span>
+              <span>Собівартість до</span>
               <input min="0" type="number" value={maxCost} onChange={(event) => { setMaxCost(event.target.value); setPage(1) }} />
             </label>
             <label className="field">
-              <span>Р¦С–РЅР° РІС–Рґ</span>
+              <span>Ціна від</span>
               <input min="0" type="number" value={minPrice} onChange={(event) => { setMinPrice(event.target.value); setPage(1) }} />
             </label>
             <label className="field">
-              <span>Р¦С–РЅР° РґРѕ</span>
+              <span>Ціна до</span>
               <input min="0" type="number" value={maxPrice} onChange={(event) => { setMaxPrice(event.target.value); setPage(1) }} />
             </label>
           </div>
@@ -240,33 +240,33 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
       </div>
 
       <div className="inventory-widget-grid">
-        <article><span>РЈСЃСЊРѕРіРѕ С‚РѕРІР°СЂСѓ</span><strong>{totals.total}</strong></article>
-        <article><span>Р’ РЅР°СЏРІРЅРѕСЃС‚С–</span><strong>{totals.available} С‚РѕРІР°СЂС–РІ</strong></article>
-        <article><span>Р”РѕСЃС‚СѓРїРЅРѕ</span><strong>{totals.stockUnits.toFixed(2)} РѕРґРёРЅРёС†СЊ</strong></article>
-        <article><span>РўРѕРІР°СЂС–РІ РЅР° СЃРєР»Р°РґС–</span><strong>{totals.storedValue.toLocaleString('uk-UA')} РіСЂРЅ</strong></article>
-        <article><span>РњРѕР¶Р»РёРІРёР№ РґРѕС…С–Рґ</span><strong>{totals.possibleIncome.toLocaleString('uk-UA')} РіСЂРЅ</strong></article>
+        <article><span>Усього товару</span><strong>{totals.total}</strong></article>
+        <article><span>В наявності</span><strong>{totals.available} товарів</strong></article>
+        <article><span>Доступно</span><strong>{totals.stockUnits.toFixed(2)} одиниць</strong></article>
+        <article><span>Товарів на складі</span><strong>{totals.storedValue.toLocaleString('uk-UA')} грн</strong></article>
+        <article><span>Можливий дохід</span><strong>{totals.possibleIncome.toLocaleString('uk-UA')} грн</strong></article>
       </div>
 
       <div className="inventory-actions panel">
         <button className="success-button" type="button" onClick={() => onNavigate('createProduct')}>
-          Р”РѕРґР°С‚Рё С‚РѕРІР°СЂ
+          Додати товар
         </button>
         <button className="primary-button" type="button" onClick={() => fileInputRef.current?.click()}>
-          Р†РјРїРѕСЂС‚СѓРІР°С‚Рё
+          Імпортувати
         </button>
         <input ref={fileInputRef} className="hidden-file-input" type="file" accept=".csv,.xlsx" onChange={handleImport} />
-        {importFileName && <span className="import-file-name">Р†РјРїРѕСЂС‚РѕРІР°РЅРѕ: {importFileName}</span>}
+        {importFileName && <span className="import-file-name">Імпортовано: {importFileName}</span>}
       </div>
 
       <section className="products-table-card panel">
         <div className="products-layout-header">
           <span><input type="checkbox" /></span>
-          <span>РўРѕРІР°СЂ</span>
-          <span>Р”РѕСЃС‚СѓРїРЅРѕ</span>
-          <span>РџСЂРѕРґР°Р¶С–</span>
-          <span>РЎРѕР±С–РІ.</span>
-          <span>Р¦С–РЅР° РїСЂРѕРґР°Р¶Сѓ</span>
-          <span>РќР°С†С–РЅРєР°</span>
+          <span>Товар</span>
+          <span>Доступно</span>
+          <span>Продажі</span>
+          <span>Собів.</span>
+          <span>Ціна продажу</span>
+          <span>Націнка</span>
         </div>
 
         {paginatedProducts.map((product) => {
@@ -280,8 +280,8 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
                 <div>
                   <strong>{product.name}</strong>
                   <span>ID: {product.sku}</span>
-                  <span>РљР°С‚РµРіРѕСЂС–СЏ: {product.category}</span>
-                  <button type="button" onClick={() => setEditingProduct(product)}>Р РµРґР°РіСѓРІР°С‚Рё</button>
+                  <span>Категорія: {product.category}</span>
+                  <button type="button" onClick={() => setEditingProduct(product)}>� едагувати</button>
                 </div>
               </div>
               <div className="large-product-cell available-cell">
@@ -290,10 +290,10 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
               </div>
               <div className="large-product-cell">
                 <strong>0</strong>
-                <span>РїСЂРѕРґР°Р¶С–РІ</span>
+                <span>продажів</span>
               </div>
-              <div>{product.cost.toLocaleString('uk-UA')} РіСЂРЅ</div>
-              <div>{product.price.toLocaleString('uk-UA')} РіСЂРЅ</div>
+              <div>{product.cost.toLocaleString('uk-UA')} грн</div>
+              <div>{product.price.toLocaleString('uk-UA')} грн</div>
               <div>{markup}%</div>
             </div>
           )
@@ -307,30 +307,30 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
             <div className="settings-header">
               <div>
                 <p className="eyebrow">Product</p>
-                <h2>Р РµРґР°РіСѓРІР°РЅРЅСЏ С‚РѕРІР°СЂСѓ</h2>
+                <h2>� едагування товару</h2>
               </div>
               <button className="modal-close-button" type="button" onClick={() => setEditingProduct(null)}>x</button>
             </div>
             <div className="settings-grid">
               <label className="field">
-                <span>РќР°Р·РІР°</span>
+                <span>Назва</span>
                 <input readOnly value={editingProduct.name} />
               </label>
               <label className="field">
-                <span>РђСЂС‚РёРєСѓР»</span>
+                <span>Артикул</span>
                 <input readOnly value={editingProduct.sku} />
               </label>
               <label className="field">
-                <span>РЎРєР»Р°Рґ</span>
+                <span>Склад</span>
                 <input readOnly value={editingProduct.warehouse} />
               </label>
               <label className="field">
-                <span>Р¦С–РЅР° РїСЂРѕРґР°Р¶Сѓ</span>
-                <input readOnly value={`${editingProduct.price} РіСЂРЅ`} />
+                <span>Ціна продажу</span>
+                <input readOnly value={`${editingProduct.price} грн`} />
               </label>
             </div>
             <div className="settings-actions">
-              <button className="primary-button" type="button" onClick={() => setEditingProduct(null)}>Р“РѕС‚РѕРІРѕ</button>
+              <button className="primary-button" type="button" onClick={() => setEditingProduct(null)}>Готово</button>
             </div>
           </section>
         </div>
@@ -342,20 +342,20 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
             <div className="settings-header">
               <div>
                 <p className="eyebrow">Warehouse</p>
-                <h2>{editingWarehouse.mode === 'edit' ? 'Р РµРґР°РіСѓРІР°С‚Рё СЃРєР»Р°Рґ' : 'РќРѕРІРёР№ СЃРєР»Р°Рґ'}</h2>
+                <h2>{editingWarehouse.mode === 'edit' ? '� едагувати склад' : 'Новий склад'}</h2>
               </div>
               <button className="modal-close-button" type="button" onClick={() => setEditingWarehouse(null)}>x</button>
             </div>
             <div className="settings-grid">
               <label className="field span-2">
-                <span>РќР°Р·РІР° СЃРєР»Р°РґСѓ</span>
+                <span>Назва складу</span>
                 <input value={warehouseName} maxLength="100" onChange={(event) => setWarehouseName(event.target.value)} />
               </label>
             </div>
             {warehouseError && <p className="settings-message">{warehouseError}</p>}
             <div className="settings-actions">
-              <button className="secondary-button" type="button" onClick={() => setEditingWarehouse(null)}>РЎРєР°СЃСѓРІР°С‚Рё</button>
-              <button className="primary-button" type="submit">Р—Р±РµСЂРµРіС‚Рё</button>
+              <button className="secondary-button" type="button" onClick={() => setEditingWarehouse(null)}>Скасувати</button>
+              <button className="primary-button" type="submit">Зберегти</button>
             </div>
           </form>
         </div>

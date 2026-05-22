@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
 import { CustomersTable } from '../../features/customers/components/CustomersTable.jsx'
 
@@ -19,8 +19,8 @@ export function CustomersPage({ customers = [] }) {
       <section className="panel">
         <div className="toolbar">
           <input
-            aria-label="РџРѕС€СѓРє РєР»С–С”РЅС‚С–РІ"
-            placeholder="РџРѕС€СѓРє Р·Р° С–Рј'СЏРј, С‚РµР»РµС„РѕРЅРѕРј Р°Р±Рѕ РїРѕС€С‚РѕСЋ"
+            aria-label="Пошук клієнтів"
+            placeholder="Пошук за ім'ям, телефоном або поштою"
             value={search}
             onChange={(event) => { setSearch(event.target.value); setPage(1) }}
           />

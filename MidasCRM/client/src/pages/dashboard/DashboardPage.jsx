@@ -1,12 +1,12 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MetricCard } from '../../components/MetricCard.jsx'
 import { OperationsTable } from '../../features/operations/components/OperationsTable.jsx'
 import { OrdersTable } from '../../features/sales/components/OrdersTable.jsx'
 
 const periodLabels = {
-  day: 'Р”РµРЅСЊ',
-  week: 'РўРёР¶РґРµРЅСЊ',
-  month: 'РњС–СЃСЏС†СЊ',
+  day: 'День',
+  week: 'Тиждень',
+  month: 'Місяць',
 }
 
 export function DashboardPage({ stats, sales, recentSales, operations }) {
@@ -43,59 +43,59 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
       </div>
 
       <div className="metric-grid">
-        <MetricCard label="РЎС‚Р°С‚РёСЃС‚РёРєР° РїСЂРѕРґР°Р¶С–РІ" value={periodStats.sales} hint={`Р—Р° РїРµСЂС–РѕРґ: ${periodLabels[period]}`} />
+        <MetricCard label="Статистика продажів" value={periodStats.sales} hint={`За період: ${periodLabels[period]}`} />
         <MetricCard
-          label="РџСЂРёР±СѓС‚РѕРє РІР°Р»РѕРІРёР№"
-          value={`${periodStats.grossProfit.toLocaleString('uk-UA')} РіСЂРЅ`}
-          hint="РџСЂРѕРґР°Р¶ РјС–РЅСѓСЃ СЃРѕР±С–РІР°СЂС‚С–СЃС‚СЊ С– РІРёС‚СЂР°С‚Рё"
+          label="Прибуток валовий"
+          value={`${periodStats.grossProfit.toLocaleString('uk-UA')} грн`}
+          hint="Продаж мінус собівартість і витрати"
         />
         <MetricCard
-          label="РЈР±РёС‚РѕРє/Р’РёС‚СЂР°С‚Рё"
-          value={`${periodStats.loss.toLocaleString('uk-UA')} РіСЂРЅ`}
-          hint="Р—Р°С„С–РєСЃРѕРІР°РЅС– РІРёС‚СЂР°С‚Рё"
+          label="Убиток/Витрати"
+          value={`${periodStats.loss.toLocaleString('uk-UA')} грн`}
+          hint="Зафіксовані витрати"
         />
-        <MetricCard label="РўРѕРІР°СЂРё" value={stats.products} hint="РђРєС‚РёРІРЅС– РїРѕР·РёС†С–С— РЅР° СЃРєР»Р°РґР°С…" />
+        <MetricCard label="Товари" value={stats.products} hint="Активні позиції на складах" />
       </div>
 
       <div className="insight-grid">
         <section className="panel insight-panel">
-          <h2>Р¤С–РЅР°РЅСЃРѕРІРёР№ РѕРіР»СЏРґ</h2>
+          <h2>Фінансовий огляд</h2>
           <div className="insight-list">
             <span>
-              <strong>{stats.revenue.toLocaleString('uk-UA')} РіСЂРЅ</strong>
-              РћР±РѕСЂРѕС‚
+              <strong>{stats.revenue.toLocaleString('uk-UA')} грн</strong>
+              Оборот
             </span>
             <span>
-              <strong>{averageOrder.toLocaleString('uk-UA')} РіСЂРЅ</strong>
-              РЎРµСЂРµРґРЅС–Р№ С‡РµРє
+              <strong>{averageOrder.toLocaleString('uk-UA')} грн</strong>
+              Середній чек
             </span>
             <span>
               <strong>{conversionRate}%</strong>
-              РљРѕРЅРІРµСЂСЃС–СЏ
+              Конверсія
             </span>
           </div>
         </section>
 
         <section className="panel insight-panel">
-          <h2>РљР°РЅР°Р»Рё</h2>
+          <h2>Канали</h2>
           <div className="channel-summary">
-            <span>РЈСЃСЊРѕРіРѕ РїСЂРѕРґР°Р¶С–РІ</span>
+            <span>Усього продажів</span>
             <strong>{sales.length}</strong>
           </div>
           <div className="channel-summary">
-            <span>РўРѕРІР°СЂС–РІ</span>
+            <span>Товарів</span>
             <strong>{stats.products}</strong>
           </div>
         </section>
       </div>
 
       <section className="panel">
-        <h2>РћСЃС‚Р°РЅРЅС– РїСЂРѕРґР°Р¶С–</h2>
+        <h2>Останні продажі</h2>
         <OrdersTable orders={recentSales} />
       </section>
 
       <section className="panel">
-        <h2>РћСЃС‚Р°РЅРЅС– РѕРїРµСЂР°С†С–С—</h2>
+        <h2>Останні операції</h2>
         <OperationsTable operations={operations} />
       </section>
     </section>
