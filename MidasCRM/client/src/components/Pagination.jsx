@@ -1,3 +1,7 @@
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
+
 export function Pagination({ page, pageSize, total, onPageChange }) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const firstItem = total === 0 ? 0 : (page - 1) * pageSize + 1
@@ -8,29 +12,20 @@ export function Pagination({ page, pageSize, total, onPageChange }) {
   }
 
   return (
-    <div className="pagination">
-      <span>
+    <Box alignItems="center" display="flex" justifyContent="space-between" sx={{ borderTop: 1, borderColor: 'divider', mt: 2, pt: 2 }}>
+      <Typography color="text.secondary" variant="body2">
         {firstItem}-{lastItem} з {total}
-      </span>
-      <div>
-        <button
-          className="secondary-button"
-          type="button"
-          disabled={page === 1}
-          onClick={() => onPageChange(page - 1)}
-        >
+      </Typography>
+      <Box alignItems="center" display="flex" gap={1.5}>
+        <Button disabled={page === 1} size="small" variant="outlined" onClick={() => onPageChange(page - 1)}>
           Назад
-        </button>
-        <strong>{page} / {pageCount}</strong>
-        <button
-          className="secondary-button"
-          type="button"
-          disabled={page === pageCount}
-          onClick={() => onPageChange(page + 1)}
-        >
+        </Button>
+        <Typography variant="body2">{page} / {pageCount}</Typography>
+        <Button disabled={page === pageCount} size="small" variant="outlined" onClick={() => onPageChange(page + 1)}>
           Далі
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   )
 }
+

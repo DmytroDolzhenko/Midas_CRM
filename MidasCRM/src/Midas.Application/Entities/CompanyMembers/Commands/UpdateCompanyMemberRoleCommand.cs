@@ -19,7 +19,8 @@ namespace Midas.Application.Entities.CompanyMembers.Commands
     public class UpdateCompanyMemberRoleCommandHandler(
         ICurrentUserService currentUserService,
         IGetQueries<Company, Guid> companyQueries,
-        IEntityRepository<Company> companyRepository) : IRequestHandler<UpdateCompanyMemberRoleCommand, CompanyMember>
+        IEntityRepository<Company> companyRepository,
+        IEntityRepository<CompanyMember> memberRepository) : IRequestHandler<UpdateCompanyMemberRoleCommand, CompanyMember>
     {
         public async Task<CompanyMember> Handle(UpdateCompanyMemberRoleCommand request, CancellationToken cancellationToken)
         {
@@ -40,6 +41,7 @@ namespace Midas.Application.Entities.CompanyMembers.Commands
             var member = company.Members.FirstOrDefault(x => x.UserId == request.UserId) ?? throw new Exception("Company member not found");
             member.UpdateRole(request.Role);
 
+            await memberRepository.UpdateAsync(member, cancellationToken);
             await companyRepository.UpdateAsync(company, cancellationToken);
             return member;
         }
