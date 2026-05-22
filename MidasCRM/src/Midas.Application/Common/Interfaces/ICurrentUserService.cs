@@ -8,5 +8,6 @@ namespace Midas.Application.Common.Interfaces
     {
         Guid? UserId { get; }
         Task<Guid?> GetCompanyIdAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyList<Guid>> GetAvailableCompanyIdsAsync(CancellationToken cancellationToken);
     }
 }

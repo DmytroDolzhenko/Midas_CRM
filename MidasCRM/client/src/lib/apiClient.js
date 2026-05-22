@@ -10,6 +10,14 @@ function getToken() {
   }
 }
 
+function getActiveCompanyId() {
+  try {
+    return localStorage.getItem('midas-active-company-id')
+  } catch {
+    return null
+  }
+}
+
 export async function apiRequest(path, options = {}) {
   const token = getToken()
   const isFormData = options.body instanceof FormData
@@ -22,6 +30,7 @@ export async function apiRequest(path, options = {}) {
     Accept: 'application/json',
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(getActiveCompanyId() ? { 'X-Company-Id': getActiveCompanyId() } : {}),
     ...options.headers,
   }
 

@@ -8,6 +8,7 @@ const navItems = [
   { id: 'finances', label: 'Фінанси' },
   { id: 'customers', label: 'Клієнти' },
   { id: 'operations', label: 'Історія' },
+  { id: 'company', label: 'Company' },
 ]
 
 function BellIcon() {
@@ -37,7 +38,22 @@ function SettingsIcon() {
   )
 }
 
-export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, onLogout, children }) {
+function getValue(item, camelKey, pascalKey) {
+  return item?.[camelKey] ?? item?.[pascalKey]
+}
+
+export function AppShell({
+  activePage,
+  user,
+  theme,
+  onThemeChange,
+  onNavigate,
+  onLogout,
+  companies = [],
+  activeCompanyId,
+  onCompanyChange,
+  children,
+}) {
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -77,6 +93,16 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
             <span>Client workspace</span>
           </div>
         </div>
+
+        <label className="field company-switcher-field">
+          <span>Active company</span>
+          <select value={activeCompanyId ?? ''} onChange={(event) => onCompanyChange?.(event.target.value)}>
+            {companies.map((company) => {
+              const companyId = String(getValue(company, 'id', 'Id'))
+              return <option value={companyId} key={companyId}>{getValue(company, 'name', 'Name')}</option>
+            })}
+          </select>
+        </label>
 
         <nav className="nav-list">
           {navItems.map((item) => (
@@ -167,7 +193,7 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
                 <h2 id="settings-title">Налаштування</h2>
               </div>
               <button className="modal-close-button" type="button" aria-label="Закрити налаштування" onClick={() => setIsSettingsOpen(false)}>
-                ×
+                ?
               </button>
             </div>
 
@@ -251,7 +277,7 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
             <div className="notifications-header">
               <h2 id="notifications-title">Сповіщення</h2>
               <button className="modal-close-button" type="button" onClick={() => setIsNotificationsOpen(false)}>
-                ×
+                ?
               </button>
             </div>
             <div className="notifications-content">
@@ -270,7 +296,7 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
                 <h2 id="ai-title">AI рекомендації</h2>
               </div>
               <button className="modal-close-button" type="button" onClick={() => setIsAiOpen(false)}>
-                ×
+                ?
               </button>
             </div>
             <div className="ai-recommendations">
@@ -296,4 +322,3 @@ export function AppShell({ activePage, user, theme, onThemeChange, onNavigate, o
     </div>
   )
 }
-

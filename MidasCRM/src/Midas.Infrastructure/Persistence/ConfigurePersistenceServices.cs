@@ -75,6 +75,7 @@ namespace Infrastructure.Persistence
             services.AddScoped<IProductVariantQueries, ProductVariantQueries>();
             services.AddScoped<ICustomerQueries, CustomerQueries>();
             services.AddScoped<IProductCategoryQueries, ProductCategoryQueries>();
+            services.AddScoped<IUserQueries, UserQueries>();
 
 
             services.AddHttpClient<INovaPoshtaClient, NovaPoshtaClient>(client =>

@@ -30,6 +30,13 @@ namespace Midas.Application.Entities.CompanyMembers.Commands
                 throw new Exception("Company not found");
             }
 
+            var currentUserId = currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var currentUserMember = company.Members.FirstOrDefault(x => x.UserId == currentUserId);
+            if (currentUserMember is null || (currentUserMember.Role is not CompanyRole.Owner and not CompanyRole.Admin))
+            {
+                throw new UnauthorizedAccessException("Only Owner or Admin can update company member role.");
+            }
+
             var member = company.Members.FirstOrDefault(x => x.UserId == request.UserId) ?? throw new Exception("Company member not found");
             member.UpdateRole(request.Role);
 

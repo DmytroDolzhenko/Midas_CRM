@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Midas.Core.CompanyMembers
 {
-    public class CompanyMember : IEntity<int>
+    public class CompanyMember : IEntity<int>, ICompanyOwnedEntity
     {
         public int Id { get; }
         public Guid CompanyId { get; private set; }

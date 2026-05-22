@@ -12,6 +12,7 @@ import { FinancesPage } from './pages/FinancesPage.jsx'
 import { OperationsPage } from './pages/OperationsPage.jsx'
 import { LoginPage } from './pages/LoginPage.jsx'
 import { CreateCompanyPage } from './pages/CreateCompanyPage.jsx'
+import { CompanyPage } from './pages/CompanyPage.jsx'
 import { serverApi } from './lib/serverApi.js'
 
 function formatDateTime(date) {
@@ -112,6 +113,19 @@ function buildOrderModels(serverOrders, customers, products) {
   })
 }
 
+function getCompanyId(company) {
+  return String(getValue(company, 'id', 'Id'))
+}
+
+function getCompanyMembers(company) {
+  return getValue(company, 'members', 'Members') ?? []
+}
+
+function getCurrentUserCompanyRole(company, userId) {
+  const member = getCompanyMembers(company).find((item) => String(getValue(item, 'userId', 'UserId')) === String(userId))
+  return Number(getValue(member, 'role', 'Role') ?? 0)
+}
+
 export function App() {
   const { user, login, logout } = useAuth()
   const [page, setPage] = useState('dashboard')
@@ -125,29 +139,28 @@ export function App() {
   const [finances, setFinances] = useLocalStorage('midas-finances-v1', [])
   const [operations, setOperations] = useLocalStorage('midas-operations-v2', [])
   const [theme, setTheme] = useLocalStorage('midas-theme', 'light')
+  const [companies, setCompanies] = useState([])
+  const [activeCompanyId, setActiveCompanyId] = useLocalStorage('midas-active-company-id', null)
   const [requiresCompany, setRequiresCompany] = useState(false)
   const [isCheckingCompany, setIsCheckingCompany] = useState(false)
   const [isCreatingCompany, setIsCreatingCompany] = useState(false)
   const [companyError, setCompanyError] = useState('')
+  const [companyPageError, setCompanyPageError] = useState('')
+  const [isCompanyActionLoading, setIsCompanyActionLoading] = useState(false)
 
   async function loadServerData() {
     setIsLoading(true)
     setApiError('')
 
     try {
-      const [
-        serverProducts,
-        serverVariants,
-        serverCategories,
-        serverWarehouses,
-        serverCustomers,
-      ] = await Promise.all([
+      const [serverProducts, serverVariants, serverCategories, serverWarehouses, serverCustomers] = await Promise.all([
         serverApi.products.getAll(),
         serverApi.productVariants.getAll(),
         serverApi.categories.getAll(),
         serverApi.warehouses.getAll(),
         serverApi.customers.getAll(),
       ])
+
       const nextCustomers = buildCustomerModels(serverCustomers)
       const nextProducts = buildProductModels(serverProducts, serverVariants, serverCategories, serverWarehouses)
       const serverOrders = await serverApi.orders.getAll()
@@ -164,30 +177,46 @@ export function App() {
     }
   }
 
+  async function loadCompaniesAndBootstrap() {
+    setIsCheckingCompany(true)
+    setCompanyError('')
+
+    try {
+      const serverCompanies = await serverApi.companies.getAll()
+      setCompanies(serverCompanies)
+
+      if (!serverCompanies.length) {
+        setRequiresCompany(true)
+        return
+      }
+
+      setRequiresCompany(false)
+
+      const nextActiveCompanyId = serverCompanies.some((company) => getCompanyId(company) === String(activeCompanyId))
+        ? String(activeCompanyId)
+        : getCompanyId(serverCompanies[0])
+
+      localStorage.setItem('midas-active-company-id', nextActiveCompanyId)
+      setActiveCompanyId(nextActiveCompanyId)
+      await loadServerData()
+    } catch (error) {
+      if (error.status === 401) {
+        setRequiresCompany(true)
+      } else {
+        setApiError(error.message || 'Не вдалося перевірити доступ до компаній')
+      }
+    } finally {
+      setIsCheckingCompany(false)
+    }
+  }
+
   useEffect(() => {
     if (user?.token) {
-      Promise.resolve().then(async () => {
-        setIsCheckingCompany(true)
-        setCompanyError('')
-
-        try {
-          await serverApi.companies.getBalance({ handleUnauthorized: false })
-          setRequiresCompany(false)
-          await loadServerData()
-        } catch (error) {
-          if (error.status === 401) {
-            setRequiresCompany(true)
-            return
-          }
-
-          setApiError(error.message || 'Не вдалося перевірити доступ до компанії')
-        } finally {
-          setIsCheckingCompany(false)
-        }
-      })
+      Promise.resolve().then(loadCompaniesAndBootstrap)
     } else {
       setRequiresCompany(false)
       setCompanyError('')
+      setCompanies([])
     }
   }, [user?.token])
 
@@ -197,8 +226,7 @@ export function App() {
 
     try {
       await serverApi.companies.create(companyPayload)
-      setRequiresCompany(false)
-      await loadServerData()
+      await loadCompaniesAndBootstrap()
     } catch (error) {
       setCompanyError(error.message || 'Не вдалося створити компанію')
     } finally {
@@ -206,27 +234,53 @@ export function App() {
     }
   }
 
-  const stats = useMemo(
-    () => {
-      const revenue = orders.reduce((sum, order) => sum + order.total, 0)
-      const grossProfit = orders.reduce((sum, order) => sum + order.profit, 0)
-      const saleExpenses = orders.reduce((sum, order) => sum + order.expense, 0)
-      const manualExpenses = finances.reduce((sum, finance) => sum + Number(finance.amount), 0)
-      const totalExpenses = saleExpenses + manualExpenses
+  async function switchActiveCompany(nextCompanyId) {
+    if (!nextCompanyId || String(nextCompanyId) === String(activeCompanyId)) {
+      return
+    }
 
-      return {
-        sales: orders.length,
-        customers: customers.length,
-        products: products.length,
-        expensesCount: finances.length,
-        revenue,
-        grossProfit,
-        expenses: totalExpenses,
-        loss: totalExpenses,
-      }
-    },
-    [customers.length, finances, orders, products.length],
+    setApiError('')
+    setIsLoading(true)
+
+    localStorage.setItem('midas-active-company-id', String(nextCompanyId))
+    setActiveCompanyId(String(nextCompanyId))
+
+    try {
+      await loadServerData()
+      setPage('dashboard')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const activeCompany = useMemo(
+    () => companies.find((company) => getCompanyId(company) === String(activeCompanyId)) ?? companies[0] ?? null,
+    [companies, activeCompanyId],
   )
+
+  const currentUserCompanyRole = useMemo(
+    () => getCurrentUserCompanyRole(activeCompany, user?.id),
+    [activeCompany, user?.id],
+  )
+
+  const stats = useMemo(() => {
+    const revenue = orders.reduce((sum, order) => sum + order.total, 0)
+    const grossProfit = orders.reduce((sum, order) => sum + order.profit, 0)
+    const saleExpenses = orders.reduce((sum, order) => sum + order.expense, 0)
+    const manualExpenses = finances.reduce((sum, finance) => sum + Number(finance.amount), 0)
+    const totalExpenses = saleExpenses + manualExpenses
+
+    return {
+      sales: orders.length,
+      customers: customers.length,
+      products: products.length,
+      expensesCount: finances.length,
+      revenue,
+      grossProfit,
+      expenses: totalExpenses,
+      loss: totalExpenses,
+    }
+  }, [customers.length, finances, orders, products.length])
 
   function addOperation(operation) {
     setOperations((currentOperations) => [
@@ -322,6 +376,75 @@ export function App() {
     setPage('products')
   }
 
+  async function runCompanyAction(action) {
+    setIsCompanyActionLoading(true)
+    setCompanyPageError('')
+
+    try {
+      await action()
+      const reloadedCompanies = await serverApi.companies.getAll()
+      setCompanies(reloadedCompanies)
+      await loadServerData()
+    } catch (error) {
+      setCompanyPageError(error.message || 'Помилка під час зміни компанії')
+    } finally {
+      setIsCompanyActionLoading(false)
+    }
+  }
+
+  async function handleCreateCompanyFromPage(payload) {
+    await runCompanyAction(async () => {
+      const createdCompany = await serverApi.companies.create(payload)
+      const createdCompanyId = getCompanyId(createdCompany)
+      localStorage.setItem('midas-active-company-id', createdCompanyId)
+      setActiveCompanyId(createdCompanyId)
+    })
+  }
+
+  async function handleUpdateCompany(payload) {
+    if (!activeCompany) {
+      return
+    }
+
+    await runCompanyAction(() => serverApi.companies.update(getCompanyId(activeCompany), payload))
+  }
+
+  async function handleDeleteCompany() {
+    if (!activeCompany) {
+      return
+    }
+
+    await runCompanyAction(async () => {
+      await serverApi.companies.remove(getCompanyId(activeCompany))
+      const reloadedCompanies = await serverApi.companies.getAll()
+      if (!reloadedCompanies.length) {
+        localStorage.removeItem('midas-active-company-id')
+        setActiveCompanyId(null)
+        setRequiresCompany(true)
+      } else {
+        const nextActiveCompanyId = getCompanyId(reloadedCompanies[0])
+        localStorage.setItem('midas-active-company-id', nextActiveCompanyId)
+        setActiveCompanyId(nextActiveCompanyId)
+      }
+    })
+  }
+
+  async function handleAddCompanyMember(email) {
+    if (!activeCompany) {
+      return
+    }
+
+    await runCompanyAction(() => serverApi.companies.addMemberByEmail(getCompanyId(activeCompany), email))
+  }
+
+  async function handleChangeCompanyMemberRole(userId, role) {
+    await runCompanyAction(() => serverApi.companyMembers.updateRole(userId, role))
+  }
+
+  async function handleRemoveCompanyMember(userId) {
+    await runCompanyAction(() => serverApi.companyMembers.remove(userId))
+  }
+
   if (!user) {
     return <LoginPage onLogin={login} />
   }
@@ -330,8 +453,8 @@ export function App() {
     return (
       <main className="login-page">
         <div className="login-card">
-          <h1>Перевірка доступу...</h1>
-          <p className="create-company-subtitle">Зачекайте, будь ласка. Перевіряємо участь у компанії.</p>
+          <h1>Почекайте будь ласка, завантажуємо дані</h1>
+          <p className="create-company-subtitle">Перевіряємо доступ до компаній і готуємо робочий простір.</p>
         </div>
       </main>
     )
@@ -379,20 +502,43 @@ export function App() {
     finances: <FinancesPage finances={finances} onCreate={addFinances} />,
     customers: <CustomersPage customers={customers} />,
     operations: <OperationsPage operations={operations} />,
+    company: (
+      <CompanyPage
+        activeCompany={activeCompany}
+        currentUserId={user?.id}
+        onCreateCompany={handleCreateCompanyFromPage}
+        onUpdateCompany={handleUpdateCompany}
+        onDeleteCompany={handleDeleteCompany}
+        onAddMember={handleAddCompanyMember}
+        onChangeMemberRole={handleChangeCompanyMemberRole}
+        onRemoveMember={handleRemoveCompanyMember}
+        isBusy={isCompanyActionLoading}
+        error={companyPageError}
+      />
+    ),
   }
 
   return (
-    <AppShell activePage={page} user={user} theme={theme} onThemeChange={setTheme} onNavigate={setPage} onLogout={logout}>
+    <AppShell
+      activePage={page}
+      user={user}
+      theme={theme}
+      onThemeChange={setTheme}
+      onNavigate={setPage}
+      onLogout={logout}
+      companies={companies}
+      activeCompanyId={activeCompany ? getCompanyId(activeCompany) : null}
+      activeCompanyRole={currentUserCompanyRole}
+      onCompanyChange={switchActiveCompany}
+    >
       {apiError && (
         <div className="api-error-banner">
           <span>{apiError}</span>
           <button type="button" onClick={loadServerData}>Повторити</button>
         </div>
       )}
-      {isLoading && <div className="api-info-banner">Завантаження даних з сервера...</div>}
+      {isLoading && <div className="api-info-banner">Почекайте будь ласка, завантажуємо дані</div>}
       {pages[page]}
     </AppShell>
   )
 }
-
-

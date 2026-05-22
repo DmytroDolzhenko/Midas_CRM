@@ -11,7 +11,7 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
     event.preventDefault()
 
     if (!name.trim()) {
-      setFormError('Вкажіть назву компанії')
+      setFormError('Р’РєР°Р¶С–С‚СЊ РЅР°Р·РІСѓ РєРѕРјРїР°РЅС–С—')
       return
     }
 
@@ -28,22 +28,22 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
       <form className="login-card" onSubmit={handleSubmit}>
         <div>
           <p className="eyebrow">Midas CRM</p>
-          <h1>Створити компанію</h1>
+          <h1>РЎС‚РІРѕСЂРёС‚Рё РєРѕРјРїР°РЅС–СЋ</h1>
           <p className="create-company-subtitle">
-            {userEmail} не є учасником жодної компанії. Створіть компанію, щоб продовжити роботу.
+            {userEmail} РЅРµ С” СѓС‡Р°СЃРЅРёРєРѕРј Р¶РѕРґРЅРѕС— РєРѕРјРїР°РЅС–С—. РЎС‚РІРѕСЂС–С‚СЊ РєРѕРјРїР°РЅС–СЋ, С‰РѕР± РїСЂРѕРґРѕРІР¶РёС‚Рё СЂРѕР±РѕС‚Сѓ.
           </p>
         </div>
 
         <Input
-          label="Назва компанії"
+          label="РќР°Р·РІР° РєРѕРјРїР°РЅС–С—"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="ТОВ Мідас"
+          placeholder="РўРћР’ РњС–РґР°СЃ"
           required
         />
 
         <Input
-          label="Податковий номер (необов'язково)"
+          label="РџРѕРґР°С‚РєРѕРІРёР№ РЅРѕРјРµСЂ (РЅРµРѕР±РѕРІ'СЏР·РєРѕРІРѕ)"
           value={taxNumber}
           onChange={(event) => setTaxNumber(event.target.value)}
           placeholder="12345678"
@@ -52,11 +52,11 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
         {(formError || error) && <p className="form-error">{formError || error}</p>}
 
         <Button className="full-width" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Створення...' : 'Створити компанію'}
+          {isSubmitting ? 'РЎС‚РІРѕСЂРµРЅРЅСЏ...' : 'РЎС‚РІРѕСЂРёС‚Рё РєРѕРјРїР°РЅС–СЋ'}
         </Button>
 
         <Button className="full-width" type="button" variant="secondary" onClick={onLogout}>
-          Вийти
+          Р’РёР№С‚Рё
         </Button>
       </form>
     </main>

@@ -88,6 +88,9 @@ input, textarea, select { color-scheme: light; }
 }
 .brand strong, .brand span { display: block; }
 .brand span { margin-top: 2px; color: var(--text-muted); font-size: 13px; }
+.company-switcher-field {
+  margin-top: -8px;
+}
 
 .nav-list { display: grid; gap: 8px; }
 .nav-item {
@@ -1238,6 +1241,14 @@ input, textarea, select { color-scheme: light; }
   margin: 10px 0 0;
   color: var(--text-muted);
   line-height: 1.45;
+}
+
+.company-actions {
+  grid-auto-rows: min-content;
+}
+
+.company-members-table {
+  grid-template-columns: 1.4fr 1.2fr 1fr 140px;
 }
 .form-error {
   margin: 0;

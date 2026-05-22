@@ -36,10 +36,34 @@ namespace Infrastructure.Persistence.Services
                 return null;
             }
 
+            var availableCompanyIds = await GetAvailableCompanyIdsAsync(cancellationToken);
+            if (availableCompanyIds.Count == 0)
+            {
+                return null;
+            }
+
+            var requestedCompanyId = httpContextAccessor.HttpContext?.Request.Headers["X-Company-Id"].FirstOrDefault();
+            if (Guid.TryParse(requestedCompanyId, out var parsedCompanyId)
+                && availableCompanyIds.Contains(parsedCompanyId))
+            {
+                return parsedCompanyId;
+            }
+
+            return availableCompanyIds[0];
+        }
+
+        public async Task<IReadOnlyList<Guid>> GetAvailableCompanyIdsAsync(CancellationToken cancellationToken)
+        {
+            if (UserId is null)
+            {
+                return Array.Empty<Guid>();
+            }
+
             return await dbContext.Set<Midas.Core.CompanyMembers.CompanyMember>()
                 .Where(x => x.UserId == UserId.Value)
-                .Select(x => (Guid?)x.CompanyId)
-                .FirstOrDefaultAsync(cancellationToken);
+                .OrderBy(x => x.JoinedAtUtc)
+                .Select(x => x.CompanyId)
+                .ToListAsync(cancellationToken);
         }
     }
 }
