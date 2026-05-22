@@ -35,9 +35,10 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
   return serverProducts.map((product) => {
     const productId = getValue(product, 'id', 'Id')
     const warehouseId = getValue(product, 'warehouseId', 'WarehouseId')
-    const categoryId = getValue(product, 'productCategoryId', 'ProductCategoryId')
+    const categoryIds = getValue(product, 'categoryIds', 'CategoryIds') ?? []
+    const categoryId = categoryIds[0]
     const variant = variants.find((item) => getValue(item, 'productId', 'ProductId') === productId)
-    const category = categories.find((item) => getValue(item, 'id', 'Id') === categoryId)
+    const productCategories = categories.filter((item) => categoryIds.includes(getValue(item, 'id', 'Id')))
     const warehouse = warehouses.find((item) => getValue(item, 'id', 'Id') === warehouseId)
 
     return {
@@ -45,12 +46,13 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
       productId,
       variantId: getValue(variant, 'id', 'Id'),
       productCategoryId: categoryId,
+      productCategoryIds: categoryIds,
       warehouseId,
       sku: getValue(variant, 'uniqCode', 'UniqCode') ?? `PRD-${productId}`,
       barcode: '',
       name: getValue(product, 'name', 'Name') ?? '',
       description: getValue(product, 'description', 'Description') ?? '',
-      category: getValue(category, 'name', 'Name') ?? `Категорія #${categoryId}`,
+      category: productCategories.map((item) => getValue(item, 'name', 'Name')).join(', ') || `Category #${categoryId}`,
       brand: '-',
       unit: 'одиниць',
       warehouse: getValue(warehouse, 'name', 'Name') ?? `Склад #${warehouseId}`,
@@ -221,6 +223,10 @@ export function App() {
         postalCode: Number(sale.postalCode) || 1,
         postDepartmentNumber: Number(sale.postDepartmentNumber) || 1,
       },
+      serviceType: Number(sale.serviceType),
+      cargoType: Number(sale.cargoType),
+      description: sale.description || selectedProduct.name,
+      paymentMethods: Number(sale.paymentMethods),
       items: [
         {
           productVariantId: selectedProduct.variantId,
@@ -250,25 +256,25 @@ export function App() {
   }
 
   async function addProduct(product) {
-    if (!product.warehouseId || !product.productCategoryId) {
+    if (!product.warehouseId || !product.productCategoryIds?.length) {
       throw new Error('На сервері потрібні склад і категорія для створення товару')
     }
 
-    const createdProduct = await serverApi.products.create({
+    await serverApi.products.createWithVariants({
       warehouseId: normalizeId(product.warehouseId),
       name: product.name,
       description: product.description,
       weight: Number(product.weight) || 0,
-      productCategoryId: normalizeId(product.productCategoryId),
-    })
-
-    await serverApi.productVariants.create({
-      productId: getValue(createdProduct, 'id', 'Id'),
-      color: product.color || '-',
-      size: product.size || '-',
-      quantity: Number(product.stock) || 0,
-      costPrice: Number(product.cost) || 0,
-      sellPrice: Number(product.price) || 0,
+      productCategoryIds: product.productCategoryIds.map(normalizeId),
+      variants: [
+        {
+          color: product.color || '-',
+          size: product.size || '-',
+          quantity: Number(product.stock) || 0,
+          costPrice: Number(product.cost) || 0,
+          sellPrice: Number(product.price) || 0,
+        },
+      ],
     })
 
     await loadServerData()
@@ -324,4 +330,5 @@ export function App() {
     </AppShell>
   )
 }
+
 

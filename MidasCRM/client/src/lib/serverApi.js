@@ -22,6 +22,12 @@ export const serverApi = {
         body: product,
       })
     },
+    createWithVariants(product) {
+      return apiRequest('/Product/product-with-variants', {
+        method: 'POST',
+        body: product,
+      })
+    },
   },
   productVariants: {
     getAll() {

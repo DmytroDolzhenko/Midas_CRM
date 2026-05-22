@@ -6,12 +6,12 @@ function getValue(item, camelKey, pascalKey) {
 }
 
 export function CreateProductPage({ categories = [], warehouses = [], onBack, onCreate }) {
-  const firstCategoryId = String(getValue(categories[0], 'id', 'Id') ?? '')
+  const firstCategoryId = Number(getValue(categories[0], 'id', 'Id') ?? 0)
   const firstWarehouseId = String(getValue(warehouses[0], 'id', 'Id') ?? '')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [weight, setWeight] = useState(0)
-  const [productCategoryId, setProductCategoryId] = useState(firstCategoryId)
+  const [productCategoryIds, setProductCategoryIds] = useState(firstCategoryId ? [firstCategoryId] : [])
   const [warehouseId, setWarehouseId] = useState(firstWarehouseId)
   const [stock, setStock] = useState(1)
   const [cost, setCost] = useState(0)
@@ -20,12 +20,25 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
   const [size, setSize] = useState('-')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const selectedCategoryId = productCategoryId || firstCategoryId
   const selectedWarehouseId = warehouseId || firstWarehouseId
+
+  function toggleCategory(categoryId) {
+    setProductCategoryIds((currentCategoryIds) =>
+      currentCategoryIds.includes(categoryId)
+        ? currentCategoryIds.filter((item) => item !== categoryId)
+        : [...currentCategoryIds, categoryId],
+    )
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+
+    if (productCategoryIds.length === 0) {
+      setError('Оберіть хоча б одну категорію')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -33,7 +46,7 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
         name,
         description,
         weight,
-        productCategoryId: selectedCategoryId,
+        productCategoryIds,
         warehouseId: selectedWarehouseId,
         stock,
         cost,
@@ -66,16 +79,7 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
               <span>Назва товару</span>
               <input required maxLength="100" value={name} onChange={(event) => setName(event.target.value)} />
             </label>
-            <label className="field">
-              <span>Категорія</span>
-              <select required value={selectedCategoryId} onChange={(event) => setProductCategoryId(event.target.value)}>
-                {categories.map((item) => (
-                  <option key={getValue(item, 'id', 'Id')} value={getValue(item, 'id', 'Id')}>
-                    {getValue(item, 'name', 'Name')}
-                  </option>
-                ))}
-              </select>
-            </label>
+
             <label className="field">
               <span>Склад</span>
               <select required value={selectedWarehouseId} onChange={(event) => setWarehouseId(event.target.value)}>
@@ -86,6 +90,26 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
                 ))}
               </select>
             </label>
+
+            <div className="field span-2">
+              <span>Категорії</span>
+              <div className="checkbox-grid">
+                {categories.map((item) => {
+                  const categoryId = Number(getValue(item, 'id', 'Id'))
+                  return (
+                    <label key={categoryId} className="checkbox-row">
+                      <input
+                        type="checkbox"
+                        checked={productCategoryIds.includes(categoryId)}
+                        onChange={() => toggleCategory(categoryId)}
+                      />
+                      {getValue(item, 'name', 'Name')}
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+
             <label className="field">
               <span>Вага</span>
               <input min="0" step="0.01" type="number" value={weight} onChange={(event) => setWeight(Number(event.target.value))} />
@@ -103,7 +127,7 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
               <input min="0" step="0.01" type="number" value={price} onChange={(event) => setPrice(Number(event.target.value))} />
             </label>
             <label className="field">
-              <span>Колір варіанту</span>
+              <span>Основний колір</span>
               <input required maxLength="50" value={color} onChange={(event) => setColor(event.target.value)} />
             </label>
             <label className="field">

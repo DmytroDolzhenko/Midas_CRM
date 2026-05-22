@@ -3,7 +3,7 @@ export const integrations = [
     id: 'nova-post',
     name: 'Нова Пошта',
     description: 'Генерація ТТН, відстеження статусів доставки та оновлення продажів.',
-    enabled: true,
+    enabled: false,
   },
   {
     id: 'olx',
@@ -21,7 +21,7 @@ export const integrations = [
     id: 'instagram',
     name: 'Instagram',
     description: 'Директ-повідомлення, заявки та комунікація з покупцями.',
-    enabled: true,
+    enabled: false,
   },
   {
     id: 'prom',

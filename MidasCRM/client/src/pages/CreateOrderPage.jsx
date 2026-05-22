@@ -1,6 +1,25 @@
 import { useMemo, useState } from 'react'
 import { Button } from '../components/Button.jsx'
 
+const serviceTypes = [
+  { id: 0, label: 'Двері - двері' },
+  { id: 1, label: 'Двері - склад' },
+  { id: 2, label: 'Склад - склад' },
+  { id: 3, label: 'Склад - двері' },
+]
+
+const cargoTypes = [
+  { id: 1, label: 'Вантаж' },
+  { id: 2, label: 'Документи' },
+  { id: 3, label: 'Посилка' },
+]
+
+const paymentMethods = [
+  { id: 0, label: 'Повна оплата' },
+  { id: 1, label: 'Післяплата' },
+  { id: 2, label: 'Оплачує відправник' },
+]
+
 export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   const [productQuery, setProductQuery] = useState('')
   const [productId, setProductId] = useState(String(products[0]?.id ?? ''))
@@ -9,6 +28,10 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   const [city, setCity] = useState('Київ')
   const [postalCode, setPostalCode] = useState(1)
   const [postDepartmentNumber, setPostDepartmentNumber] = useState(1)
+  const [serviceType, setServiceType] = useState(2)
+  const [cargoType, setCargoType] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState(1)
+  const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const selectedProductId = productId || String(products[0]?.id ?? '')
@@ -23,6 +46,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   )
   const selectedProduct = products.find((product) => product.id === Number(selectedProductId))
   const subtotal = (selectedProduct?.price ?? 0) * quantity
+  const orderDescription = description.trim() || selectedProduct?.name || 'CRM order'
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -37,6 +61,10 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
         city,
         postalCode,
         postDepartmentNumber,
+        serviceType,
+        cargoType,
+        paymentMethods: paymentMethod,
+        description: orderDescription,
       })
     } catch (submitError) {
       setError(submitError.message || 'Не вдалося створити продаж')
@@ -98,6 +126,40 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
               <span>Кількість</span>
               <input min="1" type="number" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
             </label>
+          </div>
+
+          <div className="delivery-box">
+            <strong>Параметри замовлення</strong>
+            <div className="form-grid-3">
+              <label className="field">
+                <span>Тип сервісу</span>
+                <select value={serviceType} onChange={(event) => setServiceType(Number(event.target.value))}>
+                  {serviceTypes.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Тип вантажу</span>
+                <select value={cargoType} onChange={(event) => setCargoType(Number(event.target.value))}>
+                  {cargoTypes.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Оплата</span>
+                <select value={paymentMethod} onChange={(event) => setPaymentMethod(Number(event.target.value))}>
+                  {paymentMethods.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="field span-2">
+                <span>Опис</span>
+                <textarea rows="3" value={description} onChange={(event) => setDescription(event.target.value)} placeholder={selectedProduct?.name ?? ''} />
+              </label>
+            </div>
           </div>
 
           <div className="delivery-box">
