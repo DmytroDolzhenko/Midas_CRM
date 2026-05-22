@@ -9,7 +9,7 @@ export function useLoginForm(onLogin) {
     event.preventDefault()
 
     if (!email || !password) {
-      setError('Введи email і пароль')
+      setError('Введіть email і пароль')
       return
     }
 
@@ -17,8 +17,8 @@ export function useLoginForm(onLogin) {
 
     try {
       await onLogin({ email, password })
-    } catch (error) {
-      setError(error.message || 'Не вдалося увійти в систему')
+    } catch (requestError) {
+      setError(requestError.message || 'Не вдалося увійти в систему')
     }
   }
 

@@ -1,15 +1,15 @@
-import { useMemo, useState } from 'react'
-import { Button } from '../components/Button.jsx'
-import { Input } from '../components/Input.jsx'
+﻿import { useMemo, useState } from 'react'
+import { Button } from '../../components/Button.jsx'
+import { Input } from '../../components/Input.jsx'
 
 const OWNER_ROLE = 1
 const ADMIN_ROLE = 2
 
 const roleOptions = [
-  { value: 1, label: 'Власник' },
-  { value: 2, label: 'Адміністратор' },
-  { value: 3, label: 'Менеджер' },
-  { value: 4, label: 'Складальник' },
+  { value: 1, label: 'Р’Р»Р°СЃРЅРёРє' },
+  { value: 2, label: 'РђРґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂ' },
+  { value: 3, label: 'РњРµРЅРµРґР¶РµСЂ' },
+  { value: 4, label: 'РЎРєР»Р°РґР°Р»СЊРЅРёРє' },
 ]
 
 function getValue(item, camelKey, pascalKey) {
@@ -22,7 +22,7 @@ function getMemberName(member) {
     const name = getValue(user, 'name', 'Name') ?? ''
     const surname = getValue(user, 'surname', 'Surname') ?? ''
     const fullName = `${name} ${surname}`.trim()
-    return fullName || getValue(user, 'email', 'Email') || 'Користувач'
+    return fullName || getValue(user, 'email', 'Email') || 'РљРѕСЂРёСЃС‚СѓРІР°С‡'
   }
 
   return String(getValue(member, 'userId', 'UserId'))
@@ -81,60 +81,60 @@ export function CompanyPage({
       <section className="page-header">
         <div>
           <p className="eyebrow">Company</p>
-          <h1>Керування компанією</h1>
+          <h1>РљРµСЂСѓРІР°РЅРЅСЏ РєРѕРјРїР°РЅС–С”СЋ</h1>
         </div>
       </section>
 
       {error && <div className="api-error-banner"><span>{error}</span></div>}
 
       <section className="panel">
-        <h2>Створити нову компанію</h2>
+        <h2>РЎС‚РІРѕСЂРёС‚Рё РЅРѕРІСѓ РєРѕРјРїР°РЅС–СЋ</h2>
         <form className="form-grid" onSubmit={submitCreate}>
           <div className="form-section">
-            <Input label="Назва" value={createName} onChange={(event) => setCreateName(event.target.value)} required />
-            <Input label="Податковий номер" value={createTaxNumber} onChange={(event) => setCreateTaxNumber(event.target.value)} />
+            <Input label="РќР°Р·РІР°" value={createName} onChange={(event) => setCreateName(event.target.value)} required />
+            <Input label="РџРѕРґР°С‚РєРѕРІРёР№ РЅРѕРјРµСЂ" value={createTaxNumber} onChange={(event) => setCreateTaxNumber(event.target.value)} />
           </div>
           <div className="summary-panel">
-            <Button type="submit" disabled={isBusy || !createName.trim()}>Створити компанію</Button>
+            <Button type="submit" disabled={isBusy || !createName.trim()}>РЎС‚РІРѕСЂРёС‚Рё РєРѕРјРїР°РЅС–СЋ</Button>
           </div>
         </form>
       </section>
 
       <section className="panel">
-        <h2>Поточна компанія</h2>
+        <h2>РџРѕС‚РѕС‡РЅР° РєРѕРјРїР°РЅС–СЏ</h2>
         <form className="form-grid" onSubmit={submitUpdate}>
           <div className="form-section">
-            <Input label="Назва" value={editName} onChange={(event) => setEditName(event.target.value)} disabled={!canManageCompany} required />
-            <Input label="Податковий номер" value={editTaxNumber ?? ''} onChange={(event) => setEditTaxNumber(event.target.value)} disabled={!canManageCompany} />
+            <Input label="РќР°Р·РІР°" value={editName} onChange={(event) => setEditName(event.target.value)} disabled={!canManageCompany} required />
+            <Input label="РџРѕРґР°С‚РєРѕРІРёР№ РЅРѕРјРµСЂ" value={editTaxNumber ?? ''} onChange={(event) => setEditTaxNumber(event.target.value)} disabled={!canManageCompany} />
           </div>
           <div className="summary-panel company-actions">
-            <Button type="submit" disabled={!canManageCompany || isBusy || !editName.trim()}>Зберегти зміни</Button>
-            <Button type="button" variant="secondary" disabled={!canManageCompany || isBusy} onClick={onDeleteCompany}>Видалити компанію</Button>
+            <Button type="submit" disabled={!canManageCompany || isBusy || !editName.trim()}>Р—Р±РµСЂРµРіС‚Рё Р·РјС–РЅРё</Button>
+            <Button type="button" variant="secondary" disabled={!canManageCompany || isBusy} onClick={onDeleteCompany}>Р’РёРґР°Р»РёС‚Рё РєРѕРјРїР°РЅС–СЋ</Button>
           </div>
         </form>
       </section>
 
       <section className="panel">
-        <h2>Учасники компанії</h2>
+        <h2>РЈС‡Р°СЃРЅРёРєРё РєРѕРјРїР°РЅС–С—</h2>
 
         {canManageCompany && (
           <form className="toolbar" onSubmit={submitAddMember}>
             <input
               type="email"
-              placeholder="email користувача"
+              placeholder="email РєРѕСЂРёСЃС‚СѓРІР°С‡Р°"
               value={memberEmail}
               onChange={(event) => setMemberEmail(event.target.value)}
               required
             />
-            <Button type="submit" disabled={isBusy}>Додати</Button>
+            <Button type="submit" disabled={isBusy}>Р”РѕРґР°С‚Рё</Button>
           </form>
         )}
 
         <div className="table-header company-members-table">
-          <span>Користувач</span>
+          <span>РљРѕСЂРёСЃС‚СѓРІР°С‡</span>
           <span>Email</span>
-          <span>Роль</span>
-          <span>Дії</span>
+          <span>Р РѕР»СЊ</span>
+          <span>Р”С–С—</span>
         </div>
 
         {members.map((member) => {
@@ -166,7 +166,7 @@ export function CompanyPage({
               <span>
                 {canModifyMember && !isCurrentUser ? (
                   <Button type="button" variant="secondary" disabled={isBusy} onClick={() => onRemoveMember(memberUserId)}>
-                    Видалити
+                    Р’РёРґР°Р»РёС‚Рё
                   </Button>
                 ) : (
                   '-'
@@ -179,3 +179,5 @@ export function CompanyPage({
     </div>
   )
 }
+
+

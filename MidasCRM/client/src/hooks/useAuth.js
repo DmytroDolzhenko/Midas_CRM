@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { loginRequest } from '../features/auth/api/authApi.js'
+import { loginRequest, registerRequest } from '../features/auth/api/authApi.js'
 import { useLocalStorage } from './useLocalStorage.js'
 
 export function useAuth() {

@@ -1,19 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { AppShell } from './components/AppShell.jsx'
 import { useAuth } from './hooks/useAuth.js'
 import { useLocalStorage } from './hooks/useLocalStorage.js'
-import { DashboardPage } from './pages/DashboardPage.jsx'
-import { OrdersPage } from './pages/OrdersPage.jsx'
-import { CreateOrderPage } from './pages/CreateOrderPage.jsx'
-import { ProductsPage } from './pages/ProductsPage.jsx'
-import { CreateProductPage } from './pages/CreateProductPage.jsx'
-import { CustomersPage } from './pages/CustomersPage.jsx'
-import { FinancesPage } from './pages/FinancesPage.jsx'
-import { OperationsPage } from './pages/OperationsPage.jsx'
-import { LoginPage } from './pages/LoginPage.jsx'
-import { RegistrationPage } from './pages/RegistrationPage.jsx'
-import { CreateCompanyPage } from './pages/CreateCompanyPage.jsx'
-import { CompanyPage } from './pages/CompanyPage.jsx'
+import { DashboardPage } from './pages/dashboard/DashboardPage.jsx'
+import { OrdersPage } from './pages/sales/OrdersPage.jsx'
+import { CreateOrderPage } from './pages/sales/CreateOrderPage.jsx'
+import { ProductsPage } from './pages/products/ProductsPage.jsx'
+import { CreateProductPage } from './pages/products/CreateProductPage.jsx'
+import { CustomersPage } from './pages/customers/CustomersPage.jsx'
+import { FinancesPage } from './pages/finance/FinancesPage.jsx'
+import { OperationsPage } from './pages/operations/OperationsPage.jsx'
+import { LoginPage } from './pages/auth/LoginPage.jsx'
+import { RegistrationPage } from './pages/auth/RegistrationPage.jsx'
+import { CreateCompanyPage } from './pages/company/CreateCompanyPage.jsx'
+import { CompanyPage } from './pages/company/CompanyPage.jsx'
 import { serverApi } from './lib/serverApi.js'
 
 function formatDateTime(date) {
@@ -128,7 +128,7 @@ function getCurrentUserCompanyRole(company, userId) {
 }
 
 export function App() {
-  const { user, login, logout } = useAuth()
+  const { user, login, register, logout } = useAuth()
   const [page, setPage] = useState('dashboard')
   const [orders, setOrders] = useState([])
   const [products, setProducts] = useState([])
@@ -212,13 +212,13 @@ export function App() {
   }
 
   useEffect(() => {
-    if (user?.token) {
-      Promise.resolve().then(loadCompaniesAndBootstrap)
-    } else {
-      setRequiresCompany(false)
-      setCompanyError('')
-      setCompanies([])
+    if (!user?.token) {
+      return
     }
+
+    Promise.resolve().then(loadCompaniesAndBootstrap)
+    // Company bootstrap should rerun only when the auth token changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.token])
 
   async function createCompany(companyPayload) {
@@ -377,6 +377,16 @@ export function App() {
     setPage('products')
   }
 
+  async function createWarehouse(payload) {
+    await serverApi.warehouses.create(payload)
+    await loadServerData()
+  }
+
+  async function updateWarehouse(id, payload) {
+    await serverApi.warehouses.update(id, payload)
+    await loadServerData()
+  }
+
   async function runCompanyAction(action) {
     setIsCompanyActionLoading(true)
     setCompanyPageError('')
@@ -447,6 +457,11 @@ export function App() {
   }
 
   if (!user) {
+    const currentPath = window.location.pathname.toLowerCase()
+    if (currentPath === '/register') {
+      return <RegistrationPage onRegister={register} />
+    }
+
     return <LoginPage onLogin={login} />
   }
 
@@ -454,7 +469,7 @@ export function App() {
     return (
       <main className="login-page">
         <div className="login-card">
-          <h1>Почекайте будь ласка, завантажуємо дані</h1>
+          <h1>Завантажуємо дані</h1>
           <p className="create-company-subtitle">Перевіряємо доступ до компаній і готуємо робочий простір.</p>
         </div>
       </main>
@@ -491,7 +506,15 @@ export function App() {
         onCreate={addSale}
       />
     ),
-    products: <ProductsPage products={products} onNavigate={setPage} />,
+    products: (
+      <ProductsPage
+        products={products}
+        warehouses={warehouses}
+        onNavigate={setPage}
+        onCreateWarehouse={createWarehouse}
+        onUpdateWarehouse={updateWarehouse}
+      />
+    ),
     createProduct: (
       <CreateProductPage
         categories={categories}
@@ -543,3 +566,4 @@ export function App() {
     </AppShell>
   )
 }
+

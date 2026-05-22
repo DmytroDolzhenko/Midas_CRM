@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Pagination } from '../components/Pagination.jsx'
-import { CustomersTable } from '../features/customers/components/CustomersTable.jsx'
+﻿import { useState } from 'react'
+import { Pagination } from '../../components/Pagination.jsx'
+import { CustomersTable } from '../../features/customers/components/CustomersTable.jsx'
 
 const PAGE_SIZE = 10
 
@@ -19,8 +19,8 @@ export function CustomersPage({ customers = [] }) {
       <section className="panel">
         <div className="toolbar">
           <input
-            aria-label="Пошук клієнтів"
-            placeholder="Пошук за ім'ям, телефоном або поштою"
+            aria-label="РџРѕС€СѓРє РєР»С–С”РЅС‚С–РІ"
+            placeholder="РџРѕС€СѓРє Р·Р° С–Рј'СЏРј, С‚РµР»РµС„РѕРЅРѕРј Р°Р±Рѕ РїРѕС€С‚РѕСЋ"
             value={search}
             onChange={(event) => { setSearch(event.target.value); setPage(1) }}
           />
@@ -31,3 +31,4 @@ export function CustomersPage({ customers = [] }) {
     </section>
   )
 }
+

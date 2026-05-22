@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
-import { Pagination } from '../components/Pagination.jsx'
-import { OperationsTable } from '../features/operations/components/OperationsTable.jsx'
+﻿import { useMemo, useState } from 'react'
+import { Pagination } from '../../components/Pagination.jsx'
+import { OperationsTable } from '../../features/operations/components/OperationsTable.jsx'
 
 const PAGE_SIZE = 10
 
@@ -40,13 +40,13 @@ export function OperationsPage({ operations }) {
       <section className="panel">
         <div className="table-filter-grid">
           <input
-            aria-label="Пошук історії"
-            placeholder="Пошук в історії"
+            aria-label="РџРѕС€СѓРє С–СЃС‚РѕСЂС–С—"
+            placeholder="РџРѕС€СѓРє РІ С–СЃС‚РѕСЂС–С—"
             value={search}
             onChange={(event) => updateFilter(setSearch, event.target.value)}
           />
           <select value={typeFilter} onChange={(event) => updateFilter(setTypeFilter, event.target.value)}>
-            <option value="all">Усі типи</option>
+            <option value="all">РЈСЃС– С‚РёРїРё</option>
             {operationTypes.map((type) => (
               <option key={type} value={type}>{type}</option>
             ))}
@@ -60,3 +60,4 @@ export function OperationsPage({ operations }) {
     </section>
   )
 }
+

@@ -6,24 +6,20 @@ export function LoginForm({ onLogin }) {
   const { email, password, error, setEmail, setPassword, submit } = useLoginForm(onLogin)
 
   return (
-    <form className="login-card" onSubmit={submit}>
-      <div>
+    <form className="auth-card" onSubmit={submit}>
+      <div className="auth-card-header">
         <p className="eyebrow">Midas CRM</p>
         <h1>Вхід у систему</h1>
+        <p>Увійдіть у робочий простір, щоб керувати продажами, товарами та фінансами.</p>
       </div>
 
-      <Input
-        label="Email"
-        type="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-      />
-      <Input
-        label="Пароль"
-        type="password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-      />
+      <div className="auth-switch">
+        <a className="active" href="/login">Увійти</a>
+        <a href="/register">Зареєструватись</a>
+      </div>
+
+      <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+      <Input label="Пароль" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
 
       {error && <p className="form-error">{error}</p>}
 

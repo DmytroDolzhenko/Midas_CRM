@@ -28,6 +28,7 @@ import {
   Tabs,
   Toolbar,
   Typography,
+  TextField,
   createTheme,
   ThemeProvider,
 } from '@mui/material'
@@ -63,12 +64,31 @@ function buildTheme(mode) {
         paper: mode === 'dark' ? '#182235' : '#ffffff',
       },
     },
-    shape: { borderRadius: 14 },
+    shape: { borderRadius: 18 },
     typography: {
-      fontFamily: 'Segoe UI, system-ui, sans-serif',
+      fontFamily: 'Inter, ui-sans-serif, system-ui, "Segoe UI", sans-serif',
+      fontWeightRegular: 500,
+      fontWeightMedium: 700,
+      fontWeightBold: 800,
     },
     components: {
-      MuiButton: { defaultProps: { disableElevation: true } },
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: {
+            borderRadius: 14,
+            fontWeight: 800,
+            textTransform: 'none',
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            borderRadius: 14,
+          },
+        },
+      },
       MuiCard: {
         styleOverrides: {
           root: {
@@ -117,14 +137,19 @@ export function AppShell({
               boxSizing: 'border-box',
               borderRight: 1,
               borderColor: 'divider',
+              backgroundImage: 'none',
             },
           }}
         >
-          <Toolbar />
-          <Stack spacing={2} sx={{ p: 2, height: '100%' }}>
-            <Box>
-              <Typography variant="h6">Midas CRM</Typography>
-              <Typography color="text.secondary" variant="body2">Client workspace</Typography>
+          <Stack spacing={2} sx={{ p: 1.5, height: '100%' }}>
+            <Box sx={{ pt: 1 }}>
+              <Stack alignItems="center" direction="row" spacing={1.25}>
+                <Box sx={{ width: 34, height: 34, borderRadius: 1.5, bgcolor: 'primary.main' }} />
+                <Box>
+                  <Typography fontWeight={900} variant="h6">Midas CRM</Typography>
+                  <Typography color="text.secondary" fontWeight={700} variant="body2">Client workspace</Typography>
+                </Box>
+              </Stack>
             </Box>
 
             <FormControl fullWidth size="small">
@@ -142,19 +167,39 @@ export function AppShell({
               </Select>
             </FormControl>
 
-            <List disablePadding>
+            <List disablePadding sx={{ display: 'grid', gap: 0.75, my: 'auto' }}>
               {navItems.map((item) => (
-                <ListItemButton key={item.id} selected={item.id === activePage} onClick={() => onNavigate(item.id)}>
-                  <ListItemText primary={item.label} />
+                <ListItemButton
+                  key={item.id}
+                  selected={item.id === activePage}
+                  onClick={() => onNavigate(item.id)}
+                  sx={{
+                    borderRadius: 3,
+                    minHeight: 46,
+                    px: 2,
+                    '&.Mui-selected': {
+                      bgcolor: 'action.selected',
+                      color: 'primary.main',
+                    },
+                    '&.Mui-selected:hover': {
+                      bgcolor: 'action.selected',
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{ fontWeight: 800, textAlign: 'center' }}
+                  />
                 </ListItemButton>
               ))}
             </List>
 
-            <Box sx={{ mt: 'auto' }}>
+            <Box sx={{ pb: 1 }}>
               <Button
                 fullWidth
                 startIcon={<Avatar sx={{ width: 24, height: 24 }}>{(user?.name ?? 'U').slice(0, 1).toUpperCase()}</Avatar>}
                 variant="outlined"
+                sx={{ justifyContent: 'flex-start', overflow: 'hidden', textTransform: 'none' }}
                 onClick={(event) => setAccountAnchor(event.currentTarget)}
               >
                 {user?.email ?? 'user'}
@@ -171,28 +216,47 @@ export function AppShell({
             sx={{
               borderBottom: 1,
               borderColor: 'divider',
-              width: { md: `calc(100% - ${drawerWidth}px)` },
-              ml: { md: `${drawerWidth}px` },
             }}
           >
-            <Toolbar sx={{ gap: 1.5, justifyContent: 'space-between' }}>
+            <Toolbar sx={{ gap: 1.5, justifyContent: 'space-between', flexWrap: { xs: 'wrap', md: 'nowrap' }, py: { xs: 1, md: 0 } }}>
               <Box>
                 <Typography color="text.secondary" variant="caption">Робочий простір</Typography>
                 <Typography variant="h6">{activeItem?.label ?? 'Midas CRM'}</Typography>
               </Box>
-              <Stack direction="row" spacing={1}>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1, justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
                 <Button size="small" variant="outlined" onClick={() => onNavigate('createOrder')}>Додати продаж</Button>
                 <Button size="small" variant="outlined" onClick={() => onNavigate('finances')}>Додати витрату</Button>
                 <Button size="small" startIcon={<AutoAwesomeOutlinedIcon />} variant="outlined" onClick={() => setIsAiOpen(true)}>AI</Button>
-                <Button size="small" onClick={() => setIsSettingsOpen(true)}><SettingsOutlinedIcon fontSize="small" /></Button>
-                <Button size="small" onClick={() => setIsNotificationsOpen(true)}>
+                <Button size="small" variant="outlined" onClick={() => setIsSettingsOpen(true)}><SettingsOutlinedIcon fontSize="small" /></Button>
+                <Button size="small" variant="outlined" onClick={() => setIsNotificationsOpen(true)}>
                   <Badge color="error" variant="dot"><NotificationsOutlinedIcon fontSize="small" /></Badge>
                 </Button>
               </Stack>
             </Toolbar>
+            <Box
+              sx={{
+                display: { xs: 'flex', md: 'none' },
+                gap: 1,
+                overflowX: 'auto',
+                px: 2,
+                pb: 1.25,
+              }}
+            >
+              {navItems.map((item) => (
+                <Button
+                  key={item.id}
+                  size="small"
+                  variant={item.id === activePage ? 'contained' : 'outlined'}
+                  onClick={() => onNavigate(item.id)}
+                  sx={{ flex: '0 0 auto' }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
           </AppBar>
 
-          <Box component="main" sx={{ p: { xs: 2, md: 3 } }}>
+          <Box component="main" sx={{ p: { xs: 2, md: 3 }, maxWidth: 1240, mx: 'auto', width: '100%' }}>
             {children}
           </Box>
         </Box>
@@ -215,8 +279,8 @@ export function AppShell({
 
           {settingsTab === 0 && (
             <Stack spacing={2}>
-              <Typography>Ім'я: {user?.name ?? '-'}</Typography>
-              <Typography>Email: {user?.email ?? '-'}</Typography>
+              <TextField label="Імʼя профілю" size="small" value={user?.name ?? ''} InputProps={{ readOnly: true }} />
+              <TextField label="Email" size="small" value={user?.email ?? ''} InputProps={{ readOnly: true }} />
               <FormControl size="small" sx={{ maxWidth: 240 }}>
                 <InputLabel id="theme-label">Тема</InputLabel>
                 <Select label="Тема" labelId="theme-label" value={theme} onChange={(event) => onThemeChange(event.target.value)}>
@@ -235,7 +299,10 @@ export function AppShell({
                   sx={{
                     border: 1,
                     borderColor: integration.enabled ? 'primary.main' : 'divider',
-                    bgcolor: integration.enabled ? 'action.selected' : 'background.paper',
+                    bgcolor: integration.enabled
+                      ? (theme === 'dark' ? 'rgba(96, 165, 250, 0.16)' : 'rgba(37, 99, 235, 0.08)')
+                      : 'background.paper',
+                    color: 'text.primary',
                   }}
                   variant="outlined"
                 >

@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
 export function useRegistrationForm(onRegister) {
+  const [name, setName] = useState('')
+  const [surname, setSurname] = useState('')
+  const [fathername, setFathername] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -9,17 +13,9 @@ export function useRegistrationForm(onRegister) {
   async function submit(event) {
     event.preventDefault()
 
-    if (!email || !password) {
-      setError('Введи email і пароль')
+    if (!name || !surname || !fathername || !email || !phoneNumber || !password) {
+      setError('Заповніть усі обовʼязкові поля')
       return
-    }
-
-    setError('')
-
-    try {
-      await onRegister({ email, password })
-    } catch (error) {
-      setError(error.message || 'Не вдалося зареєструватися')
     }
 
     if (password !== confirmPassword) {
@@ -27,13 +23,35 @@ export function useRegistrationForm(onRegister) {
       return
     }
 
+    setError('')
+
+    try {
+      await onRegister({
+        name,
+        surname,
+        fathername,
+        phoneNumber,
+        email,
+        password,
+      })
+    } catch (requestError) {
+      setError(requestError.message || 'Не вдалося зареєструватися')
+    }
   }
 
   return {
+    name,
+    surname,
+    fathername,
+    phoneNumber,
     email,
     password,
     confirmPassword,
     error,
+    setName,
+    setSurname,
+    setFathername,
+    setPhoneNumber,
     setEmail,
     setPassword,
     setConfirmPassword,

@@ -1,17 +1,17 @@
-import { useMemo, useState } from 'react'
-import { Pagination } from '../components/Pagination.jsx'
+﻿import { useMemo, useState } from 'react'
+import { Pagination } from '../../components/Pagination.jsx'
 
-const statusTabs = ['Всі', 'Продано', 'Повернення']
-const quickFilters = ['Сьогодні', 'Вчора', 'Тиждень', '30 днів', 'Цей місяць', 'Минулий місяць', '3 місяці']
+const statusTabs = ['Р’СЃС–', 'РџСЂРѕРґР°РЅРѕ', 'РџРѕРІРµСЂРЅРµРЅРЅСЏ']
+const quickFilters = ['РЎСЊРѕРіРѕРґРЅС–', 'Р’С‡РѕСЂР°', 'РўРёР¶РґРµРЅСЊ', '30 РґРЅС–РІ', 'Р¦РµР№ РјС–СЃСЏС†СЊ', 'РњРёРЅСѓР»РёР№ РјС–СЃСЏС†СЊ', '3 РјС–СЃСЏС†С–']
 const PAGE_SIZE = 10
 const statusNames = {
-  0: 'Очікує',
-  1: 'В обробці',
-  2: 'Відправлено',
-  3: 'Доставлено',
-  4: 'Повернення',
-  5: 'Отримано',
-  6: 'Скасовано',
+  0: 'РћС‡С–РєСѓС”',
+  1: 'Р’ РѕР±СЂРѕР±С†С–',
+  2: 'Р’С–РґРїСЂР°РІР»РµРЅРѕ',
+  3: 'Р”РѕСЃС‚Р°РІР»РµРЅРѕ',
+  4: 'РџРѕРІРµСЂРЅРµРЅРЅСЏ',
+  5: 'РћС‚СЂРёРјР°РЅРѕ',
+  6: 'РЎРєР°СЃРѕРІР°РЅРѕ',
 }
 
 function ExportIcon() {
@@ -25,7 +25,7 @@ function ExportIcon() {
 }
 
 function formatStatus(status) {
-  return statusNames[status] ?? status ?? 'Новий'
+  return statusNames[status] ?? status ?? 'РќРѕРІРёР№'
 }
 
 function formatDate(date) {
@@ -33,7 +33,7 @@ function formatDate(date) {
 }
 
 export function OrdersPage({ orders, onNavigate }) {
-  const [activeStatus, setActiveStatus] = useState('Всі')
+  const [activeStatus, setActiveStatus] = useState('Р’СЃС–')
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState('2026-05-19')
   const [dateTo, setDateTo] = useState('2026-05-19')
@@ -52,9 +52,9 @@ export function OrdersPage({ orders, onNavigate }) {
           .includes(search.toLowerCase())
         const isReturn = Number(order.status) === 4 || Number(order.status) === 6 || order.status === 'cancelled'
         const matchesStatus =
-          activeStatus === 'Всі' ||
-          (activeStatus === 'Продано' && !isReturn) ||
-          (activeStatus === 'Повернення' && isReturn)
+          activeStatus === 'Р’СЃС–' ||
+          (activeStatus === 'РџСЂРѕРґР°РЅРѕ' && !isReturn) ||
+          (activeStatus === 'РџРѕРІРµСЂРЅРµРЅРЅСЏ' && isReturn)
         const orderDate = order.date || ''
         const matchesDate = !orderDate || (orderDate >= dateFrom && orderDate <= dateTo)
         const matchesTotal =
@@ -79,12 +79,12 @@ export function OrdersPage({ orders, onNavigate }) {
   }, [filteredOrders])
 
   function exportSales() {
-    const header = ['Продаж', 'Покупець', 'Доставка', 'Рахунок', 'Сума', 'Статус']
+    const header = ['РџСЂРѕРґР°Р¶', 'РџРѕРєСѓРїРµС†СЊ', 'Р”РѕСЃС‚Р°РІРєР°', 'Р Р°С…СѓРЅРѕРє', 'РЎСѓРјР°', 'РЎС‚Р°С‚СѓСЃ']
     const rows = filteredOrders.map((order) => [
       order.code,
       order.customer,
-      order.deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж',
-      order.account || 'Наложка NovaPay',
+      order.deliveryMode === 'nova-post' ? 'РќРѕРІР° РџРѕС€С‚Р°' : 'РџСЂРѕСЃС‚РёР№ РїСЂРѕРґР°Р¶',
+      order.account || 'РќР°Р»РѕР¶РєР° NovaPay',
       order.total,
       formatStatus(order.status),
     ])
@@ -104,29 +104,29 @@ export function OrdersPage({ orders, onNavigate }) {
     const start = new Date(today)
     const end = new Date(today)
 
-    if (filter === 'Вчора') {
+    if (filter === 'Р’С‡РѕСЂР°') {
       start.setDate(today.getDate() - 1)
       end.setDate(today.getDate() - 1)
     }
 
-    if (filter === 'Тиждень') {
+    if (filter === 'РўРёР¶РґРµРЅСЊ') {
       start.setDate(today.getDate() - 7)
     }
 
-    if (filter === '30 днів') {
+    if (filter === '30 РґРЅС–РІ') {
       start.setDate(today.getDate() - 30)
     }
 
-    if (filter === 'Цей місяць') {
+    if (filter === 'Р¦РµР№ РјС–СЃСЏС†СЊ') {
       start.setDate(1)
     }
 
-    if (filter === 'Минулий місяць') {
+    if (filter === 'РњРёРЅСѓР»РёР№ РјС–СЃСЏС†СЊ') {
       start.setMonth(today.getMonth() - 1, 1)
       end.setMonth(today.getMonth(), 0)
     }
 
-    if (filter === '3 місяці') {
+    if (filter === '3 РјС–СЃСЏС†С–') {
       start.setMonth(today.getMonth() - 3)
     }
 
@@ -156,9 +156,9 @@ export function OrdersPage({ orders, onNavigate }) {
             <button className="dots-button" type="button" onClick={() => setIsMenuOpen((isOpen) => !isOpen)}>...</button>
             {isMenuOpen && (
               <div className="floating-menu">
-                <button type="button" onClick={exportSales}>Експортувати продажі</button>
-                <button type="button" onClick={() => setIsFilterOpen(true)}>Відкрити фільтр</button>
-                <button type="button" onClick={() => onNavigate('createOrder')}>Створити продаж</button>
+                <button type="button" onClick={exportSales}>Р•РєСЃРїРѕСЂС‚СѓРІР°С‚Рё РїСЂРѕРґР°Р¶С–</button>
+                <button type="button" onClick={() => setIsFilterOpen(true)}>Р’С–РґРєСЂРёС‚Рё С„С–Р»СЊС‚СЂ</button>
+                <button type="button" onClick={() => onNavigate('createOrder')}>РЎС‚РІРѕСЂРёС‚Рё РїСЂРѕРґР°Р¶</button>
               </div>
             )}
           </div>
@@ -166,17 +166,17 @@ export function OrdersPage({ orders, onNavigate }) {
 
         <div className="sales-filter-grid">
           <input
-            aria-label="Пошукова фраза"
-            placeholder="Пошукова фраза"
+            aria-label="РџРѕС€СѓРєРѕРІР° С„СЂР°Р·Р°"
+            placeholder="РџРѕС€СѓРєРѕРІР° С„СЂР°Р·Р°"
             value={search}
             onChange={(event) => { setSearch(event.target.value); setPage(1) }}
           />
           <input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1) }} />
           <input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1) }} />
-          <button className="icon-button flat-icon-button" type="button" aria-label="Експорт" onClick={exportSales}>
+          <button className="icon-button flat-icon-button" type="button" aria-label="Р•РєСЃРїРѕСЂС‚" onClick={exportSales}>
             <ExportIcon />
           </button>
-          <button className="secondary-button" type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>Фільтр</button>
+          <button className="secondary-button" type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>Р¤С–Р»СЊС‚СЂ</button>
         </div>
 
         <div className="quick-filter-row">
@@ -188,7 +188,7 @@ export function OrdersPage({ orders, onNavigate }) {
         {isFilterOpen && (
           <div className="inline-filter-panel">
             <label className="field">
-              <span>Статус</span>
+              <span>РЎС‚Р°С‚СѓСЃ</span>
               <select value={activeStatus} onChange={(event) => { setActiveStatus(event.target.value); setPage(1) }}>
                 {statusTabs.map((tab) => (
                   <option key={tab}>{tab}</option>
@@ -196,15 +196,15 @@ export function OrdersPage({ orders, onNavigate }) {
               </select>
             </label>
             <label className="field">
-              <span>Пошук</span>
+              <span>РџРѕС€СѓРє</span>
               <input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} />
             </label>
             <label className="field">
-              <span>Сума від</span>
+              <span>РЎСѓРјР° РІС–Рґ</span>
               <input min="0" type="number" value={minTotal} onChange={(event) => { setMinTotal(event.target.value); setPage(1) }} />
             </label>
             <label className="field">
-              <span>Сума до</span>
+              <span>РЎСѓРјР° РґРѕ</span>
               <input min="0" type="number" value={maxTotal} onChange={(event) => { setMaxTotal(event.target.value); setPage(1) }} />
             </label>
           </div>
@@ -212,29 +212,29 @@ export function OrdersPage({ orders, onNavigate }) {
       </div>
 
       <div className="inventory-widget-grid">
-        <article><span>Продажів загалом</span><strong>{filteredOrders.length} ({analytics.quantity.toFixed(2)} од.)</strong></article>
-        <article><span>Продано на</span><strong>{analytics.total.toLocaleString('uk-UA')} грн.</strong></article>
-        <article><span>Зароблено</span><strong>{analytics.profit.toLocaleString('uk-UA')} грн.</strong></article>
-        <article><span>Націнка</span><strong>{analytics.markup || '-'}%</strong></article>
-        <article><span>Комісія</span><strong>0.00 грн.</strong></article>
+        <article><span>РџСЂРѕРґР°Р¶С–РІ Р·Р°РіР°Р»РѕРј</span><strong>{filteredOrders.length} ({analytics.quantity.toFixed(2)} РѕРґ.)</strong></article>
+        <article><span>РџСЂРѕРґР°РЅРѕ РЅР°</span><strong>{analytics.total.toLocaleString('uk-UA')} РіСЂРЅ.</strong></article>
+        <article><span>Р—Р°СЂРѕР±Р»РµРЅРѕ</span><strong>{analytics.profit.toLocaleString('uk-UA')} РіСЂРЅ.</strong></article>
+        <article><span>РќР°С†С–РЅРєР°</span><strong>{analytics.markup || '-'}%</strong></article>
+        <article><span>РљРѕРјС–СЃС–СЏ</span><strong>0.00 РіСЂРЅ.</strong></article>
       </div>
 
       <section className="sales-table-card panel">
         <div className="sales-layout-header">
-          <span>Продаж</span>
-          <span>Покупець</span>
-          <span>Доставка</span>
-          <span>Рахунок</span>
-          <span>Сума, грн.</span>
-          <span>Статус</span>
-          <span>Дії</span>
+          <span>РџСЂРѕРґР°Р¶</span>
+          <span>РџРѕРєСѓРїРµС†СЊ</span>
+          <span>Р”РѕСЃС‚Р°РІРєР°</span>
+          <span>Р Р°С…СѓРЅРѕРє</span>
+          <span>РЎСѓРјР°, РіСЂРЅ.</span>
+          <span>РЎС‚Р°С‚СѓСЃ</span>
+          <span>Р”С–С—</span>
         </div>
 
         {filteredOrders.length === 0 ? (
           <div className="sales-empty-state">
-            <h2>Немає продажів</h2>
+            <h2>РќРµРјР°С” РїСЂРѕРґР°Р¶С–РІ</h2>
             <button className="primary-button" type="button" onClick={() => onNavigate('createOrder')}>
-              Додати перший продаж
+              Р”РѕРґР°С‚Рё РїРµСЂС€РёР№ РїСЂРѕРґР°Р¶
             </button>
           </div>
         ) : (
@@ -242,11 +242,11 @@ export function OrdersPage({ orders, onNavigate }) {
             <div className="sales-layout-row" key={order.id}>
               <strong>{order.code}</strong>
               <span>{order.customer}</span>
-              <span>{order.deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж'}</span>
-              <span>{order.account || 'Наложка NovaPay'}</span>
+              <span>{order.deliveryMode === 'nova-post' ? 'РќРѕРІР° РџРѕС€С‚Р°' : 'РџСЂРѕСЃС‚РёР№ РїСЂРѕРґР°Р¶'}</span>
+              <span>{order.account || 'РќР°Р»РѕР¶РєР° NovaPay'}</span>
               <span>{Number(order.total).toLocaleString('uk-UA')}</span>
               <span>{formatStatus(order.status)}</span>
-              <button type="button" onClick={() => setSelectedOrder(order)}>Відкрити</button>
+              <button type="button" onClick={() => setSelectedOrder(order)}>Р’С–РґРєСЂРёС‚Рё</button>
             </div>
           ))
         )}
@@ -261,28 +261,28 @@ export function OrdersPage({ orders, onNavigate }) {
                 <p className="eyebrow">Sale</p>
                 <h2>{selectedOrder.code}</h2>
               </div>
-              <button className="modal-close-button" type="button" onClick={() => setSelectedOrder(null)}>×</button>
+              <button className="modal-close-button" type="button" onClick={() => setSelectedOrder(null)}>Г—</button>
             </div>
             <div className="settings-grid">
               <label className="field">
-                <span>Покупець</span>
+                <span>РџРѕРєСѓРїРµС†СЊ</span>
                 <input readOnly value={selectedOrder.customer} />
               </label>
               <label className="field">
-                <span>Товар</span>
+                <span>РўРѕРІР°СЂ</span>
                 <input readOnly value={selectedOrder.product} />
               </label>
               <label className="field">
-                <span>Канал</span>
+                <span>РљР°РЅР°Р»</span>
                 <input readOnly value={selectedOrder.channel} />
               </label>
               <label className="field">
-                <span>Сума</span>
-                <input readOnly value={`${Number(selectedOrder.total).toLocaleString('uk-UA')} грн.`} />
+                <span>РЎСѓРјР°</span>
+                <input readOnly value={`${Number(selectedOrder.total).toLocaleString('uk-UA')} РіСЂРЅ.`} />
               </label>
             </div>
             <div className="settings-actions">
-              <button className="primary-button" type="button" onClick={() => setSelectedOrder(null)}>Закрити</button>
+              <button className="primary-button" type="button" onClick={() => setSelectedOrder(null)}>Р—Р°РєСЂРёС‚Рё</button>
             </div>
           </section>
         </div>
@@ -290,3 +290,5 @@ export function OrdersPage({ orders, onNavigate }) {
     </section>
   )
 }
+
+

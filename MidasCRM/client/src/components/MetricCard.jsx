@@ -4,11 +4,11 @@ import Typography from '@mui/material/Typography'
 
 export function MetricCard({ label, value, hint }) {
   return (
-    <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-      <CardContent>
-        <Typography color="text.secondary" variant="body2">{label}</Typography>
-        <Typography sx={{ my: 1 }} variant="h5">{value}</Typography>
-        <Typography color="text.secondary" variant="caption">{hint}</Typography>
+    <Card className="metric-card" elevation={0}>
+      <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+        <Typography className="metric-card-label" variant="body2">{label}</Typography>
+        <Typography className="metric-card-value" sx={{ my: 1 }} variant="h5">{value}</Typography>
+        <Typography className="metric-card-hint" variant="caption">{hint}</Typography>
       </CardContent>
     </Card>
   )

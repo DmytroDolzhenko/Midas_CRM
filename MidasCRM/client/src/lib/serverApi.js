@@ -11,6 +11,19 @@ export const serverApi = {
         },
       })
     },
+    register(credentials) {
+      return apiRequest('/Auth/register', {
+        method: 'POST',
+        body: {
+          email: credentials.email,
+          phoneNumber: credentials.phoneNumber,
+          password: credentials.password,
+          name: credentials.name,
+          surname: credentials.surname,
+          fathername: credentials.fathername,
+        },
+      })
+    },
   },
   companies: {
     getAll() {
@@ -114,6 +127,18 @@ export const serverApi = {
   warehouses: {
     getAll() {
       return apiRequest('/Warehouse')
+    },
+    create(warehouse) {
+      return apiRequest('/Warehouse', {
+        method: 'POST',
+        body: warehouse,
+      })
+    },
+    update(id, warehouse) {
+      return apiRequest(`/Warehouse/${id}`, {
+        method: 'PUT',
+        body: warehouse,
+      })
     },
   },
 }
