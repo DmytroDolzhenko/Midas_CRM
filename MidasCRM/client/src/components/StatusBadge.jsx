@@ -1,3 +1,5 @@
+import Chip from '@mui/material/Chip'
+
 const labels = {
   draft: 'Чернетка',
   processing: 'В роботі',
@@ -27,5 +29,13 @@ const classes = {
 }
 
 export function StatusBadge({ status }) {
-  return <span className={`status-badge status-${classes[status] ?? 'draft'}`}>{labels[status] ?? status}</span>
+  const state = classes[status] ?? 'draft'
+  const colorMap = {
+    draft: 'default',
+    processing: 'warning',
+    completed: 'success',
+    cancelled: 'error',
+  }
+
+  return <Chip color={colorMap[state]} label={labels[status] ?? status} size="small" variant="outlined" />
 }

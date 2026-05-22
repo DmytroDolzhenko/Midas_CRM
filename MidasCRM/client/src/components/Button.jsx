@@ -1,9 +1,14 @@
-export function Button({ children, variant = 'primary', className = '', ...props }) {
-  const buttonClass = variant === 'secondary' ? 'secondary-button' : 'primary-button'
+import MuiButton from '@mui/material/Button'
 
+export function Button({ children, variant = 'primary', className = '', ...props }) {
   return (
-    <button className={`${buttonClass} ${className}`.trim()} type="button" {...props}>
+    <MuiButton
+      className={className}
+      variant={variant === 'secondary' ? 'outlined' : 'contained'}
+      type="button"
+      {...props}
+    >
       {children}
-    </button>
+    </MuiButton>
   )
 }

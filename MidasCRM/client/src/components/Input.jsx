@@ -1,8 +1,5 @@
+import TextField from '@mui/material/TextField'
+
 export function Input({ label, ...props }) {
-  return (
-    <label className="field">
-      <span>{label}</span>
-      <input {...props} />
-    </label>
-  )
+  return <TextField fullWidth label={label} size="small" variant="outlined" {...props} />
 }
