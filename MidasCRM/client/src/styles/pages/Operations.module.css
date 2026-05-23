@@ -1,0 +1,4 @@
+.operations-list { display: grid; gap: 10px; }
+.operation-item { display: grid; grid-template-columns: 150px 160px 1fr auto; gap: 14px; align-items: center; padding: 14px; border: 1px solid var(--border); border-radius: 18px; background: rgba(var(--surface-rgb), 0.72); }
+.operation-item time, .operation-item em { color: var(--text-muted); font-size: 13px; font-style: normal; }
+@media (max-width: 1100px) { .operation-item { grid-template-columns: 1fr; } }

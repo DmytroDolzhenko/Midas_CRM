@@ -1,5 +1,15 @@
 ﻿import { useMemo, useState } from 'react'
 import { Button } from '../../components/Button.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/ProductCreate.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 function getValue(item, camelKey, pascalKey) {
   return item?.[camelKey] ?? item?.[pascalKey]
@@ -185,37 +195,37 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
   }
 
   return (
-    <section className="page-stack product-create-page">
-      <div className="page-header product-create-header">
+    <section className={cx('page-stack', 'product-create-page')}>
+      <div className={cx('page-header', 'product-create-header')}>
         <div>
-          <p className="eyebrow">Catalog</p>
+          <p className={cx('eyebrow')}>Catalog</p>
           <h1>Новий товар</h1>
           <p>Заповніть основні дані, склад і додайте один або кілька варіантів товару.</p>
         </div>
         <Button variant="secondary" onClick={onBack}>До каталогу</Button>
       </div>
 
-      <form className="product-create-layout" onSubmit={handleSubmit}>
-        <section className="panel product-form-panel">
-          <div className="product-form-section">
+      <form className={cx('product-create-layout')} onSubmit={handleSubmit}>
+        <section className={cx('panel', 'product-form-panel')}>
+          <div className={cx('product-form-section')}>
             <div>
-              <p className="eyebrow">Product</p>
+              <p className={cx('eyebrow')}>Product</p>
               <h2>Основна інформація</h2>
             </div>
-            <div className="form-grid-3">
-              <label className="field span-2">
+            <div className={cx('form-grid-3')}>
+              <label className={cx('field', 'span-2')}>
                 <span>Назва товару</span>
                 <input required maxLength="100" value={name} onChange={(event) => setName(event.target.value)} placeholder="Наприклад, Oversize hoodie" />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Вага, кг</span>
                 <input min="0" step="0.01" type="number" value={weight} onChange={(event) => setWeight(event.target.value)} placeholder="0.4" />
               </label>
-              <label className="field span-2">
+              <label className={cx('field', 'span-2')}>
                 <span>Опис</span>
                 <textarea required maxLength="500" rows="4" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Короткий опис товару для внутрішнього каталогу" />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Склад</span>
                 <select required value={selectedWarehouseId} onChange={(event) => setWarehouseId(event.target.value)}>
                   <option value="">Оберіть склад</option>
@@ -229,16 +239,16 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
             </div>
           </div>
 
-          <div className="product-form-section">
+          <div className={cx('product-form-section')}>
             <div>
-              <p className="eyebrow">Categories</p>
+              <p className={cx('eyebrow')}>Categories</p>
               <h2>Категорії</h2>
             </div>
-            <div className="checkbox-grid">
+            <div className={cx('checkbox-grid')}>
               {categories.map((item) => {
                 const categoryId = Number(getValue(item, 'id', 'Id'))
                 return (
-                  <label key={categoryId} className="checkbox-row">
+                  <label key={categoryId} className={cx('checkbox-row')}>
                     <input
                       type="checkbox"
                       checked={productCategoryIds.includes(categoryId)}
@@ -251,42 +261,42 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
             </div>
           </div>
 
-          <div className="product-form-section">
+          <div className={cx('product-form-section')}>
             <div>
-              <p className="eyebrow">Variant</p>
+              <p className={cx('eyebrow')}>Variant</p>
               <h2>Додати варіант товару</h2>
             </div>
-            <div className="form-grid-3">
-              <label className="field">
+            <div className={cx('form-grid-3')}>
+              <label className={cx('field')}>
                 <span>Колір</span>
                 <input required maxLength="50" value={currentVariant.color} onChange={(event) => updateCurrentVariant('color', event.target.value)} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Розмір</span>
                 <input required maxLength="20" value={currentVariant.size} onChange={(event) => updateCurrentVariant('size', event.target.value)} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Кількість</span>
                 <input min="1" type="number" value={currentVariant.quantity} onChange={(event) => updateCurrentVariant('quantity', event.target.value)} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Собівартість</span>
                 <input min="0" step="0.01" type="number" value={currentVariant.costPrice} onChange={(event) => updateCurrentVariant('costPrice', event.target.value)} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Ціна продажу</span>
                 <input min="0" step="0.01" type="number" value={currentVariant.sellPrice} onChange={(event) => updateCurrentVariant('sellPrice', event.target.value)} />
               </label>
             </div>
             <Button type="button" variant="secondary" onClick={addVariant}>Додати ще один варіант</Button>
 
-            <div className="panel" style={{ padding: '16px', marginTop: '8px' }}>
+            <div className={cx('panel')} style={{ padding: '16px', marginTop: '8px' }}>
               <h3 style={{ margin: '0 0 12px' }}>Варіанти товару ({variants.length})</h3>
               {variants.length === 0 ? (
                 <p style={{ margin: 0 }}>Ще не додано жодного варіанту</p>
               ) : (
                 <div>
-                  <div className="table-header product-table">
+                  <div className={cx('table-header', 'product-table')}>
                     <span>Колір</span>
                     <span>Розмір</span>
                     <span>Кількість</span>
@@ -294,7 +304,7 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
                     <span>Ціна продажу</span>
                   </div>
                   {variants.map((variant) => (
-                    <div key={variant.id} className="table-row product-table">
+                    <div key={variant.id} className={cx('table-row', 'product-table')}>
                       <span>{variant.color}</span>
                       <span>{variant.size}</span>
                       <span>{variant.quantity}</span>
@@ -310,22 +320,22 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
             </div>
           </div>
 
-          <div className="product-form-section">
+          <div className={cx('product-form-section')}>
             <div>
-              <p className="eyebrow">Images</p>
+              <p className={cx('eyebrow')}>Images</p>
               <h2>Фото товару</h2>
             </div>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Додати фото</span>
               <input multiple accept="image/*" type="file" onChange={handleImageChange} />
             </label>
 
-            <div className="panel" style={{ padding: '16px', marginTop: '8px' }}>
+            <div className={cx('panel')} style={{ padding: '16px', marginTop: '8px' }}>
               <h3 style={{ margin: '0 0 12px' }}>Додані фото ({images.length})</h3>
               {images.length === 0 ? (
                 <p style={{ margin: 0 }}>Фото не додано. Товар можна створити і без фото.</p>
               ) : (
-                <div className="table-header product-table" style={{ gridTemplateColumns: '1.4fr 1fr 0.8fr 0.8fr 0.7fr' }}>
+                <div className={cx('table-header', 'product-table')} style={{ gridTemplateColumns: '1.4fr 1fr 0.8fr 0.8fr 0.7fr' }}>
                   <span>Файл</span>
                   <span>Розмір</span>
                   <span>Головне</span>
@@ -335,7 +345,7 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
               )}
 
               {images.map((image, index) => (
-                <div key={`${image.name}-${index}`} className="table-row product-table" style={{ gridTemplateColumns: '1.4fr 1fr 0.8fr 0.8fr 0.7fr' }}>
+                <div key={`${image.name}-${index}`} className={cx('table-row', 'product-table')} style={{ gridTemplateColumns: '1.4fr 1fr 0.8fr 0.8fr 0.7fr' }}>
                   <span>{image.name}</span>
                   <span>{(image.size / 1024 / 1024).toFixed(2)} MB</span>
                   <span>
@@ -352,40 +362,40 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
             </div>
           </div>
 
-          {error && <p className="form-error">{error}</p>}
-          {notice && <p className="settings-message">{notice}</p>}
+          {error && <p className={cx('form-error')}>{error}</p>}
+          {notice && <p className={cx('settings-message')}>{notice}</p>}
         </section>
 
-        <aside className="panel product-summary-card">
-          <p className="eyebrow">Preview</p>
+        <aside className={cx('panel', 'product-summary-card')}>
+          <p className={cx('eyebrow')}>Preview</p>
           <h2>{name || 'Новий товар'}</h2>
           <p>{description || 'Опис зʼявиться тут після заповнення форми.'}</p>
 
-          <div className="summary-pill-list">
+          <div className={cx('summary-pill-list')}>
             <span>{selectedWarehouse ? getValue(selectedWarehouse, 'name', 'Name') : 'Склад не обрано'}</span>
             <span>{selectedCategories.length ? selectedCategories.map((item) => getValue(item, 'name', 'Name')).join(', ') : 'Без категорії'}</span>
             <span>Варіантів: {variants.length}</span>
             <span>Фото: {images.length}</span>
           </div>
 
-          <div className="summary-line">
+          <div className={cx('summary-line')}>
             <span>Загальна кількість</span>
             <strong>{summary.quantityTotal.toLocaleString('uk-UA')}</strong>
           </div>
-          <div className="summary-line">
+          <div className={cx('summary-line')}>
             <span>Собівартість залишку</span>
             <strong>{summary.costTotal.toLocaleString('uk-UA')} грн</strong>
           </div>
-          <div className="summary-line">
+          <div className={cx('summary-line')}>
             <span>Потенційний продаж</span>
             <strong>{summary.saleTotal.toLocaleString('uk-UA')} грн</strong>
           </div>
-          <div className="summary-total">
+          <div className={cx('summary-total')}>
             <span>Потенційний прибуток</span>
             <strong>{summary.profit.toLocaleString('uk-UA')} грн</strong>
           </div>
 
-          <Button className="full-width" type="submit" disabled={isSubmitting}>
+          <Button className={cx('full-width')} type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Створення товару і завантаження фото...' : 'Створити товар'}
           </Button>
         </aside>

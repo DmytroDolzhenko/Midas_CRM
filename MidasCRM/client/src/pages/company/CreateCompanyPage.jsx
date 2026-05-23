@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { Button } from '../../components/Button.jsx'
 import { Input } from '../../components/Input.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Company.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, error, onLogout }) {
   const [name, setName] = useState('')
@@ -24,19 +34,19 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
   }
 
   return (
-    <main className="company-setup-page">
-      <section className="company-setup-card">
-        <div className="company-setup-copy">
-          <p className="eyebrow">Перший запуск</p>
+    <main className={cx('company-setup-page')}>
+      <section className={cx('company-setup-card')}>
+        <div className={cx('company-setup-copy')}>
+          <p className={cx('eyebrow')}>Перший запуск</p>
           <h1>Створіть компанію</h1>
           <p>
             Компанія обʼєднує товари, продажі, клієнтів і фінанси в одному робочому просторі.
             Після створення ви одразу перейдете до CRM.
           </p>
-          <div className="company-user-chip">{userEmail}</div>
+          <div className={cx('company-user-chip')}>{userEmail}</div>
         </div>
 
-        <form className="company-setup-form" onSubmit={handleSubmit}>
+        <form className={cx('company-setup-form')} onSubmit={handleSubmit}>
           <Input
             label="Назва компанії"
             value={name}
@@ -52,13 +62,13 @@ export function CreateCompanyPage({ userEmail, onCreateCompany, isSubmitting, er
             placeholder="Необовʼязково"
           />
 
-          {(formError || error) && <p className="form-error">{formError || error}</p>}
+          {(formError || error) && <p className={cx('form-error')}>{formError || error}</p>}
 
-          <Button className="full-width" type="submit" disabled={isSubmitting}>
+          <Button className={cx('full-width')} type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Створюємо...' : 'Створити компанію'}
           </Button>
 
-          <Button className="full-width" type="button" variant="secondary" onClick={onLogout}>
+          <Button className={cx('full-width')} type="button" variant="secondary" onClick={onLogout}>
             Вийти
           </Button>
         </form>

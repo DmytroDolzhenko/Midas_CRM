@@ -1,9 +1,15 @@
 import { StatusBadge } from '../../../components/StatusBadge.jsx'
+import sharedStyles from '../../../styles/Shared.module.css'
+
+
+const cx = (...classes) => classes.map((className) => sharedStyles[className] ?? className).join(' ')
+
+
 
 export function OrdersTable({ orders }) {
   return (
     <>
-      <div className="table-header sales-table">
+      <div className={cx('table-header', 'sales-table')}>
         <span>Номер</span>
         <span>Клієнт</span>
         <span>Канал</span>
@@ -11,7 +17,7 @@ export function OrdersTable({ orders }) {
         <span>Статус</span>
       </div>
       {orders.map((order) => (
-        <div className="table-row sales-table" key={order.id}>
+        <div className={cx('table-row', 'sales-table')} key={order.id}>
           <strong>{order.code}</strong>
           <span>{order.customer}</span>
           <span>{order.channel}</span>

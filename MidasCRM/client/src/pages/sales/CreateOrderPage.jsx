@@ -1,5 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Button } from '../../components/Button.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Sales.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 const serviceTypes = [
   { id: 0, label: 'Двері - двері' },
@@ -83,26 +93,26 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   }
 
   return (
-    <section className="page-stack">
-      <div className="page-header">
+    <section className={cx('page-stack')}>
+      <div className={cx('page-header')}>
         <div>
-          <p className="eyebrow">Sales</p>
+          <p className={cx('eyebrow')}>Sales</p>
           <h1>Новий продаж</h1>
         </div>
         <Button variant="secondary" onClick={onBack}>До продажів</Button>
       </div>
 
-      <form className="wide-form" onSubmit={handleSubmit}>
-        <section className="panel form-section">
-          <div className="form-grid-3">
-            <label className="field span-2">
+      <form className={cx('wide-form')} onSubmit={handleSubmit}>
+        <section className={cx('panel', 'form-section')}>
+          <div className={cx('form-grid-3')}>
+            <label className={cx('field', 'span-2')}>
               <span>Товар</span>
-              <button className="product-picker-button" type="button" onClick={() => setIsProductPickerOpen(true)}>
+              <button className={cx('product-picker-button')} type="button" onClick={() => setIsProductPickerOpen(true)}>
                 <strong>{selectedProduct?.name ?? 'Оберіть товар'}</strong>
                 <small>{selectedProduct ? `${selectedProduct.sku} · ${selectedProduct.warehouse}` : 'Відкрити каталог товарів'}</small>
               </button>
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Клієнт</span>
               <select required value={selectedCustomerId} onChange={(event) => setCustomerId(event.target.value)}>
                 {customers.map((customer) => (
@@ -112,16 +122,16 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                 ))}
               </select>
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Кількість</span>
               <input min="1" type="number" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
             </label>
           </div>
 
-          <div className="delivery-box">
+          <div className={cx('delivery-box')}>
             <strong>Параметри замовлення</strong>
-            <div className="form-grid-3">
-              <label className="field">
+            <div className={cx('form-grid-3')}>
+              <label className={cx('field')}>
                 <span>Тип сервісу</span>
                 <select value={serviceType} onChange={(event) => setServiceType(Number(event.target.value))}>
                   {serviceTypes.map((item) => (
@@ -129,7 +139,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                   ))}
                 </select>
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Тип вантажу</span>
                 <select value={cargoType} onChange={(event) => setCargoType(Number(event.target.value))}>
                   {cargoTypes.map((item) => (
@@ -137,7 +147,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                   ))}
                 </select>
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Оплата</span>
                 <select value={paymentMethod} onChange={(event) => setPaymentMethod(Number(event.target.value))}>
                   {paymentMethods.map((item) => (
@@ -145,68 +155,68 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                   ))}
                 </select>
               </label>
-              <label className="field span-2">
+              <label className={cx('field', 'span-2')}>
                 <span>Опис</span>
                 <textarea rows="3" value={description} onChange={(event) => setDescription(event.target.value)} placeholder={selectedProduct?.name ?? ''} />
               </label>
             </div>
           </div>
 
-          <div className="delivery-box">
+          <div className={cx('delivery-box')}>
             <strong>Адреса доставки</strong>
-            <div className="form-grid-3">
-              <label className="field">
+            <div className={cx('form-grid-3')}>
+              <label className={cx('field')}>
                 <span>Місто</span>
                 <input required maxLength="100" value={city} onChange={(event) => setCity(event.target.value)} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Поштовий код</span>
                 <input min="1" type="number" value={postalCode} onChange={(event) => setPostalCode(Number(event.target.value))} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Відділення НП</span>
                 <input min="1" type="number" value={postDepartmentNumber} onChange={(event) => setPostDepartmentNumber(Number(event.target.value))} />
               </label>
             </div>
           </div>
 
-          {error && <p className="form-error">{error}</p>}
+          {error && <p className={cx('form-error')}>{error}</p>}
         </section>
 
-        <section className="panel summary-panel">
+        <section className={cx('panel', 'summary-panel')}>
           <h2>Підсумок продажу</h2>
-          <div className="summary-line">
+          <div className={cx('summary-line')}>
             <span>Товар</span>
             <strong>{selectedProduct?.name ?? '-'}</strong>
           </div>
-          <div className="summary-line">
+          <div className={cx('summary-line')}>
             <span>Кількість</span>
             <strong>{quantity}</strong>
           </div>
-          <div className="summary-total">
+          <div className={cx('summary-total')}>
             <span>Орієнтовна сума</span>
             <strong>{subtotal.toLocaleString('uk-UA')} грн</strong>
           </div>
-          <Button className="full-width" type="submit" disabled={isSubmitting}>
+          <Button className={cx('full-width')} type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Створення...' : 'Створити продаж'}
           </Button>
         </section>
       </form>
 
       {isProductPickerOpen && (
-        <div className="modal-backdrop" role="presentation" onClick={() => setIsProductPickerOpen(false)}>
-          <section className="product-picker-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <div className="settings-header">
+        <div className={cx('modal-backdrop')} role="presentation" onClick={() => setIsProductPickerOpen(false)}>
+          <section className={cx('product-picker-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className={cx('settings-header')}>
               <div>
-                <p className="eyebrow">Catalog</p>
+                <p className={cx('eyebrow')}>Catalog</p>
                 <h2>Оберіть товар</h2>
               </div>
-              <button className="modal-close-button" type="button" onClick={() => setIsProductPickerOpen(false)}>x</button>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setIsProductPickerOpen(false)}>x</button>
             </div>
-            <div className="product-picker-search">
+            <div className={cx('product-picker-search')}>
               <input value={productQuery} onChange={(event) => setProductQuery(event.target.value)} placeholder="Пошук за назвою, артикулом або складом" />
             </div>
-            <div className="product-picker-list">
+            <div className={cx('product-picker-list')}>
               {filteredProducts.map((product) => (
                 <button key={product.id} type="button" onClick={() => chooseProduct(product)}>
                   <span>

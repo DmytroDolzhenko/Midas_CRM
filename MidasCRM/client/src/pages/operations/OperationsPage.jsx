@@ -1,6 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
 import { OperationsTable } from '../../features/operations/components/OperationsTable.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Operations.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 const PAGE_SIZE = 10
 
@@ -36,9 +46,9 @@ export function OperationsPage({ operations }) {
   }
 
   return (
-    <section className="page-stack">
-      <section className="panel">
-        <div className="table-filter-grid">
+    <section className={cx('page-stack')}>
+      <section className={cx('panel')}>
+        <div className={cx('table-filter-grid')}>
           <input
             aria-label="Пошук історії"
             placeholder="Пошук в історії"

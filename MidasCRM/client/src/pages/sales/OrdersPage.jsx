@@ -1,5 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Sales.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 const statusTabs = ['Всі', 'Продано', 'Повернення']
 const quickFilters = ['Сьогодні', 'Вчора', 'Тиждень', '30 днів', 'Цей місяць', 'Минулий місяць', '3 місяці']
@@ -136,26 +146,26 @@ export function OrdersPage({ orders, onNavigate }) {
   }
 
   return (
-    <section className="sales-page">
-      <div className="sales-toolbar panel">
-        <div className="sales-tabs-row">
-          <div className="tabs">
+    <section className={cx('sales-page')}>
+      <div className={cx('sales-toolbar', 'panel')}>
+        <div className={cx('sales-tabs-row')}>
+          <div className={cx('tabs')}>
             {statusTabs.map((tab) => (
               <button
                 key={tab}
                 type="button"
-                className={activeStatus === tab ? 'tab-button active' : 'tab-button'}
+                className={activeStatus === tab ? cx('tab-button', 'active') : cx('tab-button')}
                 onClick={() => { setActiveStatus(tab); setPage(1) }}
               >
                 {tab}
               </button>
             ))}
           </div>
-          <button className="warehouse-add-button" type="button" onClick={() => onNavigate('createOrder')}>+</button>
-          <div className="relative-menu">
-            <button className="dots-button" type="button" onClick={() => setIsMenuOpen((isOpen) => !isOpen)}>...</button>
+          <button className={cx('warehouse-add-button')} type="button" onClick={() => onNavigate('createOrder')}>+</button>
+          <div className={cx('relative-menu')}>
+            <button className={cx('dots-button')} type="button" onClick={() => setIsMenuOpen((isOpen) => !isOpen)}>...</button>
             {isMenuOpen && (
-              <div className="floating-menu">
+              <div className={cx('floating-menu')}>
                 <button type="button" onClick={exportSales}>Експортувати продажі</button>
                 <button type="button" onClick={() => setIsFilterOpen(true)}>Відкрити фільтр</button>
                 <button type="button" onClick={() => onNavigate('createOrder')}>Створити продаж</button>
@@ -164,7 +174,7 @@ export function OrdersPage({ orders, onNavigate }) {
           </div>
         </div>
 
-        <div className="sales-filter-grid">
+        <div className={cx('sales-filter-grid')}>
           <input
             aria-label="Пошукова фраза"
             placeholder="Пошукова фраза"
@@ -173,21 +183,21 @@ export function OrdersPage({ orders, onNavigate }) {
           />
           <input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1) }} />
           <input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1) }} />
-          <button className="icon-button flat-icon-button" type="button" aria-label="Експорт" onClick={exportSales}>
+          <button className={cx('icon-button', 'flat-icon-button')} type="button" aria-label="Експорт" onClick={exportSales}>
             <ExportIcon />
           </button>
-          <button className="secondary-button" type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>Фільтр</button>
+          <button className={cx('secondary-button')} type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>Фільтр</button>
         </div>
 
-        <div className="quick-filter-row">
+        <div className={cx('quick-filter-row')}>
           {quickFilters.map((filter) => (
             <button key={filter} type="button" onClick={() => applyQuickFilter(filter)}>{filter}</button>
           ))}
         </div>
 
         {isFilterOpen && (
-          <div className="inline-filter-panel">
-            <label className="field">
+          <div className={cx('inline-filter-panel')}>
+            <label className={cx('field')}>
               <span>Статус</span>
               <select value={activeStatus} onChange={(event) => { setActiveStatus(event.target.value); setPage(1) }}>
                 {statusTabs.map((tab) => (
@@ -195,15 +205,15 @@ export function OrdersPage({ orders, onNavigate }) {
                 ))}
               </select>
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Пошук</span>
               <input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} />
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Сума від</span>
               <input min="0" type="number" value={minTotal} onChange={(event) => { setMinTotal(event.target.value); setPage(1) }} />
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Сума до</span>
               <input min="0" type="number" value={maxTotal} onChange={(event) => { setMaxTotal(event.target.value); setPage(1) }} />
             </label>
@@ -211,7 +221,7 @@ export function OrdersPage({ orders, onNavigate }) {
         )}
       </div>
 
-      <div className="inventory-widget-grid">
+      <div className={cx('inventory-widget-grid')}>
         <article><span>Продажів загалом</span><strong>{filteredOrders.length} ({analytics.quantity.toFixed(2)} од.)</strong></article>
         <article><span>Продано на</span><strong>{analytics.total.toLocaleString('uk-UA')} грн.</strong></article>
         <article><span>Зароблено</span><strong>{analytics.profit.toLocaleString('uk-UA')} грн.</strong></article>
@@ -219,8 +229,8 @@ export function OrdersPage({ orders, onNavigate }) {
         <article><span>Комісія</span><strong>0.00 грн.</strong></article>
       </div>
 
-      <section className="sales-table-card panel">
-        <div className="sales-layout-header">
+      <section className={cx('sales-table-card', 'panel')}>
+        <div className={cx('sales-layout-header')}>
           <span>Продаж</span>
           <span>Покупець</span>
           <span>Доставка</span>
@@ -231,15 +241,15 @@ export function OrdersPage({ orders, onNavigate }) {
         </div>
 
         {filteredOrders.length === 0 ? (
-          <div className="sales-empty-state">
+          <div className={cx('sales-empty-state')}>
             <h2>Немає продажів</h2>
-            <button className="primary-button" type="button" onClick={() => onNavigate('createOrder')}>
+            <button className={cx('primary-button')} type="button" onClick={() => onNavigate('createOrder')}>
               Додати перший продаж
             </button>
           </div>
         ) : (
           paginatedOrders.map((order) => (
-            <div className="sales-layout-row" key={order.id}>
+            <div className={cx('sales-layout-row')} key={order.id}>
               <strong>{order.code}</strong>
               <span>{order.customer}</span>
               <span>{order.deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж'}</span>
@@ -254,35 +264,35 @@ export function OrdersPage({ orders, onNavigate }) {
       </section>
 
       {selectedOrder && (
-        <div className="modal-backdrop" role="presentation" onClick={() => setSelectedOrder(null)}>
-          <section className="small-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <div className="settings-header">
+        <div className={cx('modal-backdrop')} role="presentation" onClick={() => setSelectedOrder(null)}>
+          <section className={cx('small-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className={cx('settings-header')}>
               <div>
-                <p className="eyebrow">Sale</p>
+                <p className={cx('eyebrow')}>Sale</p>
                 <h2>{selectedOrder.code}</h2>
               </div>
-              <button className="modal-close-button" type="button" onClick={() => setSelectedOrder(null)}>×</button>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setSelectedOrder(null)}>×</button>
             </div>
-            <div className="settings-grid">
-              <label className="field">
+            <div className={cx('settings-grid')}>
+              <label className={cx('field')}>
                 <span>Покупець</span>
                 <input readOnly value={selectedOrder.customer} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Товар</span>
                 <input readOnly value={selectedOrder.product} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Канал</span>
                 <input readOnly value={selectedOrder.channel} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Сума</span>
                 <input readOnly value={`${Number(selectedOrder.total).toLocaleString('uk-UA')} грн.`} />
               </label>
             </div>
-            <div className="settings-actions">
-              <button className="primary-button" type="button" onClick={() => setSelectedOrder(null)}>Закрити</button>
+            <div className={cx('settings-actions')}>
+              <button className={cx('primary-button')} type="button" onClick={() => setSelectedOrder(null)}>Закрити</button>
             </div>
           </section>
         </div>

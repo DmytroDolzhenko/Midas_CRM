@@ -1,7 +1,12 @@
+
+import sharedStyles from '../../../styles/Shared.module.css'
+
+const cx = (...classes) => classes.map((className) => sharedStyles[className] ?? className).join(' ')
+
 export function ProductsTable({ products }) {
   return (
     <>
-      <div className="table-header product-table">
+      <div className={cx('table-header', 'product-table')}>
         <span>Артикул</span>
         <span>Назва</span>
         <span>Бренд</span>
@@ -9,7 +14,7 @@ export function ProductsTable({ products }) {
         <span>Ціна</span>
       </div>
       {products.map((product) => (
-        <div className="table-row product-table" key={product.id}>
+        <div className={cx('table-row', 'product-table')} key={product.id}>
           <strong>{product.sku}</strong>
           <span>{product.name}</span>
           <span>{product.brand}</span>

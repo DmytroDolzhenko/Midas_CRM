@@ -1,6 +1,7 @@
 import { useRegistrationForm } from '../hooks/useRegistrationForm.js'
 import { Button } from '../../../components/Button.jsx'
 import { Input } from '../../../components/Input.jsx'
+import styles from '../styles/Auth.module.css'
 
 export function RegistrationForm({ onRegister }) {
   const {
@@ -23,19 +24,19 @@ export function RegistrationForm({ onRegister }) {
   } = useRegistrationForm(onRegister)
 
   return (
-    <form className="auth-card auth-card-wide" onSubmit={submit}>
-      <div className="auth-card-header">
+    <form className={`${styles['auth-card']} ${styles['auth-card-wide']}`} onSubmit={submit}>
+      <div className={styles['auth-card-header']}>
         <p className="eyebrow">Midas CRM</p>
         <h1>Створення акаунта</h1>
         <p>Заповніть дані користувача. Після реєстрації система автоматично виконає вхід.</p>
       </div>
 
-      <div className="auth-switch">
+      <div className={styles['auth-switch']}>
         <a href="/login">Увійти</a>
-        <a className="active" href="/register">Зареєструватись</a>
+        <a className={styles.active} href="/register">Зареєструватись</a>
       </div>
 
-      <div className="auth-form-grid">
+      <div className={styles['auth-form-grid']}>
         <Input label="Імʼя" value={name} onChange={(event) => setName(event.target.value)} />
         <Input label="Прізвище" value={surname} onChange={(event) => setSurname(event.target.value)} />
         <Input label="По батькові" value={fathername} onChange={(event) => setFathername(event.target.value)} />
@@ -43,7 +44,7 @@ export function RegistrationForm({ onRegister }) {
         <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         <Input label="Пароль" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
         <Input
-          className="auth-grid-span"
+          className={styles['auth-grid-span']}
           label="Підтвердження пароля"
           type="password"
           value={confirmPassword}

@@ -2,6 +2,16 @@ import { useMemo, useState } from 'react'
 import { MetricCard } from '../../components/MetricCard.jsx'
 import { OperationsTable } from '../../features/operations/components/OperationsTable.jsx'
 import { OrdersTable } from '../../features/sales/components/OrdersTable.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Dashboard.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 const periodLabels = {
   day: 'День',
@@ -26,14 +36,14 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
   const conversionRate = stats.customers > 0 ? Math.round((stats.sales / stats.customers) * 100) : 0
 
   return (
-    <section className="page-stack">
-      <div className="page-header">
-        <div className="tabs">
+    <section className={cx('page-stack')}>
+      <div className={cx('page-header')}>
+        <div className={cx('tabs')}>
           {Object.entries(periodLabels).map(([value, label]) => (
             <button
               key={value}
               type="button"
-              className={period === value ? 'tab-button active' : 'tab-button'}
+              className={period === value ? cx('tab-button', 'active') : cx('tab-button')}
               onClick={() => setPeriod(value)}
             >
               {label}
@@ -42,7 +52,7 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
         </div>
       </div>
 
-      <div className="metric-grid">
+      <div className={cx('metric-grid')}>
         <MetricCard label="Статистика продажів" value={periodStats.sales} hint={`За період: ${periodLabels[period]}`} />
         <MetricCard
           label="Прибуток валовий"
@@ -57,10 +67,10 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
         <MetricCard label="Товари" value={stats.products} hint="Активні позиції на складах" />
       </div>
 
-      <div className="insight-grid">
-        <section className="panel insight-panel">
+      <div className={cx('insight-grid')}>
+        <section className={cx('panel', 'insight-panel')}>
           <h2>Фінансовий огляд</h2>
-          <div className="insight-list">
+          <div className={cx('insight-list')}>
             <span>
               <strong>{stats.revenue.toLocaleString('uk-UA')} грн</strong>
               Оборот
@@ -76,25 +86,25 @@ export function DashboardPage({ stats, sales, recentSales, operations }) {
           </div>
         </section>
 
-        <section className="panel insight-panel">
+        <section className={cx('panel', 'insight-panel')}>
           <h2>Канали</h2>
-          <div className="channel-summary">
+          <div className={cx('channel-summary')}>
             <span>Усього продажів</span>
             <strong>{sales.length}</strong>
           </div>
-          <div className="channel-summary">
+          <div className={cx('channel-summary')}>
             <span>Товарів</span>
             <strong>{stats.products}</strong>
           </div>
         </section>
       </div>
 
-      <section className="panel">
+      <section className={cx('panel')}>
         <h2>Останні продажі</h2>
         <OrdersTable orders={recentSales} />
       </section>
 
-      <section className="panel">
+      <section className={cx('panel')}>
         <h2>Останні операції</h2>
         <OperationsTable operations={operations} />
       </section>

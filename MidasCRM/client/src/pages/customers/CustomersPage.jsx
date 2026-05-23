@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
 import { CustomersTable } from '../../features/customers/components/CustomersTable.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+
+
+const cx = (...classes) => classes.map((className) => sharedStyles[className] ?? className).join(' ')
+
+
 
 const PAGE_SIZE = 10
 
@@ -15,9 +21,9 @@ export function CustomersPage({ customers = [] }) {
   const paginatedCustomers = filteredCustomers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
-    <section className="page-stack">
-      <section className="panel">
-        <div className="toolbar">
+    <section className={cx('page-stack')}>
+      <section className={cx('panel')}>
+        <div className={cx('toolbar')}>
           <input
             aria-label="Пошук клієнтів"
             placeholder="Пошук за ім'ям, телефоном або поштою"

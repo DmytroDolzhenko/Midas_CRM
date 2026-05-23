@@ -1,5 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Finance.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 const categories = ['Загальні', 'Доставка', 'Пакування', 'Маркетинг', 'Оренда']
 const stores = ['Основний склад']
@@ -75,15 +85,15 @@ export function FinancesPage({ finances, onCreate }) {
   }
 
   return (
-    <section className="page-stack">
-      <div className="crm-page-header">
-        <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
+    <section className={cx('page-stack')}>
+      <div className={cx('crm-page-header')}>
+        <button className={cx('primary-button')} type="button" onClick={() => setIsModalOpen(true)}>
           Додати фінансову операцію
         </button>
       </div>
 
-      <section className="panel">
-        <div className="table-filter-grid">
+      <section className={cx('panel')}>
+        <div className={cx('table-filter-grid')}>
           <input
             aria-label="Пошук фінансових операцій"
             placeholder="Пошук за описом, категорією або рахунком"
@@ -105,7 +115,7 @@ export function FinancesPage({ finances, onCreate }) {
           <input type="date" value={dateFrom} onChange={(event) => updateFilter(setDateFrom, event.target.value)} />
           <input type="date" value={dateTo} onChange={(event) => updateFilter(setDateTo, event.target.value)} />
         </div>
-        <div className="table-header expenses-table">
+        <div className={cx('table-header', 'expenses-table')}>
           <span>Дата</span>
           <span>Категорія</span>
           <span>Опис</span>
@@ -113,15 +123,15 @@ export function FinancesPage({ finances, onCreate }) {
           <span>Сума</span>
         </div>
         {filteredFinances.length === 0 ? (
-          <div className="expense-empty">
+          <div className={cx('expense-empty')}>
             <h2>Фінансові операції поки немає</h2>
-            <button className="primary-button" type="button" onClick={() => setIsModalOpen(true)}>
+            <button className={cx('primary-button')} type="button" onClick={() => setIsModalOpen(true)}>
               Додати першу фінансову операцію
             </button>
           </div>
         ) : (
           paginatedFinances.map((finance) => (
-            <div className="table-row expenses-table" key={finance.id}>
+            <div className={cx('table-row', 'expenses-table')} key={finance.id}>
               <span>{finance.date}</span>
               <strong>{finance.category}</strong>
               <span>{finance.description}</span>
@@ -134,20 +144,20 @@ export function FinancesPage({ finances, onCreate }) {
       </section>
 
       {isModalOpen && (
-        <div className="modal-backdrop" role="presentation" onClick={closeModal}>
-          <form className="expense-modal" onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()}>
-            <div className="settings-header">
+        <div className={cx('modal-backdrop')} role="presentation" onClick={closeModal}>
+          <form className={cx('expense-modal')} onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()}>
+            <div className={cx('settings-header')}>
               <div>
-                <p className="eyebrow">Expense</p>
+                <p className={cx('eyebrow')}>Expense</p>
                 <h2>Додати витрату</h2>
               </div>
-              <button className="modal-close-button" type="button" onClick={closeModal}>
+              <button className={cx('modal-close-button')} type="button" onClick={closeModal}>
                 ×
               </button>
             </div>
 
-            <div className="expense-form-grid">
-              <label className="field">
+            <div className={cx('expense-form-grid')}>
+              <label className={cx('field')}>
                 <span>Сума витрати</span>
                 <input
                   required
@@ -158,7 +168,7 @@ export function FinancesPage({ finances, onCreate }) {
                   onChange={(event) => setAmount(event.target.value)}
                 />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Категорія витрат</span>
                 <select value={category} onChange={(event) => setCategory(event.target.value)}>
                   {categories.map((item) => (
@@ -166,7 +176,7 @@ export function FinancesPage({ finances, onCreate }) {
                   ))}
                 </select>
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Склад/Магазин</span>
                 <select value={store} onChange={(event) => setStore(event.target.value)}>
                   {stores.map((item) => (
@@ -174,7 +184,7 @@ export function FinancesPage({ finances, onCreate }) {
                   ))}
                 </select>
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Списати з рахунку</span>
                 <select value={account} onChange={(event) => setAccount(event.target.value)}>
                   {accounts.map((item) => (
@@ -182,11 +192,11 @@ export function FinancesPage({ finances, onCreate }) {
                   ))}
                 </select>
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Дата</span>
                 <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
               </label>
-              <label className="field span-2">
+              <label className={cx('field', 'span-2')}>
                 <span>Опис витрати</span>
                 <textarea
                   rows="4"
@@ -197,15 +207,15 @@ export function FinancesPage({ finances, onCreate }) {
               </label>
             </div>
 
-            <div className="expense-modal-actions">
-              <button className="link-button" type="button" onClick={() => saveFinances('Заплановано')}>
+            <div className={cx('expense-modal-actions')}>
+              <button className={cx('link-button')} type="button" onClick={() => saveFinances('Заплановано')}>
                 Запланувати витрату
               </button>
               <div>
-                <button className="secondary-button" type="button" onClick={closeModal}>
+                <button className={cx('secondary-button')} type="button" onClick={closeModal}>
                   Закрити
                 </button>
-                <button className="primary-button" type="submit">
+                <button className={cx('primary-button')} type="submit">
                   Додати витрату
                 </button>
               </div>

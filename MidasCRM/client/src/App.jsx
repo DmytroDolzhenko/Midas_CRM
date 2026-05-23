@@ -15,6 +15,8 @@ import { RegistrationPage } from './pages/auth/RegistrationPage.jsx'
 import { CreateCompanyPage } from './pages/company/CreateCompanyPage.jsx'
 import { CompanyPage } from './pages/company/CompanyPage.jsx'
 import { serverApi } from './lib/serverApi.js'
+import authStyles from './features/auth/styles/Auth.module.css'
+import companyStyles from './styles/pages/Company.module.css'
 
 function formatDateTime(date) {
   return new Intl.DateTimeFormat('uk-UA', {
@@ -139,7 +141,7 @@ export function App() {
   const [apiError, setApiError] = useState('')
   const [finances, setFinances] = useLocalStorage('midas-finances-v1', [])
   const [operations, setOperations] = useLocalStorage('midas-operations-v2', [])
-  const [theme, setTheme] = useLocalStorage('midas-theme', 'light')
+  const [theme, setTheme] = useLocalStorage('midas-theme', 'dark')
   const [companies, setCompanies] = useState([])
   const [activeCompanyId, setActiveCompanyId] = useLocalStorage('midas-active-company-id', null)
   const [requiresCompany, setRequiresCompany] = useState(false)
@@ -148,6 +150,10 @@ export function App() {
   const [companyError, setCompanyError] = useState('')
   const [companyPageError, setCompanyPageError] = useState('')
   const [isCompanyActionLoading, setIsCompanyActionLoading] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light'
+  }, [theme])
 
   async function loadServerData() {
     setIsLoading(true)
@@ -499,18 +505,18 @@ export function App() {
   if (!user) {
     const currentPath = window.location.pathname.toLowerCase()
     if (currentPath === '/register') {
-      return <RegistrationPage onRegister={register} />
+      return <RegistrationPage onRegister={register} theme={theme} />
     }
 
-    return <LoginPage onLogin={login} />
+    return <LoginPage onLogin={login} theme={theme} />
   }
 
   if (isCheckingCompany) {
     return (
-      <main className="login-page">
-        <div className="login-card">
+      <main className={authStyles['login-page']} data-theme={theme === 'dark' ? 'dark' : 'light'}>
+        <div className={authStyles['login-card']}>
           <h1>Завантажуємо дані</h1>
-          <p className="create-company-subtitle">Перевіряємо доступ до компаній і готуємо робочий простір.</p>
+          <p className={companyStyles['create-company-subtitle']}>Перевіряємо доступ до компаній і готуємо робочий простір.</p>
         </div>
       </main>
     )

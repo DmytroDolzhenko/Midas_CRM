@@ -1,5 +1,15 @@
 import { useMemo, useRef, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Products.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
+
+
 
 const PAGE_SIZE = 8
 const stockFilters = [
@@ -169,34 +179,34 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
   }
 
   return (
-    <section className="catalog-page">
-      <div className="catalog-toolbar panel">
-        <div className="warehouse-tabs">
+    <section className={cx('catalog-page')}>
+      <div className={cx('catalog-toolbar', 'panel')}>
+        <div className={cx('warehouse-tabs')}>
           {warehouses.map((warehouse) => {
             const warehouseId = String(getValue(warehouse, 'id', 'Id'))
             return (
               <button
                 key={warehouseId}
                 type="button"
-                className={warehouseId === String(selectedWarehouseId) ? 'warehouse-tab active' : 'warehouse-tab'}
+                className={warehouseId === String(selectedWarehouseId) ? cx('warehouse-tab', 'active') : cx('warehouse-tab')}
                 onClick={() => updateWarehouse(warehouseId)}
               >
                 {getValue(warehouse, 'name', 'Name')}
               </button>
             )
           })}
-          <button className="warehouse-add-button" type="button" onClick={openCreateWarehouse}>+</button>
-          <button className="dots-button" type="button" onClick={openEditWarehouse}>...</button>
+          <button className={cx('warehouse-add-button')} type="button" onClick={openCreateWarehouse}>+</button>
+          <button className={cx('dots-button')} type="button" onClick={openEditWarehouse}>...</button>
         </div>
 
-        <div className="catalog-filters">
+        <div className={cx('catalog-filters')}>
           <input
             aria-label="Пошук товарів"
             placeholder="Пошук товарів"
             value={search}
             onChange={(event) => updateSearch(event.target.value)}
           />
-          <div className="radio-group">
+          <div className={cx('radio-group')}>
             {stockFilters.map((filter) => (
               <label key={filter.id}>
                 <input
@@ -209,29 +219,29 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
               </label>
             ))}
           </div>
-          <button className="icon-button flat-icon-button" type="button" aria-label="Експорт" onClick={exportProducts}>
+          <button className={cx('icon-button', 'flat-icon-button')} type="button" aria-label="Експорт" onClick={exportProducts}>
             <ExportIcon />
           </button>
-          <button className="secondary-button" type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>
+          <button className={cx('secondary-button')} type="button" onClick={() => setIsFilterOpen((isOpen) => !isOpen)}>
             Фільтр
           </button>
         </div>
 
         {isFilterOpen && (
-          <div className="inline-filter-panel">
-            <label className="field">
+          <div className={cx('inline-filter-panel')}>
+            <label className={cx('field')}>
               <span>Собівартість від</span>
               <input min="0" type="number" value={minCost} onChange={(event) => { setMinCost(event.target.value); setPage(1) }} />
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Собівартість до</span>
               <input min="0" type="number" value={maxCost} onChange={(event) => { setMaxCost(event.target.value); setPage(1) }} />
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Ціна від</span>
               <input min="0" type="number" value={minPrice} onChange={(event) => { setMinPrice(event.target.value); setPage(1) }} />
             </label>
-            <label className="field">
+            <label className={cx('field')}>
               <span>Ціна до</span>
               <input min="0" type="number" value={maxPrice} onChange={(event) => { setMaxPrice(event.target.value); setPage(1) }} />
             </label>
@@ -239,7 +249,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
         )}
       </div>
 
-      <div className="inventory-widget-grid">
+      <div className={cx('inventory-widget-grid')}>
         <article><span>Усього товару</span><strong>{totals.total}</strong></article>
         <article><span>В наявності</span><strong>{totals.available} товарів</strong></article>
         <article><span>Доступно</span><strong>{totals.stockUnits.toFixed(2)} одиниць</strong></article>
@@ -247,19 +257,19 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
         <article><span>Можливий дохід</span><strong>{totals.possibleIncome.toLocaleString('uk-UA')} грн</strong></article>
       </div>
 
-      <div className="inventory-actions panel">
-        <button className="success-button" type="button" onClick={() => onNavigate('createProduct')}>
+      <div className={cx('inventory-actions', 'panel')}>
+        <button className={cx('success-button')} type="button" onClick={() => onNavigate('createProduct')}>
           Додати товар
         </button>
-        <button className="primary-button" type="button" onClick={() => fileInputRef.current?.click()}>
+        <button className={cx('primary-button')} type="button" onClick={() => fileInputRef.current?.click()}>
           Імпортувати
         </button>
-        <input ref={fileInputRef} className="hidden-file-input" type="file" accept=".csv,.xlsx" onChange={handleImport} />
-        {importFileName && <span className="import-file-name">Імпортовано: {importFileName}</span>}
+        <input ref={fileInputRef} className={cx('hidden-file-input')} type="file" accept=".csv,.xlsx" onChange={handleImport} />
+        {importFileName && <span className={cx('import-file-name')}>Імпортовано: {importFileName}</span>}
       </div>
 
-      <section className="products-table-card panel">
-        <div className="products-layout-header">
+      <section className={cx('products-table-card', 'panel')}>
+        <div className={cx('products-layout-header')}>
           <span><input type="checkbox" /></span>
           <span>Товар</span>
           <span>Доступно</span>
@@ -273,10 +283,10 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
           const markup = product.cost > 0 ? Math.round(((product.price - product.cost) / product.cost) * 100) : 0
 
           return (
-            <div className="product-layout-row" key={product.id}>
-              <label className="product-check"><input type="checkbox" /></label>
-              <div className="product-main-cell">
-                <div className="product-preview" />
+            <div className={cx('product-layout-row')} key={product.id}>
+              <label className={cx('product-check')}><input type="checkbox" /></label>
+              <div className={cx('product-main-cell')}>
+                <div className={cx('product-preview')} />
                 <div>
                   <strong>{product.name}</strong>
                   <span>ID: {product.sku}</span>
@@ -284,11 +294,11 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
                   <button type="button" onClick={() => setEditingProduct(product)}>� едагувати</button>
                 </div>
               </div>
-              <div className="large-product-cell available-cell">
+              <div className={cx('large-product-cell', 'available-cell')}>
                 <strong>{product.stock}</strong>
                 <span>{product.unit}</span>
               </div>
-              <div className="large-product-cell">
+              <div className={cx('large-product-cell')}>
                 <strong>0</strong>
                 <span>продажів</span>
               </div>
@@ -302,60 +312,60 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
       </section>
 
       {editingProduct && (
-        <div className="modal-backdrop" role="presentation" onClick={() => setEditingProduct(null)}>
-          <section className="small-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <div className="settings-header">
+        <div className={cx('modal-backdrop')} role="presentation" onClick={() => setEditingProduct(null)}>
+          <section className={cx('small-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className={cx('settings-header')}>
               <div>
-                <p className="eyebrow">Product</p>
+                <p className={cx('eyebrow')}>Product</p>
                 <h2>� едагування товару</h2>
               </div>
-              <button className="modal-close-button" type="button" onClick={() => setEditingProduct(null)}>x</button>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setEditingProduct(null)}>x</button>
             </div>
-            <div className="settings-grid">
-              <label className="field">
+            <div className={cx('settings-grid')}>
+              <label className={cx('field')}>
                 <span>Назва</span>
                 <input readOnly value={editingProduct.name} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Артикул</span>
                 <input readOnly value={editingProduct.sku} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Склад</span>
                 <input readOnly value={editingProduct.warehouse} />
               </label>
-              <label className="field">
+              <label className={cx('field')}>
                 <span>Ціна продажу</span>
                 <input readOnly value={`${editingProduct.price} грн`} />
               </label>
             </div>
-            <div className="settings-actions">
-              <button className="primary-button" type="button" onClick={() => setEditingProduct(null)}>Готово</button>
+            <div className={cx('settings-actions')}>
+              <button className={cx('primary-button')} type="button" onClick={() => setEditingProduct(null)}>Готово</button>
             </div>
           </section>
         </div>
       )}
 
       {editingWarehouse && (
-        <div className="modal-backdrop" role="presentation" onClick={() => setEditingWarehouse(null)}>
-          <form className="small-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()} onSubmit={submitWarehouse}>
-            <div className="settings-header">
+        <div className={cx('modal-backdrop')} role="presentation" onClick={() => setEditingWarehouse(null)}>
+          <form className={cx('small-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()} onSubmit={submitWarehouse}>
+            <div className={cx('settings-header')}>
               <div>
-                <p className="eyebrow">Warehouse</p>
+                <p className={cx('eyebrow')}>Warehouse</p>
                 <h2>{editingWarehouse.mode === 'edit' ? '� едагувати склад' : 'Новий склад'}</h2>
               </div>
-              <button className="modal-close-button" type="button" onClick={() => setEditingWarehouse(null)}>x</button>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setEditingWarehouse(null)}>x</button>
             </div>
-            <div className="settings-grid">
-              <label className="field span-2">
+            <div className={cx('settings-grid')}>
+              <label className={cx('field', 'span-2')}>
                 <span>Назва складу</span>
                 <input value={warehouseName} maxLength="100" onChange={(event) => setWarehouseName(event.target.value)} />
               </label>
             </div>
-            {warehouseError && <p className="settings-message">{warehouseError}</p>}
-            <div className="settings-actions">
-              <button className="secondary-button" type="button" onClick={() => setEditingWarehouse(null)}>Скасувати</button>
-              <button className="primary-button" type="submit">Зберегти</button>
+            {warehouseError && <p className={cx('settings-message')}>{warehouseError}</p>}
+            <div className={cx('settings-actions')}>
+              <button className={cx('secondary-button')} type="button" onClick={() => setEditingWarehouse(null)}>Скасувати</button>
+              <button className={cx('primary-button')} type="submit">Зберегти</button>
             </div>
           </form>
         </div>

@@ -34,8 +34,10 @@ import {
 } from '@mui/material'
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
+import SearchIcon from '@mui/icons-material/Search'
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
 import { integrations as defaultIntegrations } from '../lib/integrationsApi.js'
+import styles from './AppShell.module.css'
 
 const drawerWidth = 240
 
@@ -57,11 +59,20 @@ function buildTheme(mode) {
   return createTheme({
     palette: {
       mode,
-      primary: { main: mode === 'dark' ? '#60a5fa' : '#2563eb' },
-      secondary: { main: '#14b8a6' },
+      primary: { main: mode === 'dark' ? '#fb923c' : '#f97316' },
+      secondary: { main: '#f59e0b' },
       background: {
-        default: mode === 'dark' ? '#111827' : '#f4f8ff',
-        paper: mode === 'dark' ? '#182235' : '#ffffff',
+        default: mode === 'dark' ? '#0d0805' : '#fff7ed',
+        paper: mode === 'dark' ? '#1b120d' : '#ffffff',
+      },
+      text: {
+        primary: mode === 'dark' ? '#fff7ed' : '#1f1308',
+        secondary: mode === 'dark' ? '#b8a99d' : '#7c5a3a',
+      },
+      divider: mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#fed7aa',
+      action: {
+        selected: mode === 'dark' ? 'rgba(251, 146, 60, 0.16)' : '#ffedd5',
+        hover: mode === 'dark' ? 'rgba(251, 146, 60, 0.12)' : '#ffedd5',
       },
     },
     shape: { borderRadius: 18 },
@@ -120,12 +131,10 @@ export function AppShell({
   const [integrations, setIntegrations] = useState(defaultIntegrations)
 
   const muiTheme = useMemo(() => buildTheme(theme === 'dark' ? 'dark' : 'light'), [theme])
-  const activeItem = navItems.find((item) => item.id === activePage)
-
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
-      <Box className="app-shell" data-theme={theme === 'dark' ? 'dark' : 'light'} sx={{ display: 'block', minHeight: '100vh' }}>
+      <Box className={styles['app-shell']} data-theme={theme === 'dark' ? 'dark' : 'light'} sx={{ display: 'block', minHeight: '100vh' }}>
         <Drawer
           variant="permanent"
           sx={{
@@ -153,9 +162,9 @@ export function AppShell({
             </Box>
 
             <FormControl fullWidth size="small">
-              <InputLabel id="company-label">Active company</InputLabel>
+              <InputLabel id="company-label">Компанія</InputLabel>
               <Select
-                label="Active company"
+                label="Компанія"
                 labelId="company-label"
                 value={activeCompanyId ?? ''}
                 onChange={(event) => onCompanyChange?.(event.target.value)}
@@ -218,21 +227,53 @@ export function AppShell({
               borderColor: 'divider',
             }}
           >
-            <Toolbar sx={{ gap: 1.5, justifyContent: 'space-between', flexWrap: { xs: 'wrap', md: 'nowrap' }, py: { xs: 1, md: 0 } }}>
-              <Box>
-                <Typography color="text.secondary" variant="caption">Робочий простір</Typography>
-                <Typography variant="h6">{activeItem?.label ?? 'Midas CRM'}</Typography>
-              </Box>
-              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1, justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
-                <Button size="small" variant="outlined" onClick={() => onNavigate('createOrder')}>Додати продаж</Button>
-                <Button size="small" variant="outlined" onClick={() => onNavigate('finances')}>Додати витрату</Button>
-                <Button size="small" startIcon={<AutoAwesomeOutlinedIcon />} variant="outlined" onClick={() => setIsAiOpen(true)}>AI</Button>
-                <Button size="small" variant="outlined" onClick={() => setIsSettingsOpen(true)}><SettingsOutlinedIcon fontSize="small" /></Button>
-                <Button size="small" variant="outlined" onClick={() => setIsNotificationsOpen(true)}>
-                  <Badge color="error" variant="dot"><NotificationsOutlinedIcon fontSize="small" /></Badge>
-                </Button>
-              </Stack>
-            </Toolbar>
+          <Toolbar sx={{ gap: 1.5, justifyContent: 'space-between', flexWrap: { xs: 'wrap', md: 'nowrap' }, py: { xs: 1, md: 0 } }}>
+
+          <TextField
+            size="small"
+            placeholder="Пошук..."
+            variant="outlined"
+            // Сюди передаєш свій стейт для пошуку, наприклад value={searchQuery}
+            // onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />
+              ),
+            }}
+            sx={{
+              flexGrow: 1,
+              maxWidth: { xs: '100%', md: '400px' },
+              mx: { xs: 0, md: 2 },
+              order: { xs: 3, md: 2 },
+              
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '20px',
+                backgroundColor: 'background.paper',
+                '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+              },
+            }}
+          />
+
+  <Stack 
+    direction="row" 
+    spacing={1} 
+    sx={{ 
+      flexWrap: 'wrap', 
+      rowGap: 1, 
+      justifyContent: 'flex-end',
+      flexGrow: { xs: 1, md: 0 },
+      order: { xs: 2, md: 3 }
+    }}
+  >
+    <Button size="small" startIcon={<AutoAwesomeOutlinedIcon />} variant="outlined" onClick={() => setIsAiOpen(true)}>AI</Button>
+    <Button size="small" variant="outlined" onClick={() => setIsSettingsOpen(true)}><SettingsOutlinedIcon fontSize="small" /></Button>
+    <Button size="small" variant="outlined" onClick={() => setIsNotificationsOpen(true)}>
+      <Badge color="error" variant="dot"><NotificationsOutlinedIcon fontSize="small" /></Badge>
+    </Button>
+  </Stack>
+</Toolbar>
             <Box
               sx={{
                 display: { xs: 'flex', md: 'none' },
@@ -300,7 +341,7 @@ export function AppShell({
                     border: 1,
                     borderColor: integration.enabled ? 'primary.main' : 'divider',
                     bgcolor: integration.enabled
-                      ? (theme === 'dark' ? 'rgba(96, 165, 250, 0.16)' : 'rgba(37, 99, 235, 0.08)')
+                      ? (theme === 'dark' ? 'rgba(251, 146, 60, 0.18)' : 'rgba(249, 115, 22, 0.1)')
                       : 'background.paper',
                     color: 'text.primary',
                   }}

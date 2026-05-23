@@ -1,20 +1,21 @@
 import { Button } from '../../../components/Button.jsx'
 import { Input } from '../../../components/Input.jsx'
 import { useLoginForm } from '../hooks/useLoginForm.js'
+import styles from '../styles/Auth.module.css'
 
 export function LoginForm({ onLogin }) {
   const { email, password, error, setEmail, setPassword, submit } = useLoginForm(onLogin)
 
   return (
-    <form className="auth-card" onSubmit={submit}>
-      <div className="auth-card-header">
+    <form className={styles['auth-card']} onSubmit={submit}>
+      <div className={styles['auth-card-header']}>
         <p className="eyebrow">Midas CRM</p>
         <h1>Вхід у систему</h1>
         <p>Увійдіть у робочий простір, щоб керувати продажами, товарами та фінансами.</p>
       </div>
 
-      <div className="auth-switch">
-        <a className="active" href="/login">Увійти</a>
+      <div className={styles['auth-switch']}>
+        <a className={styles.active} href="/login">Увійти</a>
         <a href="/register">Зареєструватись</a>
       </div>
 

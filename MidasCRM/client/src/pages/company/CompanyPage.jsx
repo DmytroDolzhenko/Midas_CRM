@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Button } from '../../components/Button.jsx'
 import { Input } from '../../components/Input.jsx'
+import sharedStyles from '../../styles/Shared.module.css'
+import pageStyles from '../../styles/pages/Company.module.css'
+
+
+const cx = (...classes) => classes.flatMap((className) => {
+  const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
+  return resolved.length ? resolved : className
+}).join(' ')
 
 const OWNER_ROLE = 1
 const ADMIN_ROLE = 2
@@ -11,6 +19,8 @@ const roleOptions = [
   { value: 3, label: 'Менеджер' },
   { value: 4, label: 'Складальник' },
 ]
+
+const roleLabels = new Map(roleOptions.map((role) => [role.value, role.label]))
 
 function getValue(item, camelKey, pascalKey) {
   return item?.[camelKey] ?? item?.[pascalKey]
@@ -26,6 +36,10 @@ function getMemberName(member) {
   }
 
   return String(getValue(member, 'userId', 'UserId'))
+}
+
+function getMemberKey(member) {
+  return String(getValue(member, 'id', 'Id') ?? getValue(member, 'userId', 'UserId'))
 }
 
 export function CompanyPage({
@@ -77,48 +91,48 @@ export function CompanyPage({
   }
 
   return (
-    <div className="page-stack">
-      <section className="page-header">
+    <div className={cx('page-stack')}>
+      <section className={cx('page-header')}>
         <div>
-          <p className="eyebrow">Company</p>
+          <p className={cx('eyebrow')}>Company</p>
           <h1>Керування компанією</h1>
         </div>
       </section>
 
-      {error && <div className="api-error-banner"><span>{error}</span></div>}
+      {error && <div className={cx('api-error-banner')}><span>{error}</span></div>}
 
-      <section className="panel">
+      <section className={cx('panel')}>
         <h2>Створити нову компанію</h2>
-        <form className="form-grid" onSubmit={submitCreate}>
-          <div className="form-section">
+        <form className={cx('form-grid')} onSubmit={submitCreate}>
+          <div className={cx('form-section')}>
             <Input label="Назва" value={createName} onChange={(event) => setCreateName(event.target.value)} required />
             <Input label="Податковий номер" value={createTaxNumber} onChange={(event) => setCreateTaxNumber(event.target.value)} />
           </div>
-          <div className="summary-panel">
+          <div className={cx('summary-panel')}>
             <Button type="submit" disabled={isBusy || !createName.trim()}>Створити компанію</Button>
           </div>
         </form>
       </section>
 
-      <section className="panel">
+      <section className={cx('panel')}>
         <h2>Поточна компанія</h2>
-        <form className="form-grid" onSubmit={submitUpdate}>
-          <div className="form-section">
+        <form className={cx('form-grid')} onSubmit={submitUpdate}>
+          <div className={cx('form-section')}>
             <Input label="Назва" value={editName} onChange={(event) => setEditName(event.target.value)} disabled={!canManageCompany} required />
             <Input label="Податковий номер" value={editTaxNumber ?? ''} onChange={(event) => setEditTaxNumber(event.target.value)} disabled={!canManageCompany} />
           </div>
-          <div className="summary-panel company-actions">
+          <div className={cx('summary-panel', 'company-actions')}>
             <Button type="submit" disabled={!canManageCompany || isBusy || !editName.trim()}>Зберегти зміни</Button>
             <Button type="button" variant="secondary" disabled={!canManageCompany || isBusy} onClick={onDeleteCompany}>Видалити компанію</Button>
           </div>
         </form>
       </section>
 
-      <section className="panel">
+      <section className={cx('panel')}>
         <h2>Учасники компанії</h2>
 
         {canManageCompany && (
-          <form className="toolbar" onSubmit={submitAddMember}>
+          <form className={cx('toolbar')} onSubmit={submitAddMember}>
             <input
               type="email"
               placeholder="email користувача"
@@ -130,12 +144,18 @@ export function CompanyPage({
           </form>
         )}
 
-        <div className="table-header company-members-table">
+        <div className={cx('table-header', 'company-members-table')}>
           <span>Користувач</span>
           <span>Email</span>
-          <span>� оль</span>
+          <span>Роль</span>
           <span>Дії</span>
         </div>
+
+        {!members.length && (
+          <div className={cx('member-empty')}>
+            У цій компанії ще немає учасників.
+          </div>
+        )}
 
         {members.map((member) => {
           const memberUser = getValue(member, 'user', 'User')
@@ -145,12 +165,13 @@ export function CompanyPage({
           const canModifyMember = canManageCompany && memberRole !== OWNER_ROLE
 
           return (
-            <div className="table-row company-members-table" key={String(getValue(member, 'id', 'Id'))}>
-              <span>{getMemberName(member)}</span>
-              <span>{getValue(memberUser, 'email', 'Email') ?? '-'}</span>
+            <div className={cx('table-row', 'company-members-table')} key={getMemberKey(member)}>
+              <span className={cx('member-primary')}>{getMemberName(member)}</span>
+              <span className={cx('member-muted')}>{getValue(memberUser, 'email', 'Email') ?? '-'}</span>
               <span>
                 {canModifyMember ? (
                   <select
+                    className={cx('member-role-select')}
                     value={memberRole}
                     onChange={(event) => onChangeMemberRole(memberUserId, Number(event.target.value))}
                     disabled={isBusy}
@@ -160,10 +181,10 @@ export function CompanyPage({
                     ))}
                   </select>
                 ) : (
-                  roleOptions.find((role) => role.value === memberRole)?.label ?? memberRole
+                  <span className={cx('member-role-label')}>{roleLabels.get(memberRole) ?? memberRole}</span>
                 )}
               </span>
-              <span>
+              <span className={cx('member-actions')}>
                 {canModifyMember && !isCurrentUser ? (
                   <Button type="button" variant="secondary" disabled={isBusy} onClick={() => onRemoveMember(memberUserId)}>
                     Видалити
@@ -179,5 +200,3 @@ export function CompanyPage({
     </div>
   )
 }
-
-
