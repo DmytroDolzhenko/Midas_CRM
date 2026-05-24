@@ -17,9 +17,10 @@ namespace Midas.Infrastructure.Persistence.Configuration
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(x => x.PostalCode).IsRequired();
+            //builder.Property(x => x.PostalCode).IsRequired();
 
             builder.Property(x => x.PostDepartmentNumber).IsRequired();
+            builder.Property(x => x.DeliveryPointType).IsRequired();
 
             builder.HasOne(x => x.Customer)
                 .WithMany(x => x.Addresses)

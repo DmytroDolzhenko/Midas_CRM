@@ -15,11 +15,11 @@ namespace Midas.Application.Entities.Orders.CommandsValidators
                 .NotEmpty()
                 .MaximumLength(100);
 
-            RuleFor(x => x.PostalCode)
-                .GreaterThan(0);
-
             RuleFor(x => x.PostDepartmentNumber)
                 .GreaterThan(0);
+
+            RuleFor(x => x.DeliveryPointType)
+                .IsInEnum();
         }
     }
 }

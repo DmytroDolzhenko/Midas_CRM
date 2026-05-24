@@ -68,7 +68,8 @@ namespace Api.Dtos
     public record CreateOneClickAddressDto(
         string City,
         int PostalCode,
-        int PostDepartmentNumber
+        int PostDepartmentNumber,
+        DeliveryPointType DeliveryPointType
     );
 
     public record CreateOneClickOrderItemDto(

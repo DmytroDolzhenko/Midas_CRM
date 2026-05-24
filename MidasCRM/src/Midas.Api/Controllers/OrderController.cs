@@ -81,8 +81,8 @@ namespace Midas.Api.Controllers
                 City = request.Address.City,
                 ServiceType = request.ServiceType,
                 CargoType = request.CargoType,
-                PostalCode = request.Address.PostalCode,
                 PostDepartmentNumber = request.Address.PostDepartmentNumber,
+                DeliveryPointType = request.Address.DeliveryPointType,
                 PaymentMethods = request.PaymentMethods,
                 Description = request.Description
             };
@@ -116,6 +116,7 @@ namespace Midas.Api.Controllers
                 Description = request.Description,
                 PostalCode = request.Address.PostalCode,
                 PostDepartmentNumber = request.Address.PostDepartmentNumber,
+                DeliveryPointType = request.Address.DeliveryPointType,
                 PaymentMethods = request.PaymentMethods,
 
                 Items = request.Items

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Midas.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260524095936_RemovePostalCodeInAddress")]
+    partial class RemovePostalCodeInAddress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -311,10 +314,6 @@ namespace Midas.Infrastructure.Persistence.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer")
                         .HasColumnName("customer_id");
-
-                    b.Property<int>("DeliveryPointType")
-                        .HasColumnType("integer")
-                        .HasColumnName("delivery_point_type");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
