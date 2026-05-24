@@ -46,7 +46,18 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
     const warehouseId = getValue(product, 'warehouseId', 'WarehouseId')
     const categoryIds = getValue(product, 'categoryIds', 'CategoryIds') ?? []
     const categoryId = categoryIds[0]
-    const variant = variants.find((item) => getValue(item, 'productId', 'ProductId') === productId)
+    const productVariants = variants
+      .filter((item) => getValue(item, 'productId', 'ProductId') === productId)
+      .map((item) => ({
+        id: getValue(item, 'id', 'Id'),
+        uniqCode: getValue(item, 'uniqCode', 'UniqCode'),
+        color: getValue(item, 'color', 'Color'),
+        size: getValue(item, 'size', 'Size'),
+        stockQuantity: Number(getValue(item, 'stockQuantity', 'StockQuantity') ?? 0),
+        costPrice: Number(getValue(item, 'costPrice', 'CostPrice') ?? 0),
+        sellPrice: Number(getValue(item, 'sellPrice', 'SellPrice') ?? 0),
+      }))
+    const variant = productVariants[0]
     const productCategories = categories.filter((item) => categoryIds.includes(getValue(item, 'id', 'Id')))
     const warehouse = warehouses.find((item) => getValue(item, 'id', 'Id') === warehouseId)
 
@@ -65,9 +76,10 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
       brand: '-',
       unit: 'одиниць',
       warehouse: getValue(warehouse, 'name', 'Name') ?? `Склад #${warehouseId}`,
-      stock: Number(getValue(variant, 'stockQuantity', 'StockQuantity') ?? 0),
-      cost: Number(getValue(variant, 'costPrice', 'CostPrice') ?? 0),
-      price: Number(getValue(variant, 'sellPrice', 'SellPrice') ?? 0),
+      stock: productVariants.reduce((sum, item) => sum + item.stockQuantity, 0),
+      cost: Number(variant?.costPrice ?? 0),
+      price: Number(variant?.sellPrice ?? 0),
+      variants: productVariants,
     }
   })
 }
@@ -337,39 +349,51 @@ export function App() {
   }
 
   async function addSale(sale) {
+    const deliveryPointType = sale.deliveryPointType === 'parcelLocker' ? 1 : 0
     const selectedCustomer = customers.find((customer) => customer.id === normalizeId(sale.customerId))
-    const selectedProduct = products.find((product) => product.id === normalizeId(sale.productId))
+    const resolvedCustomer = sale.isNewCustomer
+      ? {
+        firstName: sale.newCustomer?.name?.trim(),
+        surname: sale.newCustomer?.surname?.trim() || '-',
+        phone: sale.newCustomer?.phone?.trim(),
+        email: sale.newCustomer?.email?.trim(),
+      }
+      : {
+        firstName: selectedCustomer?.firstName || selectedCustomer?.name,
+        surname: selectedCustomer?.surname || '-',
+        phone: selectedCustomer?.phone,
+        email: selectedCustomer?.email,
+      }
 
-    if (!selectedCustomer) {
-      throw new Error('Оберіть клієнта з бази даних')
+    if (!resolvedCustomer.firstName || !resolvedCustomer.phone || !resolvedCustomer.email) {
+      throw new Error('Заповніть дані клієнта')
     }
 
-    if (!selectedProduct?.variantId) {
-      throw new Error('Для цього товару немає варіанту на сервері, тому продаж неможливо створити')
+    if (!sale.items?.length) {
+      throw new Error('Додайте хоча б один товар у замовлення')
     }
 
     await serverApi.orders.createOneClick({
       customer: {
-        name: selectedCustomer.firstName || selectedCustomer.name,
-        surname: selectedCustomer.surname || '-',
-        contactValue: selectedCustomer.phone || '+380000000000',
-        email: selectedCustomer.email || 'customer@midas.local',
+        name: resolvedCustomer.firstName,
+        surname: resolvedCustomer.surname,
+        contactValue: resolvedCustomer.phone,
+        email: resolvedCustomer.email,
       },
       address: {
         city: sale.city || 'Київ',
         postalCode: Number(sale.postalCode) || 1,
         postDepartmentNumber: Number(sale.postDepartmentNumber) || 1,
+        deliveryPointType,
       },
       serviceType: Number(sale.serviceType),
       cargoType: Number(sale.cargoType),
-      description: sale.description || selectedProduct.name,
+      description: sale.description || 'CRM order',
       paymentMethods: Number(sale.paymentMethods),
-      items: [
-        {
-          productVariantId: selectedProduct.variantId,
-          quantity: Number(sale.quantity) || 1,
-        },
-      ],
+      items: sale.items.map((item) => ({
+        productVariantId: Number(item.productVariantId),
+        quantity: Number(item.quantity),
+      })),
     })
 
     await loadServerData()

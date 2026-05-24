@@ -32,6 +32,9 @@ namespace Midas.Application.Entities.Orders.CommandsValidators
             RuleFor(x => x.PostDepartmentNumber)
                 .GreaterThan(0);
 
+            RuleFor(x => x.DeliveryPointType)
+                .IsInEnum();
+
             RuleFor(x => x.Items)
                 .NotEmpty();
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Midas.Core.Customers;
+using Midas.Core.Enums;
 using Midas.Core.Orders;
 
 namespace Midas.Core.CustomerAddresses
@@ -16,8 +17,8 @@ namespace Midas.Core.CustomerAddresses
         public string? NovaPoshtaWarehouseRef { get; private set; }
 
         public string City { get; private set; }
-        public int PostalCode { get; private set; }
         public int PostDepartmentNumber { get; private set; }
+        public DeliveryPointType DeliveryPointType { get; private set; }
 
         public Guid CompanyId { get; private set; }
         public bool IsDeleted { get; private set; }
@@ -30,15 +31,15 @@ namespace Midas.Core.CustomerAddresses
             int id,
             int customerId,
             string city,
-            int postalCode,
             int postDepartmentNumber,
+            DeliveryPointType deliveryPointType,
             Guid companyId)
         {
             Id = id;
             CustomerId = customerId;
             City = city;
-            PostalCode = postalCode;
             PostDepartmentNumber = postDepartmentNumber;
+            DeliveryPointType = deliveryPointType;
             CompanyId = companyId;
         }
 
@@ -46,32 +47,32 @@ namespace Midas.Core.CustomerAddresses
             int id,
             int customerId,
             string city,
-            int postalCode,
             int postDepartmentNumber,
+            DeliveryPointType deliveryPointType,
             Guid companyId)
         {
             return new CustomerAddress(
                 id,
                 customerId,
                 city,
-                postalCode,
                 postDepartmentNumber,
+                deliveryPointType,
                 companyId);
         }
 
         public static CustomerAddress Create(
             Customer customer,
             string city,
-            int postalCode,
             int postDepartmentNumber,
+            DeliveryPointType deliveryPointType,
             Guid companyId)
         {
             var address = new CustomerAddress(
                 0,
                 customer.Id,
                 city,
-                postalCode,
                 postDepartmentNumber,
+                deliveryPointType,
                 companyId);
 
             address.Customer = customer;
@@ -81,13 +82,13 @@ namespace Midas.Core.CustomerAddresses
         public void Update(
             int customerId,
             string city,
-            int postalCode,
-            int postDepartmentNumber)
+            int postDepartmentNumber,
+            DeliveryPointType deliveryPointType)
         {
             CustomerId = customerId;
             City = city;
-            PostalCode = postalCode;
             PostDepartmentNumber = postDepartmentNumber;
+            DeliveryPointType = deliveryPointType;
         }
 
         public void Delete()

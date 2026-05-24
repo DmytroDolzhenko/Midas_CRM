@@ -11,8 +11,8 @@ namespace Midas.Application.Entities.Orders.Commands
     {
         public required int CustomerId { get; init; }
         public required string City { get; init; }
-        public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
+        public required DeliveryPointType DeliveryPointType { get; init; }
         public required string Description { get; init; }
         public required ServiceType ServiceType { get; init; }
         public required CargoType CargoType { get; init; }
@@ -34,8 +34,8 @@ namespace Midas.Application.Entities.Orders.Commands
                 0,
                 request.CustomerId,
                 request.City,
-                request.PostalCode,
                 request.PostDepartmentNumber,
+                request.DeliveryPointType,
                 companyId);
 
             var uniqCode = await uniqCodeGenerator.GenerateOrderCodeAsync(

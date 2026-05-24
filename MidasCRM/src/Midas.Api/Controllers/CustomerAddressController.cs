@@ -37,8 +37,9 @@ namespace Midas.Api.Controllers
             {
                 CustomerId = request.CustomerId,
                 City = request.City,
-                PostalCode = request.PostalCode,
-                PostDepartmentNumber = request.PostDepartmentNumber
+              //  PostalCode = request.PostalCode,
+                PostDepartmentNumber = request.PostDepartmentNumber,
+                DeliveryPointType = request.DeliveryPointType
             };
 
             var result = await sender.Send(command, cancellationToken);
@@ -53,8 +54,9 @@ namespace Midas.Api.Controllers
                 Id = id,
                 CustomerId = request.CustomerId,
                 City = request.City,
-                PostalCode = request.PostalCode,
-                PostDepartmentNumber = request.PostDepartmentNumber
+               // PostalCode = request.PostalCode,
+                PostDepartmentNumber = request.PostDepartmentNumber,
+                DeliveryPointType = request.DeliveryPointType
             };
 
             var result = await sender.Send(command, cancellationToken);

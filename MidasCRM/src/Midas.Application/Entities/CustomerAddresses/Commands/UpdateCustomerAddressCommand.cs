@@ -3,6 +3,7 @@ using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
 using Midas.Core.CustomerAddresses;
+using Midas.Core.Enums;
 
 namespace Midas.Application.Entities.CustomerAddresses.Commands
 {
@@ -11,8 +12,9 @@ namespace Midas.Application.Entities.CustomerAddresses.Commands
         public required int Id { get; init; }
         public required int CustomerId { get; init; }
         public required string City { get; init; }
-        public required int PostalCode { get; init; }
+      //  public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
+        public required DeliveryPointType DeliveryPointType { get; init; }
     }
 
     public class UpdateCustomerAddressCommandHandler(
@@ -31,8 +33,9 @@ namespace Midas.Application.Entities.CustomerAddresses.Commands
             customerAddress.Update(
                 request.CustomerId,
                 request.City,
-                request.PostalCode,
-                request.PostDepartmentNumber);
+               // request.PostalCode,
+                request.PostDepartmentNumber,
+                request.DeliveryPointType);
 
             await repository.UpdateAsync(customerAddress, cancellationToken);
             return customerAddress;

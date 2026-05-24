@@ -86,6 +86,9 @@ namespace Midas.Api.Modules.Validators.OrdersDtoValidators
 
             RuleFor(x => x.PostDepartmentNumber)
                 .GreaterThan(0);
+
+            RuleFor(x => x.DeliveryPointType)
+                .IsInEnum();
         }
     }
 

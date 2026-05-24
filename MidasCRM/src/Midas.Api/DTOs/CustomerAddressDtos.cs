@@ -1,4 +1,5 @@
 using Midas.Core.CustomerAddresses;
+using Midas.Core.Enums;
 
 namespace Api.Dtos
 {
@@ -6,8 +7,8 @@ namespace Api.Dtos
         int Id,
         int CustomerId,
         string City,
-        int PostalCode,
         int PostDepartmentNumber,
+        DeliveryPointType DeliveryPointType,
         bool IsDeleted
     )
     {
@@ -16,8 +17,8 @@ namespace Api.Dtos
                 customerAdress.Id,
                 customerAdress.CustomerId,
                 customerAdress.City,
-                customerAdress.PostalCode,
                 customerAdress.PostDepartmentNumber,
+                customerAdress.DeliveryPointType,
                 customerAdress.IsDeleted
             );
     }
@@ -25,15 +26,15 @@ namespace Api.Dtos
     public record CreateCustomerAddressDto(
         int CustomerId,
         string City,
-        int PostalCode,
-        int PostDepartmentNumber
+        int PostDepartmentNumber,
+        DeliveryPointType DeliveryPointType
     );
 
     public record UpdateCustomerAddressDto(
         int CustomerId,
         string City,
-        int PostalCode,
-        int PostDepartmentNumber
+        int PostDepartmentNumber,
+        DeliveryPointType DeliveryPointType
     );
 
     public record DeleteCustomerAddressDto(

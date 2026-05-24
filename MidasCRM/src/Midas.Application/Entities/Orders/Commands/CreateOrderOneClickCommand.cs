@@ -25,6 +25,7 @@ namespace Midas.Application.Entities.Orders.Commands
         public required string City { get; init; }
         public required int PostalCode { get; init; }
         public required int PostDepartmentNumber { get; init; }
+        public required DeliveryPointType DeliveryPointType { get; init; }
         public required ServiceType ServiceType { get; init; }
         public required CargoType CargoType { get; init; }
         public required string Description { get; init; }
@@ -81,8 +82,8 @@ namespace Midas.Application.Entities.Orders.Commands
             var address = CustomerAddress.Create(
                 customer,
                 request.City,
-                request.PostalCode,
                 request.PostDepartmentNumber,
+                request.DeliveryPointType,
                 companyId);
 
             //address.SetNovaPoshtaRefs(request.NovaPoshtaCityRef, request.NovaPoshtaWarehouseRef);
