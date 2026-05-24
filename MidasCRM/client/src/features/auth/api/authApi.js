@@ -25,8 +25,16 @@ export async function loginRequest(credentials) {
 
 export async function registerRequest(credentials) {
   await serverApi.auth.register(credentials)
-  return loginRequest({
+  const user = await loginRequest({
     email: credentials.email,
     password: credentials.password,
   })
+
+  return {
+    ...user,
+    name: credentials.name || user.name,
+    surname: credentials.surname || '',
+    fathername: credentials.fathername || '',
+    phoneNumber: credentials.phoneNumber || '',
+  }
 }

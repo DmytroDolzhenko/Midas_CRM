@@ -21,6 +21,23 @@
   box-shadow: 18px 0 60px rgba(249, 115, 22, 0.12);
 }
 
+:global([data-theme='light'] .MuiDrawer-paper) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.98)) !important;
+  border-color: #fed7aa !important;
+  color: #1f1308 !important;
+  box-shadow: 18px 0 60px rgba(249, 115, 22, 0.16);
+}
+
+:global([data-theme='light'] .MuiDrawer-paper .MuiListItemText-primary) {
+  color: #1f1308 !important;
+}
+
+:global([data-theme='light'] .MuiDrawer-paper .MuiListItemButton-root.Mui-selected) {
+  color: #ea580c !important;
+  background: #ffedd5 !important;
+}
+
 .app-shell[data-theme='light'] :global(.MuiAppBar-root) {
   background: rgba(255, 250, 245, 0.78) !important;
   border-color: #fed7aa !important;

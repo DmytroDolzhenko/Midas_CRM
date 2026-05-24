@@ -1,32 +1,20 @@
 export const integrations = [
   {
     id: 'nova-post',
+    pageId: 'novaPostIntegration',
     name: 'Нова Пошта',
-    description: 'Генерація ТТН, відстеження статусів доставки та оновлення продажів.',
+    description: 'ТТН, відстеження посилок, статуси отримання та автоматичні події для замовлень.',
+    status: 'Потрібен API token',
+    accent: 'Доставка',
     enabled: false,
   },
   {
     id: 'olx',
+    pageId: 'olxIntegration',
     name: 'OLX',
-    description: 'Синхронізація замовлень, залишків і повідомлень покупців.',
-    enabled: false,
-  },
-  {
-    id: 'telegram',
-    name: 'Telegram',
-    description: 'Прийом діалогів клієнтів і швидкі відповіді з CRM.',
-    enabled: false,
-  },
-  {
-    id: 'instagram',
-    name: 'Instagram',
-    description: 'Директ-повідомлення, заявки та комунікація з покупцями.',
-    enabled: false,
-  },
-  {
-    id: 'prom',
-    name: 'Prom.ua',
-    description: 'Синхронізація продажів, товарів, залишків і статусів.',
+    description: 'Підготовка до синхронізації оголошень, заявок покупців і майбутнього імпорту замовлень.',
+    status: 'Потрібен access token',
+    accent: 'Маркетплейс',
     enabled: false,
   },
 ]

@@ -121,6 +121,12 @@ export const serverApi = {
     getAll() {
       return apiRequest('/Order')
     },
+    updateStatus(orderId, status) {
+      return apiRequest('/Order/update-status', {
+        method: 'PATCH',
+        body: { orderId, status },
+      })
+    },
     createOneClick(order) {
       return apiRequest('/Order/one-click', {
         method: 'POST',
@@ -131,6 +137,33 @@ export const serverApi = {
   customers: {
     getAll() {
       return apiRequest('/Customer')
+    },
+    create(customer) {
+      return apiRequest('/Customer', {
+        method: 'POST',
+        body: customer,
+      })
+    },
+    remove(id) {
+      return apiRequest(`/Customer/${id}`, {
+        method: 'DELETE',
+      })
+    },
+  },
+  financialOperations: {
+    getAll() {
+      return apiRequest('/FinancialOperation')
+    },
+    create(operation) {
+      return apiRequest('/FinancialOperation', {
+        method: 'POST',
+        body: operation,
+      })
+    },
+    remove(id) {
+      return apiRequest(`/FinancialOperation/${id}`, {
+        method: 'DELETE',
+      })
     },
   },
   categories: {

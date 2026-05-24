@@ -3,47 +3,91 @@ import { Pagination } from '../../components/Pagination.jsx'
 import sharedStyles from '../../styles/Shared.module.css'
 import pageStyles from '../../styles/pages/Finance.module.css'
 
-
 const cx = (...classes) => classes.flatMap((className) => {
   const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
   return resolved.length ? resolved : className
 }).join(' ')
 
+const OPERATION_TYPES = {
+  accrual: 1,
+  writeOff: 2,
+}
 
+const categories = [
+  { value: 1, label: 'Закупівля' },
+  { value: 2, label: 'Продаж' },
+  { value: 3, label: 'Реклама' },
+  { value: 4, label: 'Інше' },
+  { value: 5, label: 'Послуги' },
+  { value: 6, label: 'Виведення коштів' },
+]
 
-const categories = ['Загальні', 'Доставка', 'Пакування', 'Маркетинг', 'Оренда']
-const stores = ['Основний склад']
-const accounts = ['NovaPay', 'Monobank', 'Готівка']
+const categoryLabels = new Map(categories.map((category) => [category.value, category.label]))
 const PAGE_SIZE = 10
 
-export function FinancesPage({ finances, onCreate }) {
+function getValue(item, camelKey, pascalKey) {
+  return item?.[camelKey] ?? item?.[pascalKey]
+}
+
+function formatMoney(value) {
+  return `${Number(value ?? 0).toLocaleString('uk-UA')} грн`
+}
+
+function formatDate(value) {
+  if (!value) {
+    return '-'
+  }
+
+  return new Intl.DateTimeFormat('uk-UA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
+export function FinancesPage({ balance, finances = [], onCreate }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [operationType, setOperationType] = useState(OPERATION_TYPES.writeOff)
   const [amount, setAmount] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('Загальні')
-  const [store, setStore] = useState('Основний склад')
-  const [account, setAccount] = useState(accounts[0])
-  const [date, setDate] = useState('2026-05-19')
+  const [comment, setComment] = useState('')
+  const [category, setCategory] = useState(4)
   const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
-  const [storeFilter, setStoreFilter] = useState('all')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
   const [page, setPage] = useState(1)
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const activeOperations = useMemo(
+    () => finances.filter((operation) => !getValue(operation, 'isDeleted', 'IsDeleted')),
+    [finances],
+  )
+
+  const accrualTotal = activeOperations
+    .filter((operation) => Number(getValue(operation, 'operationType', 'OperationType')) === OPERATION_TYPES.accrual)
+    .reduce((sum, operation) => sum + Number(getValue(operation, 'amount', 'Amount') ?? 0), 0)
+
+  const writeOffTotal = activeOperations
+    .filter((operation) => Number(getValue(operation, 'operationType', 'OperationType')) === OPERATION_TYPES.writeOff)
+    .reduce((sum, operation) => sum + Number(getValue(operation, 'amount', 'Amount') ?? 0), 0)
 
   const filteredFinances = useMemo(
     () =>
-      finances.filter((finance) => {
-        const matchesSearch = `${finance.description ?? ''} ${finance.category ?? ''} ${finance.store ?? ''} ${finance.account ?? ''}`
+      activeOperations.filter((operation) => {
+        const currentType = Number(getValue(operation, 'operationType', 'OperationType'))
+        const currentCategory = Number(getValue(operation, 'category', 'Category'))
+        const currentComment = getValue(operation, 'comment', 'Comment') ?? ''
+        const matchesSearch = `${currentComment} ${categoryLabels.get(currentCategory) ?? ''}`
           .toLowerCase()
           .includes(search.toLowerCase())
-        const matchesCategory = categoryFilter === 'all' || finance.category === categoryFilter
-        const matchesStore = storeFilter === 'all' || finance.store === storeFilter
-        const matchesDate = (!dateFrom || finance.date >= dateFrom) && (!dateTo || finance.date <= dateTo)
+        const matchesType = typeFilter === 'all' || currentType === Number(typeFilter)
+        const matchesCategory = categoryFilter === 'all' || currentCategory === Number(categoryFilter)
 
-        return matchesSearch && matchesCategory && matchesStore && matchesDate
+        return matchesSearch && matchesType && matchesCategory
       }),
-    [categoryFilter, dateFrom, dateTo, finances, search, storeFilter],
+    [activeOperations, categoryFilter, search, typeFilter],
   )
   const paginatedFinances = filteredFinances.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
@@ -52,13 +96,18 @@ export function FinancesPage({ finances, onCreate }) {
     setPage(1)
   }
 
+  function openModal(type) {
+    setOperationType(type)
+    setCategory(type === OPERATION_TYPES.accrual ? 4 : 1)
+    setIsModalOpen(true)
+  }
+
   function resetForm() {
     setAmount('')
-    setDescription('')
-    setCategory('Загальні')
-    setStore('Основний склад')
-    setAccount(accounts[0])
-    setDate('2026-05-19')
+    setComment('')
+    setCategory(4)
+    setOperationType(OPERATION_TYPES.writeOff)
+    setError('')
   }
 
   function closeModal() {
@@ -66,79 +115,111 @@ export function FinancesPage({ finances, onCreate }) {
     resetForm()
   }
 
-  function saveFinances(status) {
-    onCreate({
-      amount: Number(amount),
-      description,
-      category,
-      store,
-      account,
-      date,
-      status,
-    })
-    closeModal()
-  }
-
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    saveFinances('Додано')
+    setError('')
+    setIsSubmitting(true)
+
+    try {
+      await onCreate({
+        operationType,
+        category: Number(category),
+        amount: Number(amount),
+        comment,
+        orderId: null,
+      })
+      closeModal()
+    } catch (submitError) {
+      setError(submitError.message || 'Не вдалося зберегти операцію')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <section className={cx('page-stack')}>
       <div className={cx('crm-page-header')}>
-        <button className={cx('primary-button')} type="button" onClick={() => setIsModalOpen(true)}>
-          Додати фінансову операцію
-        </button>
+        <div className={cx('finance-actions')}>
+          <button className={cx('secondary-button')} type="button" onClick={() => openModal(OPERATION_TYPES.writeOff)}>
+            Додати витрату
+          </button>
+          <button className={cx('primary-button')} type="button" onClick={() => openModal(OPERATION_TYPES.accrual)}>
+            Поповнити рахунок
+          </button>
+        </div>
+      </div>
+
+      <div className={cx('account-grid')}>
+        <article className={cx('account-card')}>
+          <span>Поточний баланс</span>
+          <strong>{formatMoney(getValue(balance, 'balance', 'Balance'))}</strong>
+          <small>Дані з серверного Company/balance</small>
+        </article>
+        <article className={cx('account-card')}>
+          <span>Поповнення</span>
+          <strong>{formatMoney(accrualTotal)}</strong>
+          <small>Ручні та автоматичні нарахування</small>
+        </article>
+        <article className={cx('account-card')}>
+          <span>Витрати</span>
+          <strong>{formatMoney(writeOffTotal)}</strong>
+          <small>Списання з рахунку</small>
+        </article>
       </div>
 
       <section className={cx('panel')}>
         <div className={cx('table-filter-grid')}>
           <input
             aria-label="Пошук фінансових операцій"
-            placeholder="Пошук за описом, категорією або рахунком"
+            placeholder="Пошук за коментарем або категорією"
             value={search}
             onChange={(event) => updateFilter(setSearch, event.target.value)}
           />
+          <select value={typeFilter} onChange={(event) => updateFilter(setTypeFilter, event.target.value)}>
+            <option value="all">Усі типи</option>
+            <option value={OPERATION_TYPES.accrual}>Поповнення</option>
+            <option value={OPERATION_TYPES.writeOff}>Витрати</option>
+          </select>
           <select value={categoryFilter} onChange={(event) => updateFilter(setCategoryFilter, event.target.value)}>
             <option value="all">Усі категорії</option>
             {categories.map((item) => (
-              <option key={item} value={item}>{item}</option>
+              <option key={item.value} value={item.value}>{item.label}</option>
             ))}
           </select>
-          <select value={storeFilter} onChange={(event) => updateFilter(setStoreFilter, event.target.value)}>
-            <option value="all">Усі склади</option>
-            {stores.map((item) => (
-              <option key={item} value={item}>{item}</option>
-            ))}
-          </select>
-          <input type="date" value={dateFrom} onChange={(event) => updateFilter(setDateFrom, event.target.value)} />
-          <input type="date" value={dateTo} onChange={(event) => updateFilter(setDateTo, event.target.value)} />
         </div>
+
         <div className={cx('table-header', 'expenses-table')}>
           <span>Дата</span>
+          <span>Тип</span>
+          <span>Коментар</span>
           <span>Категорія</span>
-          <span>Опис</span>
-          <span>Склад/Магазин</span>
           <span>Сума</span>
         </div>
         {filteredFinances.length === 0 ? (
           <div className={cx('expense-empty')}>
-            <h2>Фінансові операції поки немає</h2>
-            <button className={cx('primary-button')} type="button" onClick={() => setIsModalOpen(true)}>
-              Додати першу фінансову операцію
+            <h2>Фінансових операцій поки немає</h2>
+            <button className={cx('primary-button')} type="button" onClick={() => openModal(OPERATION_TYPES.accrual)}>
+              Поповнити рахунок
             </button>
           </div>
         ) : (
-          paginatedFinances.map((finance) => (
-            <div className={cx('table-row', 'expenses-table')} key={finance.id}>
-              <span>{finance.date}</span>
-              <strong>{finance.category}</strong>
-              <span>{finance.description}</span>
-              <span>{finance.store}</span>
-              <span>{Number(finance.amount).toLocaleString('uk-UA')} грн. {finance.status === 'Заплановано' ? '(план)' : ''}</span>
-            </div>
-          ))
+          paginatedFinances.map((operation) => {
+            const currentType = Number(getValue(operation, 'operationType', 'OperationType'))
+            const currentCategory = Number(getValue(operation, 'category', 'Category'))
+            const amountValue = Number(getValue(operation, 'amount', 'Amount') ?? 0)
+
+            return (
+              <div className={cx('table-row', 'expenses-table')} key={String(getValue(operation, 'id', 'Id'))}>
+                <span>{formatDate(getValue(operation, 'createdAt', 'CreatedAt'))}</span>
+                <strong>{currentType === OPERATION_TYPES.accrual ? 'Поповнення' : 'Витрата'}</strong>
+                <span>{getValue(operation, 'comment', 'Comment') || '-'}</span>
+                <span>{categoryLabels.get(currentCategory) ?? currentCategory}</span>
+                <span className={currentType === OPERATION_TYPES.accrual ? cx('amount-positive') : cx('amount-negative')}>
+                  {currentType === OPERATION_TYPES.accrual ? '+' : '-'}{formatMoney(amountValue)}
+                </span>
+              </div>
+            )
+          })
         )}
         <Pagination page={page} pageSize={PAGE_SIZE} total={filteredFinances.length} onPageChange={setPage} />
       </section>
@@ -148,8 +229,8 @@ export function FinancesPage({ finances, onCreate }) {
           <form className={cx('expense-modal')} onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()}>
             <div className={cx('settings-header')}>
               <div>
-                <p className={cx('eyebrow')}>Expense</p>
-                <h2>Додати витрату</h2>
+                <p className="eyebrow">{operationType === OPERATION_TYPES.accrual ? 'Top up' : 'Expense'}</p>
+                <h2>{operationType === OPERATION_TYPES.accrual ? 'Поповнити рахунок' : 'Додати витрату'}</h2>
               </div>
               <button className={cx('modal-close-button')} type="button" onClick={closeModal}>
                 ×
@@ -158,65 +239,53 @@ export function FinancesPage({ finances, onCreate }) {
 
             <div className={cx('expense-form-grid')}>
               <label className={cx('field')}>
-                <span>Сума витрати</span>
+                <span>Тип операції</span>
+                <select value={operationType} onChange={(event) => setOperationType(Number(event.target.value))}>
+                  <option value={OPERATION_TYPES.accrual}>Поповнення</option>
+                  <option value={OPERATION_TYPES.writeOff}>Витрата</option>
+                </select>
+              </label>
+              <label className={cx('field')}>
+                <span>Сума</span>
                 <input
                   required
                   min="0"
+                  step="0.01"
                   type="number"
-                  placeholder="Зазначте суму витрати"
+                  placeholder="Вкажіть суму"
                   value={amount}
                   onChange={(event) => setAmount(event.target.value)}
                 />
               </label>
               <label className={cx('field')}>
-                <span>Категорія витрат</span>
-                <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                <span>Категорія</span>
+                <select value={category} onChange={(event) => setCategory(Number(event.target.value))}>
                   {categories.map((item) => (
-                    <option key={item}>{item}</option>
+                    <option key={item.value} value={item.value}>{item.label}</option>
                   ))}
                 </select>
-              </label>
-              <label className={cx('field')}>
-                <span>Склад/Магазин</span>
-                <select value={store} onChange={(event) => setStore(event.target.value)}>
-                  {stores.map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
-              </label>
-              <label className={cx('field')}>
-                <span>Списати з рахунку</span>
-                <select value={account} onChange={(event) => setAccount(event.target.value)}>
-                  {accounts.map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
-              </label>
-              <label className={cx('field')}>
-                <span>Дата</span>
-                <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
               </label>
               <label className={cx('field', 'span-2')}>
-                <span>Опис витрати</span>
+                <span>Коментар</span>
                 <textarea
                   rows="4"
-                  placeholder="Коментар по цій витраті"
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Коментар до фінансової операції"
+                  value={comment}
+                  onChange={(event) => setComment(event.target.value)}
                 />
               </label>
             </div>
 
+            {error && <p className="form-error">{error}</p>}
+
             <div className={cx('expense-modal-actions')}>
-              <button className={cx('link-button')} type="button" onClick={() => saveFinances('Заплановано')}>
-                Запланувати витрату
-              </button>
+              <span />
               <div>
                 <button className={cx('secondary-button')} type="button" onClick={closeModal}>
                   Закрити
                 </button>
-                <button className={cx('primary-button')} type="submit">
-                  Додати витрату
+                <button className={cx('primary-button')} type="submit" disabled={isSubmitting || !amount}>
+                  Зберегти
                 </button>
               </div>
             </div>
@@ -226,4 +295,3 @@ export function FinancesPage({ finances, onCreate }) {
     </section>
   )
 }
-

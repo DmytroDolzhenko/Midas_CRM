@@ -179,6 +179,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
   }
 
   return (
+    
     <section className={cx('catalog-page')}>
       <div className={cx('catalog-toolbar', 'panel')}>
         <div className={cx('warehouse-tabs')}>
@@ -291,7 +292,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
                   <strong>{product.name}</strong>
                   <span>ID: {product.sku}</span>
                   <span>Категорія: {product.category}</span>
-                  <button type="button" onClick={() => setEditingProduct(product)}>� едагувати</button>
+                  <button type="button" onClick={() => setEditingProduct(product)}>Редагувати</button>
                 </div>
               </div>
               <div className={cx('large-product-cell', 'available-cell')}>
@@ -317,7 +318,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
             <div className={cx('settings-header')}>
               <div>
                 <p className={cx('eyebrow')}>Product</p>
-                <h2>� едагування товару</h2>
+                <h2>Редагування товару</h2>
               </div>
               <button className={cx('modal-close-button')} type="button" onClick={() => setEditingProduct(null)}>x</button>
             </div>
@@ -352,7 +353,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
             <div className={cx('settings-header')}>
               <div>
                 <p className={cx('eyebrow')}>Warehouse</p>
-                <h2>{editingWarehouse.mode === 'edit' ? '� едагувати склад' : 'Новий склад'}</h2>
+                <h2>{editingWarehouse.mode === 'edit' ? 'Редагувати склад' : 'Новий склад'}</h2>
               </div>
               <button className={cx('modal-close-button')} type="button" onClick={() => setEditingWarehouse(null)}>x</button>
             </div>

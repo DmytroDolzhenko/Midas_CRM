@@ -18,6 +18,13 @@ export function useAuth() {
     setUser(null)
   }
 
+  function updateUserProfile(profile) {
+    setUser((currentUser) => ({
+      ...currentUser,
+      ...profile,
+    }))
+  }
+
   useEffect(() => {
     function handleAuthExpired() {
       setUser(null)
@@ -32,5 +39,6 @@ export function useAuth() {
     login,
     register,
     logout,
+    updateUserProfile,
   }
 }

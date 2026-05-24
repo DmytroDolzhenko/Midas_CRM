@@ -4,7 +4,6 @@ import { Input } from '../../components/Input.jsx'
 import sharedStyles from '../../styles/Shared.module.css'
 import pageStyles from '../../styles/pages/Company.module.css'
 
-
 const cx = (...classes) => classes.flatMap((className) => {
   const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
   return resolved.length ? resolved : className
@@ -93,10 +92,6 @@ export function CompanyPage({
   return (
     <div className={cx('page-stack')}>
       <section className={cx('page-header')}>
-        <div>
-          <p className={cx('eyebrow')}>Company</p>
-          <h1>Керування компанією</h1>
-        </div>
       </section>
 
       {error && <div className={cx('api-error-banner')}><span>{error}</span></div>}
@@ -132,7 +127,7 @@ export function CompanyPage({
         <h2>Учасники компанії</h2>
 
         {canManageCompany && (
-          <form className={cx('toolbar')} onSubmit={submitAddMember}>
+          <form className={cx('toolbar', 'company-member-toolbar')} onSubmit={submitAddMember}>
             <input
               type="email"
               placeholder="email користувача"
@@ -166,9 +161,9 @@ export function CompanyPage({
 
           return (
             <div className={cx('table-row', 'company-members-table')} key={getMemberKey(member)}>
-              <span className={cx('member-primary')}>{getMemberName(member)}</span>
-              <span className={cx('member-muted')}>{getValue(memberUser, 'email', 'Email') ?? '-'}</span>
-              <span>
+              <span className={cx('member-primary')} data-label="Користувач">{getMemberName(member)}</span>
+              <span className={cx('member-muted')} data-label="Email">{getValue(memberUser, 'email', 'Email') ?? '-'}</span>
+              <span data-label="Роль">
                 {canModifyMember ? (
                   <select
                     className={cx('member-role-select')}
@@ -184,7 +179,7 @@ export function CompanyPage({
                   <span className={cx('member-role-label')}>{roleLabels.get(memberRole) ?? memberRole}</span>
                 )}
               </span>
-              <span className={cx('member-actions')}>
+              <span className={cx('member-actions')} data-label="Дії">
                 {canModifyMember && !isCurrentUser ? (
                   <Button type="button" variant="secondary" disabled={isBusy} onClick={() => onRemoveMember(memberUserId)}>
                     Видалити

@@ -8,8 +8,12 @@ import { CreateOrderPage } from './pages/sales/CreateOrderPage.jsx'
 import { ProductsPage } from './pages/products/ProductsPage.jsx'
 import { CreateProductPage } from './pages/products/CreateProductPage.jsx'
 import { CustomersPage } from './pages/customers/CustomersPage.jsx'
+import { CreateCustomerPage } from './pages/customers/CreateCustomerPage.jsx'
 import { FinancesPage } from './pages/finance/FinancesPage.jsx'
 import { OperationsPage } from './pages/operations/OperationsPage.jsx'
+import { NovaPoshtaIntegrationPage } from './pages/Integrations/NovaPoshtaIntegrationPage.jsx'
+import { OlxIntegrationPage } from './pages/Integrations/OlxIntegrationPage.jsx'
+import { ProfilePage } from './pages/profile/ProfilePage.jsx'
 import { LoginPage } from './pages/auth/LoginPage.jsx'
 import { RegistrationPage } from './pages/auth/RegistrationPage.jsx'
 import { CreateCompanyPage } from './pages/company/CreateCompanyPage.jsx'
@@ -69,7 +73,7 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
 }
 
 function buildCustomerModels(serverCustomers) {
-  return serverCustomers.map((customer) => {
+  return serverCustomers.filter((customer) => !getValue(customer, 'isDeleted', 'IsDeleted')).map((customer) => {
     const contact = getValue(customer, 'contact', 'Contact')
     const name = getValue(customer, 'name', 'Name') ?? ''
     const surname = getValue(customer, 'surname', 'Surname') ?? ''
@@ -81,6 +85,7 @@ function buildCustomerModels(serverCustomers) {
       surname,
       email: getValue(customer, 'email', 'Email') ?? '',
       phone: getValue(contact, 'value', 'Value') ?? getValue(customer, 'contactValue', 'ContactValue') ?? '',
+      isDeleted: Boolean(getValue(customer, 'isDeleted', 'IsDeleted')),
     }
   })
 }
@@ -130,18 +135,20 @@ function getCurrentUserCompanyRole(company, userId) {
 }
 
 export function App() {
-  const { user, login, register, logout } = useAuth()
+  const { user, login, register, logout, updateUserProfile } = useAuth()
   const [page, setPage] = useState('dashboard')
   const [orders, setOrders] = useState([])
   const [products, setProducts] = useState([])
   const [customers, setCustomers] = useState([])
+  const [financialOperations, setFinancialOperations] = useState([])
+  const [companyBalance, setCompanyBalance] = useState(null)
   const [categories, setCategories] = useState([])
   const [warehouses, setWarehouses] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [apiError, setApiError] = useState('')
-  const [finances, setFinances] = useLocalStorage('midas-finances-v1', [])
   const [operations, setOperations] = useLocalStorage('midas-operations-v2', [])
   const [theme, setTheme] = useLocalStorage('midas-theme', 'dark')
+  const [connectedIntegrations, setConnectedIntegrations] = useLocalStorage('midas-connected-integrations', {})
   const [companies, setCompanies] = useState([])
   const [activeCompanyId, setActiveCompanyId] = useLocalStorage('midas-active-company-id', null)
   const [requiresCompany, setRequiresCompany] = useState(false)
@@ -160,12 +167,22 @@ export function App() {
     setApiError('')
 
     try {
-      const [serverProducts, serverVariants, serverCategories, serverWarehouses, serverCustomers] = await Promise.all([
+      const [
+        serverProducts,
+        serverVariants,
+        serverCategories,
+        serverWarehouses,
+        serverCustomers,
+        serverFinancialOperations,
+        serverBalance,
+      ] = await Promise.all([
         serverApi.products.getAll(),
         serverApi.productVariants.getAll(),
         serverApi.categories.getAll(),
         serverApi.warehouses.getAll(),
         serverApi.customers.getAll(),
+        serverApi.financialOperations.getAll(),
+        serverApi.companies.getBalance().catch(() => null),
       ])
 
       const nextCustomers = buildCustomerModels(serverCustomers)
@@ -177,6 +194,8 @@ export function App() {
       setCustomers(nextCustomers)
       setProducts(nextProducts)
       setOrders(buildOrderModels(serverOrders, nextCustomers, nextProducts))
+      setFinancialOperations(serverFinancialOperations)
+      setCompanyBalance(serverBalance)
     } catch (error) {
       setApiError(error.message || 'Не вдалося завантажити дані з сервера')
     } finally {
@@ -270,24 +289,40 @@ export function App() {
     [activeCompany, user?.id],
   )
 
+  const notifications = useMemo(
+    () => {
+      const receivedOrders = orders
+        .filter((order) => Number(order.status) === 5)
+        .slice(0, 5)
+        .map((order) => ({
+          id: `received-${order.id}`,
+          title: `Покупець забрав посилку ${order.code || ''}`.trim(),
+          description: `Замовлення на ${Number(order.total).toLocaleString('uk-UA')} грн отримано. Сервер має нарахувати кошти на рахунок компанії.`,
+        }))
+
+      return receivedOrders
+    },
+    [orders],
+  )
+
   const stats = useMemo(() => {
     const revenue = orders.reduce((sum, order) => sum + order.total, 0)
     const grossProfit = orders.reduce((sum, order) => sum + order.profit, 0)
-    const saleExpenses = orders.reduce((sum, order) => sum + order.expense, 0)
-    const manualExpenses = finances.reduce((sum, finance) => sum + Number(finance.amount), 0)
-    const totalExpenses = saleExpenses + manualExpenses
+    const writeOffs = financialOperations
+      .filter((operation) => Number(getValue(operation, 'operationType', 'OperationType')) === 2)
+      .reduce((sum, operation) => sum + Number(getValue(operation, 'amount', 'Amount') ?? 0), 0)
 
     return {
       sales: orders.length,
       customers: customers.length,
       products: products.length,
-      expensesCount: finances.length,
+      expensesCount: financialOperations.length,
       revenue,
       grossProfit,
-      expenses: totalExpenses,
-      loss: totalExpenses,
+      expenses: writeOffs,
+      loss: writeOffs,
     }
-  }, [customers.length, finances, orders, products.length])
+  }, [customers.length, financialOperations, orders, products.length])
 
   function addOperation(operation) {
     setOperations((currentOperations) => [
@@ -341,20 +376,34 @@ export function App() {
     setPage('orders')
   }
 
-  function addFinances(finance) {
-    setFinances((currentFinances) => [
-      {
-        ...finance,
-        id: crypto.randomUUID(),
-      },
-      ...currentFinances,
+  async function addFinancialOperation(operation) {
+    const createdOperation = await serverApi.financialOperations.create(operation)
+    const [nextOperations, nextBalance] = await Promise.all([
+      serverApi.financialOperations.getAll(),
+      serverApi.companies.getBalance().catch(() => null),
     ])
 
+    setFinancialOperations(nextOperations)
+    setCompanyBalance(nextBalance)
+
     addOperation({
-      type: 'Фінансова витрата',
-      description: finance.description || 'Додано витрату',
-      amount: `${Number(finance.amount).toLocaleString('uk-UA')} грн`,
+      type: Number(operation.operationType) === 1 ? 'Поповнення рахунку' : 'Фінансова витрата',
+      description: operation.comment || 'Фінансова операція',
+      amount: `${Number(operation.amount).toLocaleString('uk-UA')} грн`,
     })
+
+    return createdOperation
+  }
+
+  async function createCustomer(payload) {
+    await serverApi.customers.create(payload)
+    await loadServerData()
+    setPage('customers')
+  }
+
+  async function deleteCustomer(customerId) {
+    await serverApi.customers.remove(customerId)
+    await loadServerData()
   }
 
   async function addProduct(product) {
@@ -502,6 +551,17 @@ export function App() {
     await runCompanyAction(() => serverApi.companyMembers.remove(userId))
   }
 
+  function connectIntegration(integrationId, token) {
+    setConnectedIntegrations((currentIntegrations) => ({
+      ...currentIntegrations,
+      [integrationId]: {
+        connected: true,
+        connectedAt: new Date().toISOString(),
+        tokenPreview: `${token.slice(0, 4)}...${token.slice(-4)}`,
+      },
+    }))
+  }
+
   if (!user) {
     const currentPath = window.location.pathname.toLowerCase()
     if (currentPath === '/register') {
@@ -569,9 +629,36 @@ export function App() {
         onCreate={addProduct}
       />
     ),
-    finances: <FinancesPage finances={finances} onCreate={addFinances} />,
-    customers: <CustomersPage customers={customers} />,
+    finances: (
+      <FinancesPage
+        balance={companyBalance ?? activeCompany}
+        finances={financialOperations}
+        onCreate={addFinancialOperation}
+      />
+    ),
+    customers: <CustomersPage customers={customers} onNavigate={setPage} onDelete={deleteCustomer} />,
+    createCustomer: (
+      <CreateCustomerPage
+        onBack={() => setPage('customers')}
+        onCreate={createCustomer}
+      />
+    ),
     operations: <OperationsPage operations={operations} />,
+    profile: <ProfilePage user={user} onUpdateProfile={updateUserProfile} />,
+    novaPostIntegration: (
+      <NovaPoshtaIntegrationPage
+        connection={connectedIntegrations['nova-post']}
+        onBack={() => setPage('dashboard')}
+        onConnect={(token) => connectIntegration('nova-post', token)}
+      />
+    ),
+    olxIntegration: (
+      <OlxIntegrationPage
+        connection={connectedIntegrations.olx}
+        onBack={() => setPage('dashboard')}
+        onConnect={(token) => connectIntegration('olx', token)}
+      />
+    ),
     company: (
       <CompanyPage
         activeCompany={activeCompany}
@@ -600,6 +687,8 @@ export function App() {
       activeCompanyId={activeCompany ? getCompanyId(activeCompany) : null}
       activeCompanyRole={currentUserCompanyRole}
       onCompanyChange={switchActiveCompany}
+      notifications={notifications}
+      connectedIntegrations={connectedIntegrations}
     >
       {apiError && (
         <div className="api-error-banner">

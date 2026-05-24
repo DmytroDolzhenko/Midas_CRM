@@ -16,6 +16,7 @@ import {
   Divider,
   Drawer,
   FormControl,
+  IconButton,
   InputLabel,
   List,
   ListItemButton,
@@ -36,6 +37,7 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import SearchIcon from '@mui/icons-material/Search'
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
+import MenuIcon from '@mui/icons-material/Menu'
 import { integrations as defaultIntegrations } from '../lib/integrationsApi.js'
 import styles from './AppShell.module.css'
 
@@ -121,14 +123,17 @@ export function AppShell({
   companies = [],
   activeCompanyId,
   onCompanyChange,
+  notifications = [],
+  connectedIntegrations = {},
   children,
 }) {
   const [accountAnchor, setAccountAnchor] = useState(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isAiOpen, setIsAiOpen] = useState(false)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [settingsTab, setSettingsTab] = useState(0)
-  const [integrations, setIntegrations] = useState(defaultIntegrations)
+  const integrations = defaultIntegrations
 
   const muiTheme = useMemo(() => buildTheme(theme === 'dark' ? 'dark' : 'light'), [theme])
   return (
@@ -197,7 +202,7 @@ export function AppShell({
                 >
                   <ListItemText
                     primary={item.label}
-                    primaryTypographyProps={{ fontWeight: 800, textAlign: 'center' }}
+                    primaryTypographyProps={{ fontWeight: 900 }}
                   />
                 </ListItemButton>
               ))}
@@ -217,6 +222,78 @@ export function AppShell({
           </Stack>
         </Drawer>
 
+        <Drawer
+          anchor="left"
+          open={isMobileNavOpen}
+          variant="temporary"
+          onClose={() => setIsMobileNavOpen(false)}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': {
+              width: 'min(86vw, 320px)',
+              boxSizing: 'border-box',
+              borderRight: 1,
+              borderColor: 'divider',
+              backgroundImage: 'none',
+            },
+          }}
+        >
+          <Stack spacing={2} sx={{ p: 2, minHeight: '100%' }}>
+            <Stack alignItems="center" direction="row" spacing={1.25}>
+              <Box sx={{ width: 34, height: 34, borderRadius: 1.5, bgcolor: 'primary.main' }} />
+              <Box>
+                <Typography fontWeight={900} variant="h6">Midas CRM</Typography>
+                <Typography color="text.secondary" fontWeight={700} variant="body2">Client workspace</Typography>
+              </Box>
+            </Stack>
+
+            <FormControl fullWidth size="small">
+              <InputLabel id="mobile-company-label">Компанія</InputLabel>
+              <Select
+                label="Компанія"
+                labelId="mobile-company-label"
+                value={activeCompanyId ?? ''}
+                onChange={(event) => onCompanyChange?.(event.target.value)}
+              >
+                {companies.map((company) => {
+                  const companyId = String(getValue(company, 'id', 'Id'))
+                  return <MenuItem key={companyId} value={companyId}>{getValue(company, 'name', 'Name')}</MenuItem>
+                })}
+              </Select>
+            </FormControl>
+
+            <List disablePadding sx={{ display: 'grid', gap: 0.75 }}>
+              {navItems.map((item) => (
+                <ListItemButton
+                  key={item.id}
+                  selected={item.id === activePage}
+                  onClick={() => {
+                    onNavigate(item.id)
+                    setIsMobileNavOpen(false)
+                  }}
+                  sx={{
+                    borderRadius: 3,
+                    minHeight: 58,
+                    px: 2,
+                    '&.Mui-selected': {
+                      bgcolor: 'action.selected',
+                      color: 'primary.main',
+                    },
+                    '&.Mui-selected:hover': {
+                      bgcolor: 'action.selected',
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{ fontWeight: 900 }}
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          </Stack>
+        </Drawer>
+
         <Box sx={{ ml: { md: `${drawerWidth}px` }, minWidth: 0 }}>
           <AppBar
             color="inherit"
@@ -229,12 +306,25 @@ export function AppShell({
           >
           <Toolbar sx={{ gap: 1.5, justifyContent: 'space-between', flexWrap: { xs: 'wrap', md: 'nowrap' }, py: { xs: 1, md: 0 } }}>
 
+          <IconButton
+            aria-label="Відкрити меню"
+            color="inherit"
+            onClick={() => setIsMobileNavOpen(true)}
+            sx={{
+              display: { xs: 'inline-flex', md: 'none' },
+              order: { xs: 1, md: 1 },
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 2,
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+
           <TextField
             size="small"
             placeholder="Пошук..."
             variant="outlined"
-            // Сюди передаєш свій стейт для пошуку, наприклад value={searchQuery}
-            // onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
               startAdornment: (
                 <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />
@@ -270,31 +360,10 @@ export function AppShell({
     <Button size="small" startIcon={<AutoAwesomeOutlinedIcon />} variant="outlined" onClick={() => setIsAiOpen(true)}>AI</Button>
     <Button size="small" variant="outlined" onClick={() => setIsSettingsOpen(true)}><SettingsOutlinedIcon fontSize="small" /></Button>
     <Button size="small" variant="outlined" onClick={() => setIsNotificationsOpen(true)}>
-      <Badge color="error" variant="dot"><NotificationsOutlinedIcon fontSize="small" /></Badge>
+      <Badge color="error" invisible={!notifications.length} variant="dot"><NotificationsOutlinedIcon fontSize="small" /></Badge>
     </Button>
   </Stack>
 </Toolbar>
-            <Box
-              sx={{
-                display: { xs: 'flex', md: 'none' },
-                gap: 1,
-                overflowX: 'auto',
-                px: 2,
-                pb: 1.25,
-              }}
-            >
-              {navItems.map((item) => (
-                <Button
-                  key={item.id}
-                  size="small"
-                  variant={item.id === activePage ? 'contained' : 'outlined'}
-                  onClick={() => onNavigate(item.id)}
-                  sx={{ flex: '0 0 auto' }}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </Box>
           </AppBar>
 
           <Box component="main" sx={{ p: { xs: 2, md: 3 }, maxWidth: 1240, mx: 'auto', width: '100%' }}>
@@ -304,6 +373,7 @@ export function AppShell({
       </Box>
 
       <Menu anchorEl={accountAnchor} open={Boolean(accountAnchor)} onClose={() => setAccountAnchor(null)}>
+        <MenuItem onClick={() => { onNavigate('profile'); setAccountAnchor(null) }}>Особистий кабінет</MenuItem>
         <MenuItem onClick={() => { setIsSettingsOpen(true); setAccountAnchor(null) }}>Налаштування</MenuItem>
         <MenuItem onClick={() => { setSettingsTab(1); setIsSettingsOpen(true); setAccountAnchor(null) }}>Інтеграції</MenuItem>
         <Divider />
@@ -334,38 +404,44 @@ export function AppShell({
 
           {settingsTab === 1 && (
             <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
-              {integrations.map((integration) => (
-                <Card
-                  key={integration.id}
-                  sx={{
-                    border: 1,
-                    borderColor: integration.enabled ? 'primary.main' : 'divider',
-                    bgcolor: integration.enabled
-                      ? (theme === 'dark' ? 'rgba(251, 146, 60, 0.18)' : 'rgba(249, 115, 22, 0.1)')
-                      : 'background.paper',
-                    color: 'text.primary',
-                  }}
-                  variant="outlined"
-                >
-                  <CardActionArea
-                    onClick={() => {
-                      setIntegrations((currentIntegrations) =>
-                        currentIntegrations.map((item) =>
-                          item.id === integration.id ? { ...item, enabled: !item.enabled } : item,
-                        ),
-                      )
+              {integrations.map((integration) => {
+                const connection = connectedIntegrations[integration.id]
+                const isConnected = Boolean(connection?.connected)
+
+                return (
+                  <Card
+                    key={integration.id}
+                    sx={{
+                      border: 1,
+                      borderColor: isConnected ? 'primary.main' : 'divider',
+                      bgcolor: isConnected
+                        ? (theme === 'dark' ? 'rgba(251, 146, 60, 0.18)' : 'rgba(249, 115, 22, 0.1)')
+                        : 'background.paper',
+                      color: 'text.primary',
                     }}
+                    variant="outlined"
                   >
-                    <CardContent>
-                      <Typography fontWeight={700}>{integration.name}</Typography>
-                      <Typography color="text.secondary" sx={{ mb: 1 }} variant="body2">{integration.description}</Typography>
-                      <Button size="small" variant={integration.enabled ? 'contained' : 'outlined'}>
-                        {integration.enabled ? 'Підключено' : 'Підключити'}
-                      </Button>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              ))}
+                    <CardActionArea
+                      onClick={() => {
+                        setIsSettingsOpen(false)
+                        onNavigate(integration.pageId)
+                      }}
+                    >
+                      <CardContent>
+                        <Typography color="primary.main" fontWeight={900} variant="caption">{integration.accent}</Typography>
+                        <Typography fontWeight={900} variant="h6">{integration.name}</Typography>
+                        <Typography color="text.secondary" sx={{ mb: 1.5 }} variant="body2">{integration.description}</Typography>
+                        <Typography sx={{ display: 'block', mb: 1.5 }} variant="caption">
+                          {isConnected ? 'Підключено' : integration.status}
+                        </Typography>
+                        <Button size="small" variant={isConnected ? 'contained' : 'outlined'}>
+                          {isConnected ? 'Підключено' : 'Налаштувати'}
+                        </Button>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                )
+              })}
             </Box>
           )}
         </DialogContent>
@@ -377,7 +453,27 @@ export function AppShell({
       <Dialog fullWidth maxWidth="xs" open={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)}>
         <DialogTitle>Сповіщення</DialogTitle>
         <DialogContent>
-          <Typography color="text.secondary">Нових сповіщень немає</Typography>
+          {notifications.length ? (
+            <Stack spacing={1.25}>
+              {notifications.map((notification) => (
+                <Box
+                  key={notification.id}
+                  sx={{
+                    border: 1,
+                    borderColor: 'divider',
+                    borderRadius: 3,
+                    p: 1.5,
+                    bgcolor: 'background.paper',
+                  }}
+                >
+                  <Typography fontWeight={900}>{notification.title}</Typography>
+                  <Typography color="text.secondary" variant="body2">{notification.description}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          ) : (
+            <Typography color="text.secondary">Нових сповіщень немає</Typography>
+          )}
         </DialogContent>
       </Dialog>
 
