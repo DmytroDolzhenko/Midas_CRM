@@ -50,9 +50,11 @@ export async function apiRequest(path, options = {}) {
     const handleUnauthorized = options.handleUnauthorized !== false
 
     if (response.status === 401 && handleUnauthorized) {
+      const error = new Error('Session expired. Please log in again.')
+      error.status = response.status
       localStorage.removeItem('midas-user')
       window.dispatchEvent(new Event('midas-auth-expired'))
-      throw new Error('Session expired. Please log in again.')
+      throw error
     }
 
     let message = `API request failed: ${response.status}`

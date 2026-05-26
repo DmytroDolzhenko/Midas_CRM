@@ -5,6 +5,7 @@ using Midas.Application.Common.Interfaces.Queries;
 using Midas.Core;
 using Midas.Core.Companies;
 using Midas.Core.CompanyMembers;
+using Midas.Infrastructure.Persistence.Queries.Extensions;
 
 namespace Midas.Infrastructure.Persistence.Queries
 {
@@ -21,39 +22,12 @@ namespace Midas.Infrastructure.Persistence.Queries
 
         private async Task<IQueryable<T>> BuildOwnedQueryAsync(CancellationToken cancellationToken)
         {
-            var query = _context.Set<T>().AsQueryable();
-
-            if (typeof(T).GetProperty("IsDeleted") != null)
-            {
-                query = query.Where(entity => !EF.Property<bool>(entity, "IsDeleted"));
-            }
-
-            if (typeof(T) == typeof(Company))
-            {
-                var currentUserId = _currentUserService.UserId;
-                if (currentUserId is null)
-                {
-                    return query.Where(_ => false);
-                }
-
-                return query.Where(entity =>
-                    _context.Set<CompanyMember>().Any(member =>
-                        member.CompanyId == EF.Property<Guid>(entity, nameof(Company.Id))
-                        && member.UserId == currentUserId.Value));
-            }
-
-            if (!typeof(ICompanyOwnedEntity).IsAssignableFrom(typeof(T)))
-            {
-                return query;
-            }
-
             var companyId = await _currentUserService.GetCompanyIdAsync(cancellationToken);
-            if (companyId is null)
-            {
-                return query.Where(_ => false);
-            }
+            var userId = _currentUserService.UserId;
 
-            return query.Where(entity => EF.Property<Guid>(entity, nameof(ICompanyOwnedEntity.CompanyId)) == companyId.Value);
+            return _context.Set<T>()
+                .AsQueryable()
+                .ApplyCompanyFilter(_context, userId, companyId);
         }
 
         public async Task<IReadOnlyList<T>> GetAllAsync(

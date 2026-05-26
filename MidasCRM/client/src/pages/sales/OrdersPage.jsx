@@ -3,13 +3,10 @@ import { Pagination } from '../../components/Pagination.jsx'
 import sharedStyles from '../../styles/Shared.module.css'
 import pageStyles from '../../styles/pages/Sales.module.css'
 
-
 const cx = (...classes) => classes.flatMap((className) => {
   const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
   return resolved.length ? resolved : className
 }).join(' ')
-
-
 
 const statusTabs = ['Всі', 'Продано', 'Повернення']
 const quickFilters = ['Сьогодні', 'Вчора', 'Тиждень', '30 днів', 'Цей місяць', 'Минулий місяць', '3 місяці']
@@ -42,11 +39,19 @@ function formatDate(date) {
   return date.toISOString().slice(0, 10)
 }
 
-export function OrdersPage({ orders, onNavigate }) {
+export function OrdersPage({ orders = [], onNavigate }) {
   const [activeStatus, setActiveStatus] = useState('Всі')
   const [search, setSearch] = useState('')
-  const [dateFrom, setDateFrom] = useState('2026-05-19')
-  const [dateTo, setDateTo] = useState('2026-05-19')
+  
+  // Динамічні дати за замовчуванням (Поточний місяць: від 1-го числа до сьогодні)
+  const [dateFrom, setDateFrom] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+  })
+  const [dateTo, setDateTo] = useState(() => {
+    return new Date().toISOString().slice(0, 10)
+  })
+
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
@@ -54,50 +59,86 @@ export function OrdersPage({ orders, onNavigate }) {
   const [maxTotal, setMaxTotal] = useState('')
   const [page, setPage] = useState(1)
 
-  const filteredOrders = useMemo(
-    () => {
-      return orders.filter((order) => {
-        const matchesSearch = `${order.code} ${order.customer} ${order.product} ${order.channel}`
-          .toLowerCase()
-          .includes(search.toLowerCase())
-        const isReturn = Number(order.status) === 4 || Number(order.status) === 6 || order.status === 'cancelled'
-        const matchesStatus =
-          activeStatus === 'Всі' ||
-          (activeStatus === 'Продано' && !isReturn) ||
-          (activeStatus === 'Повернення' && isReturn)
-        const orderDate = order.date || ''
-        const matchesDate = !orderDate || (orderDate >= dateFrom && orderDate <= dateTo)
-        const matchesTotal =
-          (!minTotal || Number(order.total) >= Number(minTotal)) &&
-          (!maxTotal || Number(order.total) <= Number(maxTotal))
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      // 1. Уніфікація полів (camelCase + PascalCase)
+      const code = order.code || order.Code || ''
+      const total = order.total || order.Total || 0
+      const status = order.status !== undefined ? order.status : (order.Status !== undefined ? order.Status : 0)
+      const deliveryMode = order.deliveryMode || order.DeliveryMode || ''
+      const account = order.account || order.Account || ''
+      const channel = order.channel || order.Channel || ''
 
-        return matchesSearch && matchesStatus && matchesDate && matchesTotal
-      })
-    },
-    [activeStatus, dateFrom, dateTo, maxTotal, minTotal, orders, search],
-  )
+      // Безпечно витягуємо клієнта та товар (якщо це об'єкти чи рядки)
+      const customerName = typeof order.customer === 'object' 
+        ? `${order.customer?.name || ''} ${order.customer?.surname || ''}`.trim() 
+        : (order.customer || order.Customer || '')
+
+      const productName = typeof order.product === 'object' 
+        ? `${order.product?.name || ''}` 
+        : (order.product || order.Product || '')
+
+      // Обробка дати (відсікаємо час T00:00:00, якщо він є)
+      let orderDate = order.date || order.Date || order.createdAt || order.CreatedAt || ''
+      if (orderDate.includes('T')) {
+        orderDate = orderDate.split('T')[0]
+      }
+
+      // 2. Фільтр пошуку
+      const matchesSearch = `${code} ${customerName} ${productName} ${channel}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+
+      // 3. Фільтр статусів
+      const isReturn = Number(status) === 4 || Number(status) === 6 || status === 'cancelled'
+      const matchesStatus =
+        activeStatus === 'Всі' ||
+        (activeStatus === 'Продано' && !isReturn) ||
+        (activeStatus === 'Повернення' && isReturn)
+
+      // 4. Фільтр дат
+      const matchesDate = !orderDate || (orderDate >= dateFrom && orderDate <= dateTo)
+
+      // 5. Фільтр суми
+      const matchesTotal =
+        (!minTotal || Number(total) >= Number(minTotal)) &&
+        (!maxTotal || Number(total) <= Number(maxTotal))
+
+      return matchesSearch && matchesStatus && matchesDate && matchesTotal
+    })
+  }, [activeStatus, dateFrom, dateTo, maxTotal, minTotal, orders, search])
+
   const paginatedOrders = filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const analytics = useMemo(() => {
-    const total = filteredOrders.reduce((sum, order) => sum + Number(order.total), 0)
-    const cost = filteredOrders.reduce((sum, order) => sum + Number(order.cost), 0)
-    const profit = filteredOrders.reduce((sum, order) => sum + Number(order.profit), 0)
-    const quantity = filteredOrders.reduce((sum, order) => sum + Number(order.quantity), 0)
+    const total = filteredOrders.reduce((sum, order) => sum + Number(order.total || order.Total || 0), 0)
+    const cost = filteredOrders.reduce((sum, order) => sum + Number(order.cost || order.Cost || 0), 0)
+    const profit = filteredOrders.reduce((sum, order) => sum + Number(order.profit || order.Profit || 0), 0)
+    const quantity = filteredOrders.reduce((sum, order) => sum + Number(order.quantity || order.Quantity || 0), 0)
     const markup = cost > 0 ? Math.round(((total - cost) / cost) * 100) : 0
 
     return { total, profit, quantity, markup }
   }, [filteredOrders])
 
   function exportSales() {
-    const header = ['Продаж', 'Покупець', 'Доставка', '� ахунок', 'Сума', 'Статус']
-    const rows = filteredOrders.map((order) => [
-      order.code,
-      order.customer,
-      order.deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж',
-      order.account || 'Наложка NovaPay',
-      order.total,
-      formatStatus(order.status),
-    ])
+    const header = ['Продаж', 'Покупець', 'Доставка', 'Рахунок', 'Сума', 'Статус']
+    const rows = filteredOrders.map((order) => {
+      const code = order.code || order.Code || ''
+      const customer = typeof order.customer === 'object' ? (order.customer?.name || '') : (order.customer || order.Customer || '')
+      const deliveryMode = order.deliveryMode || order.DeliveryMode || ''
+      const account = order.account || order.Account || ''
+      const total = order.total || order.Total || 0
+      const status = order.status !== undefined ? order.status : (order.Status !== undefined ? order.Status : 0)
+
+      return [
+        code,
+        customer,
+        deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж',
+        account || 'Наложка NovaPay',
+        total,
+        formatStatus(status),
+      ]
+    })
     const csv = [header, ...rows].map((row) => row.join(';')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -110,7 +151,7 @@ export function OrdersPage({ orders, onNavigate }) {
   }
 
   function applyQuickFilter(filter) {
-    const today = new Date('2026-05-19')
+    const today = new Date()
     const start = new Date(today)
     const end = new Date(today)
 
@@ -118,24 +159,19 @@ export function OrdersPage({ orders, onNavigate }) {
       start.setDate(today.getDate() - 1)
       end.setDate(today.getDate() - 1)
     }
-
     if (filter === 'Тиждень') {
       start.setDate(today.getDate() - 7)
     }
-
     if (filter === '30 днів') {
       start.setDate(today.getDate() - 30)
     }
-
     if (filter === 'Цей місяць') {
       start.setDate(1)
     }
-
     if (filter === 'Минулий місяць') {
       start.setMonth(today.getMonth() - 1, 1)
       end.setMonth(today.getMonth(), 0)
     }
-
     if (filter === '3 місяці') {
       start.setMonth(today.getMonth() - 3)
     }
@@ -234,7 +270,7 @@ export function OrdersPage({ orders, onNavigate }) {
           <span>Продаж</span>
           <span>Покупець</span>
           <span>Доставка</span>
-          <span>� ахунок</span>
+          <span>Рахунок</span>
           <span>Сума, грн.</span>
           <span>Статус</span>
           <span>Дії</span>
@@ -248,17 +284,30 @@ export function OrdersPage({ orders, onNavigate }) {
             </button>
           </div>
         ) : (
-          paginatedOrders.map((order) => (
-            <div className={cx('sales-layout-row')} key={order.id}>
-              <strong>{order.code}</strong>
-              <span>{order.customer}</span>
-              <span>{order.deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж'}</span>
-              <span>{order.account || 'Наложка NovaPay'}</span>
-              <span>{Number(order.total).toLocaleString('uk-UA')}</span>
-              <span>{formatStatus(order.status)}</span>
-              <button type="button" onClick={() => setSelectedOrder(order)}>Відкрити</button>
-            </div>
-          ))
+          paginatedOrders.map((order) => {
+            const id = order.id || order.Id || order.code || order.Code;
+            const code = order.code || order.Code || '';
+            const deliveryMode = order.deliveryMode || order.DeliveryMode || '';
+            const account = order.account || order.Account || '';
+            const total = order.total || order.Total || 0;
+            const status = order.status !== undefined ? order.status : (order.Status !== undefined ? order.Status : 0);
+            
+            const customerName = typeof order.customer === 'object' 
+              ? `${order.customer?.name || ''} ${order.customer?.surname || ''}`.trim() 
+              : (order.customer || order.Customer || '');
+
+            return (
+              <div className={cx('sales-layout-row')} key={id}>
+                <strong>{code}</strong>
+                <span>{customerName}</span>
+                <span>{deliveryMode === 'nova-post' ? 'Нова Пошта' : 'Простий продаж'}</span>
+                <span>{account || 'Наложка NovaPay'}</span>
+                <span>{Number(total).toLocaleString('uk-UA')}</span>
+                <span>{formatStatus(status)}</span>
+                <button type="button" onClick={() => setSelectedOrder(order)}>Відкрити</button>
+              </div>
+            );
+          })
         )}
         <Pagination page={page} pageSize={PAGE_SIZE} total={filteredOrders.length} onPageChange={setPage} />
       </section>
@@ -269,26 +318,34 @@ export function OrdersPage({ orders, onNavigate }) {
             <div className={cx('settings-header')}>
               <div>
                 <p className={cx('eyebrow')}>Sale</p>
-                <h2>{selectedOrder.code}</h2>
+                <h2>{selectedOrder.code || selectedOrder.Code}</h2>
               </div>
               <button className={cx('modal-close-button')} type="button" onClick={() => setSelectedOrder(null)}>×</button>
             </div>
             <div className={cx('settings-grid')}>
               <label className={cx('field')}>
                 <span>Покупець</span>
-                <input readOnly value={selectedOrder.customer} />
+                <input readOnly value={
+                  typeof selectedOrder.customer === 'object' 
+                    ? `${selectedOrder.customer?.name || ''} ${selectedOrder.customer?.surname || ''}`.trim() 
+                    : (selectedOrder.customer || selectedOrder.Customer || '')
+                } />
               </label>
               <label className={cx('field')}>
                 <span>Товар</span>
-                <input readOnly value={selectedOrder.product} />
+                <input readOnly value={
+                  typeof selectedOrder.product === 'object' 
+                    ? `${selectedOrder.product?.name || ''}` 
+                    : (selectedOrder.product || selectedOrder.Product || '')
+                } />
               </label>
               <label className={cx('field')}>
                 <span>Канал</span>
-                <input readOnly value={selectedOrder.channel} />
+                <input readOnly value={selectedOrder.channel || selectedOrder.Channel || ''} />
               </label>
               <label className={cx('field')}>
                 <span>Сума</span>
-                <input readOnly value={`${Number(selectedOrder.total).toLocaleString('uk-UA')} грн.`} />
+                <input readOnly value={`${Number(selectedOrder.total || selectedOrder.Total || 0).toLocaleString('uk-UA')} грн.`} />
               </label>
             </div>
             <div className={cx('settings-actions')}>
@@ -300,5 +357,3 @@ export function OrdersPage({ orders, onNavigate }) {
     </section>
   )
 }
-
-

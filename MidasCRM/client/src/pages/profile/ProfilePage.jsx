@@ -47,8 +47,8 @@ export function ProfilePage({ user, onUpdateProfile }) {
         </div>
 
         <form className={cx('profile-form')} onSubmit={submitProfile}>
-          <Input label="Email" value={user?.email ?? ''} InputProps={{ readOnly: true }} />
-          <Input label="Імʼя" value={user?.name ?? ''} InputProps={{ readOnly: true }} />
+          <Input label="Email" value={user?.email ?? ''} slotProps={{ input: { readOnly: true } }} />
+          <Input label="Імʼя" value={user?.name ?? ''} slotProps={{ input: { readOnly: true } }} />
           <Input
             label="Мобільний телефон"
             placeholder="+380..."

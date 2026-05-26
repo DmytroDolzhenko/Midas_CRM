@@ -12,11 +12,11 @@ export function Pagination({ page, pageSize, total, onPageChange }) {
   }
 
   return (
-    <Box alignItems="center" display="flex" justifyContent="space-between" sx={{ borderTop: 1, borderColor: 'divider', mt: 2, pt: 2 }}>
+    <Box sx={{ alignItems: 'center', borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', mt: 2, pt: 2 }}>
       <Typography color="text.secondary" variant="body2">
         {firstItem}-{lastItem} з {total}
       </Typography>
-      <Box alignItems="center" display="flex" gap={1.5}>
+      <Box sx={{ alignItems: 'center', display: 'flex', gap: 1.5 }}>
         <Button disabled={page === 1} size="small" variant="outlined" onClick={() => onPageChange(page - 1)}>
           Назад
         </Button>

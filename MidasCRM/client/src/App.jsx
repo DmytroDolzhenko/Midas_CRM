@@ -239,7 +239,7 @@ export function App() {
       await loadServerData()
     } catch (error) {
       if (error.status === 401) {
-        setRequiresCompany(true)
+        setApiError('Сесія завершилась. Увійдіть ще раз, щоб завантажити компанії та продажі.')
       } else {
         setApiError(error.message || 'Не вдалося перевірити доступ до компаній')
       }
