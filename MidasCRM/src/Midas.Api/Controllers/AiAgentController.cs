@@ -27,6 +27,16 @@ public class AiAgentController : ControllerBase
     [HttpGet("business-advice")]
     public async Task<IActionResult> GetBusinessAdvice(CancellationToken cancellationToken)
     {
+        var anyVariants = await _context.Set<ProductVariant>().AnyAsync(cancellationToken);
+        if (!anyVariants)
+        {
+            return Ok(new
+            {
+                advice = "### СИСТЕМА ПОРОЖНЯ\nОблік ще не розпочато. Додайте перші товари та склади, щоб AI-агент зміг сформувати аналітику.",
+                report = "Звіт порожній: у базі даних відсутні товари."
+            });
+        }
+
         var salesByVariant = await _context.Set<OrderItem>()
             .AsNoTracking()
             .Where(item => !item.IsDeleted)
@@ -84,9 +94,13 @@ public class AiAgentController : ControllerBase
         var currentRevenue = await _context.Set<Order>()
             .AsNoTracking()
             .Where(order => !order.IsDeleted)
-            .SumAsync(order => order.TotalCost, cancellationToken);
+            .Select(order => (decimal?)order.TotalCost)
+            .SumAsync(cancellationToken) ?? decimal.Zero;
 
-        var currentGrossProfit = salesByVariant.Values.Sum(item => item.GrossProfit);
+        var currentGrossProfit = salesByVariant.Count > 0
+            ? salesByVariant.Values.Sum(item => (decimal)item.GrossProfit)
+            : decimal.Zero;
+
         var stockValue = variants.Sum(variant => variant.StockQuantity * variant.CostPrice);
         var potentialRevenue = variants.Sum(variant => variant.StockQuantity * variant.SellPrice);
 
@@ -98,6 +112,15 @@ public class AiAgentController : ControllerBase
             lowStock,
             deadStock,
             topPerformers);
+
+        if (salesByVariant.Count == 0)
+        {
+            return Ok(new
+            {
+                advice = "### ОЧІКУВАННЯ ПЕРШИХ ПРОДАЖІВ\nТовари успішно внесені до бази даних, проте операцій продажу ще не зафіксовано. Щойно з'являться перші замовлення, ШІ-агент сформує аналітику та стратегічний інвест-план.",
+                report
+            });
+        }
 
         const string systemPrompt =
             "Ти — професійний фінансовий аналітик та AI-агент CRM системи MidasCRM.\n" +

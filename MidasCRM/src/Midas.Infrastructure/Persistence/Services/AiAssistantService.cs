@@ -45,17 +45,18 @@ namespace Midas.Infrastructure.Persistence.Services
                 ],
                 false);
 
-            using var response = await _httpClient.PostAsJsonAsync(_settings.BaseUrl, request, cancellationToken);
-            var result = await response.Content.ReadFromJsonAsync<ChatCompletionResponse>(cancellationToken: cancellationToken);
+            var response = await _httpClient.PostAsJsonAsync(_settings.BaseUrl, request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var message = result?.Error?.Message ?? response.ReasonPhrase ?? "AI service request failed.";
+                var errorResult = await response.Content.ReadFromJsonAsync<ChatCompletionResponse>(cancellationToken: cancellationToken);
+                var message = errorResult?.Error?.Message ?? response.ReasonPhrase ?? "AI service request failed.";
                 throw new InvalidOperationException(message);
             }
 
-            return result?.Choices?.FirstOrDefault()?.Message?.Content?.Trim()
-                ?? "AI сервіс не повернув рекомендації.";
+            var result = await response.Content.ReadFromJsonAsync<ChatCompletionResponse>(cancellationToken: cancellationToken);
+
+            return result?.Message?.Content?.Trim() ?? "AI сервіс не повернув рекомендації.";
         }
 
         private sealed record ChatCompletionRequest(
@@ -68,11 +69,8 @@ namespace Midas.Infrastructure.Persistence.Services
             [property: JsonPropertyName("content")] string Content);
 
         private sealed record ChatCompletionResponse(
-            [property: JsonPropertyName("choices")] IReadOnlyCollection<ChatChoice>? Choices,
+            [property: JsonPropertyName("message")] ChatMessage? Message,
             [property: JsonPropertyName("error")] AiError? Error);
-
-        private sealed record ChatChoice(
-            [property: JsonPropertyName("message")] ChatMessage? Message);
 
         private sealed record AiError(
             [property: JsonPropertyName("message")] string? Message);
