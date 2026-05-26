@@ -1,0 +1,61 @@
+using MediatR;
+using Midas.Application.Common.Interfaces;
+using Midas.Application.Common.Interfaces.Queries;
+using Midas.Application.Common.Interfaces.Repositories;
+using Midas.Application.Common.Messaging;
+using Midas.Core.ProductCategories;
+using Midas.Core.Products;
+using Midas.Core.Warehouses;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Midas.Application.Entities.Products.Commands
+{
+    public class CreateProductCommand : ICommand<Product>
+    {
+        public required int WarehouseId { get; init; }
+        public required string Name { get; init; }
+        public required string Description { get; init; } 
+        public required decimal Weight { get; init; }
+        public required List<int> ProductCategoryIds { get; init; } = new();
+        public required DateTime CreatedAt { get; init; }
+    }
+    public class CreateProductCommandHandler
+        (IEntityRepository<Product> repositories, 
+        IEntityRepository<Warehouse> warehouseRepositories, 
+        IGetQueries<Warehouse, int> warehouseQueries,
+        IGetQueries<ProductCategory, int> productCategoryQueries,
+        ICurrentUserService currentUserService
+        ) : IRequestHandler<CreateProductCommand, Product>
+    {
+        public async Task<Product> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+        {
+            var companyId = await currentUserService.GetCompanyIdAsync(cancellationToken)
+                ?? throw new UnauthorizedAccessException();
+            var warehouse = await warehouseQueries.GetByIdAsync(request.WarehouseId, cancellationToken);
+            if (warehouse == null)
+            {
+                throw new Exception($"Warehouse with id {request.WarehouseId} not found");
+            }
+
+            if(warehouse.CompanyId != companyId)
+            {
+                throw new UnauthorizedAccessException("You are not the owner of this warehouse");
+            }
+
+            var product = Product.Create(
+                request.WarehouseId,
+                request.Name,
+                request.Description,
+                request.Weight,
+                request.ProductCategoryIds,
+                companyId);
+
+            await repositories.AddAsync(product, cancellationToken);
+            await warehouseRepositories.UpdateAsync(warehouse, cancellationToken);
+            return product;
+        }
+    }
+}
+

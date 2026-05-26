@@ -1,0 +1,315 @@
+.catalog-page {
+  display: grid;
+  gap: 16px;
+}
+
+.catalog-toolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.warehouse-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warehouse-tab,
+.warehouse-add-button,
+.dots-button {
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(var(--surface-rgb), 0.68);
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.warehouse-tab {
+  padding: 0 16px;
+}
+
+.warehouse-tab.active {
+  color: #160b05;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.warehouse-add-button,
+.dots-button {
+  width: 38px;
+  color: var(--primary);
+}
+
+.catalog-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.catalog-filters input,
+.catalog-filters select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(var(--surface-rgb), 0.72);
+  color: var(--text);
+}
+
+.catalog-filters input::placeholder {
+  color: var(--text-muted);
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.radio-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.flat-icon-button svg,
+.success-button svg,
+.primary-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.inventory-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.inventory-widget-grid article {
+  display: grid;
+  gap: 8px;
+  min-height: 98px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(var(--surface-rgb), 0.92), rgba(30, 19, 13, 0.74));
+  box-shadow: var(--shadow);
+}
+
+.inventory-widget-grid span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.inventory-widget-grid strong {
+  color: var(--primary);
+  font-size: 22px;
+}
+
+.inventory-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.switch-row input {
+  position: absolute;
+  opacity: 0;
+}
+
+.switch-row span {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.switch-row span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--surface);
+  transition: transform 0.2s;
+}
+
+.switch-row input:checked + span {
+  background: var(--primary);
+}
+
+.switch-row input:checked + span::after {
+  transform: translateX(18px);
+}
+
+.success-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  color: #102017;
+  background: #34d399;
+  font-weight: 800;
+}
+
+.products-table-card {
+  overflow-x: auto;
+}
+
+.products-layout-header,
+.product-layout-row {
+  display: grid;
+  grid-template-columns: 42px minmax(300px, 2fr) minmax(140px, 0.8fr) minmax(150px, 0.9fr) 110px 130px 100px;
+  gap: 12px;
+  align-items: center;
+  min-width: 1040px;
+}
+
+.products-layout-header {
+  padding-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.product-layout-row {
+  min-height: 104px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.product-check {
+  display: grid;
+  place-items: center;
+}
+
+.product-main-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.product-preview {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: radial-gradient(circle at 28% 24%, rgba(255, 184, 107, 0.85), rgba(249, 115, 22, 0.28) 42%, rgba(var(--surface-rgb), 0.9));
+}
+
+.product-main-cell strong,
+.product-main-cell span {
+  display: block;
+}
+
+.product-main-cell span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.product-main-cell button {
+  margin-top: 6px;
+  border: 0;
+  color: var(--primary);
+  background: transparent;
+  font-weight: 800;
+}
+
+.large-product-cell {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--surface-muted);
+}
+
+.large-product-cell strong {
+  color: var(--primary);
+  font-size: 22px;
+}
+
+.available-cell strong {
+  color: #34d399;
+}
+
+@media (max-width: 1100px) {
+  .inventory-widget-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .catalog-filters {
+    grid-template-columns: 1fr;
+  }
+  .warehouse-tabs,
+  .inventory-actions,
+  .radio-group {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+  }
+  .warehouse-tab {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .inventory-widget-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+:global([data-theme='light']) .warehouse-tab,
+:global([data-theme='light']) .warehouse-add-button,
+:global([data-theme='light']) .dots-button,
+:global([data-theme='light']) .catalog-filters input,
+:global([data-theme='light']) .catalog-filters select {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+:global([data-theme='light']) .warehouse-tab.active {
+  color: #ffffff;
+}
+
+:global([data-theme='light']) .inventory-widget-grid article {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 237, 213, 0.68));
+  box-shadow: 0 18px 46px rgba(249, 115, 22, 0.12);
+}
+
+:global([data-theme='light']) .product-preview {
+  background: radial-gradient(circle at 28% 24%, rgba(255, 184, 107, 0.72), rgba(249, 115, 22, 0.18) 42%, rgba(255, 255, 255, 0.9));
+}
+
+:global([data-theme='light']) .large-product-cell {
+  background: rgba(255, 237, 213, 0.62);
+}

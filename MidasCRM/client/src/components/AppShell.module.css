@@ -1,0 +1,138 @@
+.app-shell {
+  min-height: 100svh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(251, 146, 60, 0.18), transparent 30%),
+    radial-gradient(circle at 96% 10%, rgba(255, 184, 107, 0.12), transparent 28%),
+    linear-gradient(135deg, #0d0805 0%, #120c08 48%, #21140c 100%);
+}
+
+.app-shell[data-theme='light'] {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(249, 115, 22, 0.16), transparent 30%),
+    radial-gradient(circle at 92% 8%, rgba(255, 184, 107, 0.22), transparent 28%),
+    linear-gradient(135deg, #fffaf5 0%, #fff7ed 48%, #ffedd5 100%);
+}
+
+.app-shell[data-theme='light'] :global(.MuiDrawer-paper) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 247, 237, 0.94)) !important;
+  border-color: #fed7aa !important;
+  box-shadow: 18px 0 60px rgba(249, 115, 22, 0.12);
+}
+
+:global([data-theme='light'] .MuiDrawer-paper) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.98)) !important;
+  border-color: #fed7aa !important;
+  color: #1f1308 !important;
+  box-shadow: 18px 0 60px rgba(249, 115, 22, 0.16);
+}
+
+:global([data-theme='light'] .MuiDrawer-paper .MuiListItemText-primary) {
+  color: #1f1308 !important;
+}
+
+:global([data-theme='light'] .MuiDrawer-paper .MuiListItemButton-root.Mui-selected) {
+  color: #ea580c !important;
+  background: #ffedd5 !important;
+}
+
+.app-shell[data-theme='light'] :global(.MuiAppBar-root) {
+  background: rgba(255, 250, 245, 0.78) !important;
+  border-color: #fed7aa !important;
+}
+
+.app-shell[data-theme='light'] :global(.MuiButton-outlined) {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.app-shell[data-theme='light'] :global(.MuiOutlinedInput-root) {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.app-shell[data-theme='light'] :global(.MuiCard-root) {
+  background: rgba(255, 255, 255, 0.84) !important;
+}
+
+:global(.MuiDrawer-paper) {
+  background:
+    linear-gradient(180deg, rgba(30, 20, 14, 0.96), rgba(13, 8, 5, 0.96)) !important;
+  border-color: var(--border) !important;
+  box-shadow: 18px 0 60px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(22px);
+}
+
+:global(.MuiAppBar-root) {
+  background: rgba(13, 8, 5, 0.62) !important;
+  border-color: var(--border) !important;
+  backdrop-filter: blur(22px);
+}
+
+:global(.MuiButton-outlined) {
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  background: rgba(var(--surface-rgb), 0.54);
+}
+
+:global(.MuiButton-contained) {
+  color: #160b05 !important;
+  background: linear-gradient(135deg, var(--primary), #ffb86b) !important;
+}
+
+:global(.MuiOutlinedInput-root) {
+  background: rgba(var(--surface-rgb), 0.64);
+}
+
+:global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--border) !important;
+}
+
+:global(.MuiCard-root) {
+  border-color: var(--border) !important;
+  background: rgba(var(--surface-rgb), 0.78) !important;
+  backdrop-filter: blur(18px);
+}
+
+:global(.MuiDialog-paper) {
+  border: 1px solid var(--border);
+  border-radius: 24px !important;
+  color: var(--text) !important;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(251, 146, 60, 0.16), transparent 34%),
+    linear-gradient(145deg, rgba(27, 18, 13, 0.98), rgba(13, 8, 5, 0.96)) !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.48) !important;
+}
+
+:global(.MuiDialogTitle-root) {
+  color: var(--text);
+  font-weight: 900 !important;
+}
+
+:global(.MuiDialogContent-root) {
+  color: var(--text);
+}
+
+:global(.MuiBackdrop-root) {
+  background-color: rgba(5, 3, 2, 0.72) !important;
+  backdrop-filter: blur(14px);
+}
+
+:global([data-theme='light'] .MuiDialog-paper) {
+  background:
+    radial-gradient(circle at 80% 0%, rgba(249, 115, 22, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 237, 213, 0.92)) !important;
+  box-shadow: 0 28px 90px rgba(249, 115, 22, 0.18) !important;
+}
+
+:global([data-theme='light'] .MuiBackdrop-root) {
+  background-color: rgba(31, 19, 8, 0.34) !important;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    background:
+      radial-gradient(circle at 30% 0%, rgba(251, 146, 60, 0.16), transparent 38%),
+      #0d0805;
+  }
+}

@@ -1,0 +1,225 @@
+.company-setup-page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at 18% 18%, rgba(251, 146, 60, 0.22), transparent 34%), linear-gradient(135deg, #0d0805 0%, #17100b 46%, #2a170d 100%);
+}
+
+.create-company-subtitle {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.company-setup-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.75fr);
+  gap: 28px;
+  width: min(920px, 100%);
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  background: rgba(var(--surface-rgb), 0.9);
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.42);
+}
+
+.company-setup-copy {
+  display: grid;
+  align-content: space-between;
+  gap: 22px;
+  min-height: 360px;
+  padding: 26px;
+  border-radius: 24px;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(67, 20, 7, 0.94), rgba(249, 115, 22, 0.86)), #431407;
+}
+
+.company-setup-copy h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.company-setup-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.55;
+}
+
+.company-setup-copy .eyebrow {
+  color: #fed7aa;
+}
+
+.company-user-chip {
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-setup-form {
+  display: grid;
+  align-content: center;
+  gap: 16px;
+}
+
+.company-actions {
+  grid-auto-rows: min-content;
+}
+
+.company-member-toolbar {
+  flex-wrap: wrap;
+}
+
+.company-member-toolbar input {
+  flex: 1 1 260px;
+}
+
+.company-members-table {
+  grid-template-columns: minmax(180px, 1.4fr) minmax(220px, 1.2fr) minmax(150px, 0.8fr) minmax(120px, 0.7fr);
+}
+
+.member-primary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-muted {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-role-select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  background: rgba(var(--surface-rgb), 0.72);
+  font-weight: 800;
+}
+
+.member-role-select:focus {
+  border-color: var(--primary);
+  outline: 3px solid rgba(249, 115, 22, 0.16);
+}
+
+.member-role-label {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: #160b05;
+  background: var(--primary);
+  font-weight: 900;
+}
+
+.member-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--text-muted);
+}
+
+.member-empty {
+  display: grid;
+  min-height: 96px;
+  place-items: center;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .company-setup-card {
+    grid-template-columns: 1fr;
+  }
+  .company-setup-copy {
+    min-height: auto;
+  }
+  .company-setup-copy h1 {
+    font-size: 32px;
+  }
+
+  .company-members-table {
+    grid-template-columns: 1fr;
+  }
+
+  .company-members-table span[data-label] {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(92px, 0.42fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    white-space: normal;
+  }
+
+  .company-members-table span[data-label]::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .member-actions {
+    justify-content: stretch;
+  }
+
+  .member-actions button,
+  .member-role-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .company-setup-card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .company-member-toolbar {
+    display: grid;
+    gap: 10px;
+  }
+
+  .company-member-toolbar input,
+  .company-member-toolbar button {
+    width: 100%;
+  }
+}
+
+:global([data-theme='light']) .company-setup-card {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 70px rgba(249, 115, 22, 0.16);
+}
+
+:global([data-theme='light']) .company-members-table {
+  border-color: rgba(234, 88, 12, 0.18);
+}
+
+:global([data-theme='light']) .member-role-select {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+:global([data-theme='light']) .member-role-label {
+  color: #ffffff;
+}

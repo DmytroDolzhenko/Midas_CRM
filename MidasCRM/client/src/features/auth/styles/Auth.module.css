@@ -1,0 +1,167 @@
+.auth-page,
+.login-page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(251, 146, 60, 0.2), transparent 34%),
+    radial-gradient(circle at 88% 82%, rgba(255, 184, 107, 0.12), transparent 32%),
+    linear-gradient(135deg, #0d0805 0%, #120c08 46%, #21140c 100%);
+}
+
+.auth-card,
+.login-card {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 16px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(var(--surface-rgb), 0.92), rgba(30, 19, 13, 0.76));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(22px);
+}
+
+.auth-page :global(.MuiButton-root),
+.login-page :global(.MuiButton-root) {
+  min-height: 46px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.auth-page :global(.MuiOutlinedInput-root),
+.login-page :global(.MuiOutlinedInput-root) {
+  border-radius: 14px;
+  font-family: inherit;
+  background: rgba(var(--surface-rgb), 0.64);
+}
+
+.auth-page :global(.MuiOutlinedInput-notchedOutline),
+.login-page :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--border);
+}
+
+.auth-page :global(.MuiInputLabel-root),
+.login-page :global(.MuiInputLabel-root) {
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.auth-card-wide {
+  width: min(620px, 100%);
+}
+
+.auth-card-header {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-card h1,
+.login-card h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 32px;
+  line-height: 1.05;
+}
+
+.auth-card-header p:last-child {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.auth-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-muted);
+}
+
+.auth-switch a {
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+  border-radius: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-switch a.active {
+  color: #160b05;
+  background: linear-gradient(135deg, var(--primary), #ffb86b);
+  box-shadow: 0 10px 22px rgba(249, 115, 22, 0.24);
+}
+
+.auth-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.auth-grid-span {
+  grid-column: 1 / -1;
+}
+
+.auth-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-page[data-theme='light'],
+.login-page[data-theme='light'] {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(249, 115, 22, 0.18), transparent 34%),
+    radial-gradient(circle at 88% 82%, rgba(255, 184, 107, 0.24), transparent 34%),
+    linear-gradient(135deg, #fffaf5 0%, #fff7ed 46%, #ffedd5 100%);
+}
+
+.auth-page[data-theme='light'] .auth-card,
+.login-page[data-theme='light'] .login-card,
+.auth-page[data-theme='light'] .login-card,
+.login-page[data-theme='light'] .auth-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 237, 213, 0.72));
+  box-shadow: 0 28px 90px rgba(249, 115, 22, 0.16);
+}
+
+.auth-page[data-theme='light'] :global(.MuiOutlinedInput-root),
+.login-page[data-theme='light'] :global(.MuiOutlinedInput-root) {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.auth-page[data-theme='light'] .auth-switch,
+.login-page[data-theme='light'] .auth-switch {
+  background: rgba(255, 237, 213, 0.72);
+}
+
+.auth-page[data-theme='light'] .auth-switch a.active,
+.login-page[data-theme='light'] .auth-switch a.active {
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .auth-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .auth-card,
+  .login-card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .auth-card h1,
+  .login-card h1 {
+    font-size: 28px;
+  }
+}
