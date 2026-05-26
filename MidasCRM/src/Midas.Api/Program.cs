@@ -19,11 +19,21 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 
 // ===== CORS =====
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy.WithOrigins("http://localhost:5173", "https://midas-crm.vercel.app")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});*/
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -102,18 +112,18 @@ builder.Services
 var app = builder.Build();
 
 // ===== Middleware =====
-/*if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}*/
+}
 
-app.UseSwagger();
+/*app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Midas API v1");
     options.RoutePrefix = "swagger";
-});
+});*/
 
 await app.InitialiseDatabaseAsync();
 
