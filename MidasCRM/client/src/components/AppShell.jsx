@@ -157,7 +157,7 @@ export function AppShell({
         >
           <Stack spacing={2} sx={{ p: 1.5, height: '100%' }}>
             <Box sx={{ pt: 1 }}>
-              <Stack alignItems="center" direction="row" spacing={1.25}>
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
                 <Box sx={{ width: 34, height: 34, borderRadius: 1.5, bgcolor: 'primary.main' }} />
                 <Box>
                   <Typography fontWeight={900} variant="h6">Midas CRM</Typography>
@@ -202,7 +202,7 @@ export function AppShell({
                 >
                   <ListItemText
                     primary={item.label}
-                    primaryTypographyProps={{ fontWeight: 900 }}
+                    slotProps={{ primary: { fontWeight: 900 } }}
                   />
                 </ListItemButton>
               ))}
@@ -239,7 +239,7 @@ export function AppShell({
           }}
         >
           <Stack spacing={2} sx={{ p: 2, minHeight: '100%' }}>
-            <Stack alignItems="center" direction="row" spacing={1.25}>
+            <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
               <Box sx={{ width: 34, height: 34, borderRadius: 1.5, bgcolor: 'primary.main' }} />
               <Box>
                 <Typography fontWeight={900} variant="h6">Midas CRM</Typography>
@@ -286,7 +286,7 @@ export function AppShell({
                 >
                   <ListItemText
                     primary={item.label}
-                    primaryTypographyProps={{ fontWeight: 900 }}
+                    slotProps={{ primary: { fontWeight: 900 } }}
                   />
                 </ListItemButton>
               ))}
@@ -325,10 +325,12 @@ export function AppShell({
             size="small"
             placeholder="Пошук..."
             variant="outlined"
-            InputProps={{
-              startAdornment: (
-                <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />
+                ),
+              },
             }}
             sx={{
               flexGrow: 1,
@@ -390,8 +392,8 @@ export function AppShell({
 
           {settingsTab === 0 && (
             <Stack spacing={2}>
-              <TextField label="Імʼя профілю" size="small" value={user?.name ?? ''} InputProps={{ readOnly: true }} />
-              <TextField label="Email" size="small" value={user?.email ?? ''} InputProps={{ readOnly: true }} />
+              <TextField label="Імʼя профілю" size="small" value={user?.name ?? ''} slotProps={{ input: { readOnly: true } }} />
+              <TextField label="Email" size="small" value={user?.email ?? ''} slotProps={{ input: { readOnly: true } }} />
               <FormControl size="small" sx={{ maxWidth: 240 }}>
                 <InputLabel id="theme-label">Тема</InputLabel>
                 <Select label="Тема" labelId="theme-label" value={theme} onChange={(event) => onThemeChange(event.target.value)}>

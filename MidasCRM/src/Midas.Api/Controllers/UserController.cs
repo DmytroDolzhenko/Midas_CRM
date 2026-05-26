@@ -1,6 +1,7 @@
 using Api.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.Users.Commands;
 using Midas.Core.Users;
