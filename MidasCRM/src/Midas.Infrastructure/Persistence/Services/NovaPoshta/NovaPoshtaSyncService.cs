@@ -14,6 +14,10 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
 {
     public class NovaPoshtaSyncService
     {
+        private const int MaxRateLimitRetries = 8;
+        private static readonly TimeSpan BaseRateLimitDelay = TimeSpan.FromSeconds(2);
+        private static readonly TimeSpan BetweenPagesDelay = TimeSpan.FromMilliseconds(450);
+
         private readonly IApplicationDbContext _context;
         private readonly INovaPoshtaClient _npClient;
         private readonly ILogger<NovaPoshtaSyncService> _logger;
@@ -32,8 +36,11 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
         {
             _logger.LogInformation("Nova Poshta sync started for company {CompanyId}", systemCompanyId);
 
-            var npCities = await _npClient.ExecuteAsync<GetAddressCitiesRequest, NpCityItem>(
-                systemCompanyId, "Address", "getCities", new GetAddressCitiesRequest(), ct);
+            var npCities = await ExecuteWithRateLimitRetryAsync(
+                () => _npClient.ExecuteAsync<GetAddressCitiesRequest, NpCityItem>(
+                    systemCompanyId, "Address", "getCities", new GetAddressCitiesRequest(), ct),
+                "getCities",
+                ct);
             _logger.LogInformation("Received {Count} cities from Nova Poshta API", npCities?.Count ?? 0);
 
             if (npCities != null && npCities.Any())
@@ -57,11 +64,14 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
 
             while (true)
             {
-                var pageResult = await _npClient.ExecuteAsync<GetWarehousesRequest, NpWarehouseItem>(
-                    systemCompanyId,
-                    "Address",
-                    "getWarehouses",
-                    new GetWarehousesRequest(Page: page.ToString(), Limit: "500"),
+                var pageResult = await ExecuteWithRateLimitRetryAsync(
+                    () => _npClient.ExecuteAsync<GetWarehousesRequest, NpWarehouseItem>(
+                        systemCompanyId,
+                        "Address",
+                        "getWarehouses",
+                        new GetWarehousesRequest(Page: page.ToString(), Limit: "500"),
+                        ct),
+                    $"getWarehouses page {page}",
                     ct);
 
                 if (pageResult == null || pageResult.Count == 0)
@@ -72,6 +82,7 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
                 allWarehouses.AddRange(pageResult);
                 _logger.LogInformation("Loaded warehouses page {Page}, count {Count}", page, pageResult.Count);
                 page++;
+                await Task.Delay(BetweenPagesDelay, ct);
             }
 
             _logger.LogInformation("Received total {Count} warehouses from Nova Poshta API", allWarehouses.Count);
@@ -92,6 +103,46 @@ namespace Midas.Infrastructure.Persistence.Services.NovaPoshta
             }
 
             _logger.LogInformation("Nova Poshta sync finished for company {CompanyId}", systemCompanyId);
+        }
+
+        private async Task<List<TResponse>> ExecuteWithRateLimitRetryAsync<TResponse>(
+            Func<Task<List<TResponse>>> action,
+            string operationName,
+            CancellationToken ct)
+        {
+            for (var attempt = 1; attempt <= MaxRateLimitRetries; attempt++)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                try
+                {
+                    return await action();
+                }
+                catch (Exception ex) when (IsRateLimitError(ex) && attempt < MaxRateLimitRetries)
+                {
+                    var delay = TimeSpan.FromMilliseconds(BaseRateLimitDelay.TotalMilliseconds * attempt);
+                    _logger.LogWarning(
+                        ex,
+                        "Nova Poshta rate limit on {Operation}. Attempt {Attempt}/{MaxAttempts}. Waiting {DelayMs} ms before retry.",
+                        operationName,
+                        attempt,
+                        MaxRateLimitRetries,
+                        delay.TotalMilliseconds);
+
+                    await Task.Delay(delay, ct);
+                }
+            }
+
+            return await action();
+        }
+
+        private static bool IsRateLimitError(Exception ex)
+        {
+            var message = ex.Message ?? string.Empty;
+            return message.Contains("too many requests", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("to many requests", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("429", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

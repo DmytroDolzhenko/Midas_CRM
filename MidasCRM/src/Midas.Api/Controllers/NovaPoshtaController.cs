@@ -3,6 +3,7 @@ using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.DTOs.NovaPoshta;
 using Midas.Application.Entities.NovaPoshta;
 using Midas.Application.Entities.NovaPoshta.Commands;
@@ -17,7 +18,8 @@ namespace Midas.Api.Controllers
         ISender sender,
         NovaPoshtaSyncService syncService,
         IConfiguration configuration,
-        ApplicationDbContext dbContext) : ControllerBase
+        ApplicationDbContext dbContext,
+        ICurrentUserService currentUserService) : ControllerBase
     {
         [HttpGet("cities")]
         public async Task<ActionResult<List<NovaPoshtaCityDto>>> GetCities([FromQuery] string search, CancellationToken ct)
@@ -36,41 +38,81 @@ namespace Midas.Api.Controllers
         [HttpPost("documents/{orderId:guid}")]
         public async Task<ActionResult<object>> CreateDocument([FromRoute] Guid orderId, CancellationToken ct)
         {
-            var ttnNumber = await sender.Send(new CreateNovaPoshtaDocumentCommand(orderId), ct);
-            return Ok(new { trackingNumber = ttnNumber });
+            try
+            {
+                var ttnNumber = await sender.Send(new CreateNovaPoshtaDocumentCommand(orderId), ct);
+                return Ok(new { trackingNumber = ttnNumber });
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("не знайдено", StringComparison.OrdinalIgnoreCase))
+                {
+                    return NotFound(new { message = ex.Message });
+                }
+
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("sync-directories")]
         public async Task<ActionResult<object>> SyncDirectories(CancellationToken ct)
         {
-            Guid? systemCompanyId = null;
-
-            var systemCompanyIdString = configuration["NovaPoshtaSettings:SystemCompanyId"];
-            if (!string.IsNullOrWhiteSpace(systemCompanyIdString)
-                && Guid.TryParse(systemCompanyIdString, out var parsedCompanyId))
+            try
             {
-                systemCompanyId = parsedCompanyId;
-            }
-            else
-            {
-                var adminUserIdString = configuration["NovaPoshtaSettings:SystemAdminUserId"];
-                if (!string.IsNullOrWhiteSpace(adminUserIdString)
-                    && Guid.TryParse(adminUserIdString, out var adminUserId))
+                var activeCompanyId = await currentUserService.GetCompanyIdAsync(ct);
+                if (activeCompanyId is not null)
                 {
-                    systemCompanyId = await dbContext.CompanyMembers
-                        .Where(x => x.UserId == adminUserId)
-                        .Select(x => (Guid?)x.CompanyId)
-                        .FirstOrDefaultAsync(ct);
+                    var hasActiveCompanyIntegration = await dbContext.UserIntegrations
+                        .AnyAsync(x => x.CompanyId == activeCompanyId.Value && x.Provider == "novaposhta", ct);
+
+                    if (hasActiveCompanyIntegration)
+                    {
+                        await syncService.SyncAllDataAsync(activeCompanyId.Value, ct);
+                        return Ok(new { message = "Nova Poshta directories synced successfully for active company." });
+                    }
                 }
-            }
 
-            if (systemCompanyId is null)
+                Guid? systemCompanyId = null;
+
+                var systemCompanyIdString = configuration["NovaPoshtaSettings:SystemCompanyId"];
+                if (!string.IsNullOrWhiteSpace(systemCompanyIdString)
+                    && Guid.TryParse(systemCompanyIdString, out var parsedCompanyId))
+                {
+                    systemCompanyId = parsedCompanyId;
+                }
+                else
+                {
+                    var adminUserIdString = configuration["NovaPoshtaSettings:SystemAdminUserId"];
+                    if (!string.IsNullOrWhiteSpace(adminUserIdString)
+                        && Guid.TryParse(adminUserIdString, out var adminUserId))
+                    {
+                        systemCompanyId = await dbContext.CompanyMembers
+                            .Where(x => x.UserId == adminUserId)
+                            .Select(x => (Guid?)x.CompanyId)
+                            .FirstOrDefaultAsync(ct);
+                    }
+                }
+
+                if (systemCompanyId is null)
+                {
+                    return BadRequest(new { message = "Не знайдено компанію для синхронізації. Перевірте активну компанію та налаштування SystemCompanyId/SystemAdminUserId." });
+                }
+
+                var hasSystemCompanyIntegration = await dbContext.UserIntegrations
+                    .AnyAsync(x => x.CompanyId == systemCompanyId.Value && x.Provider == "novaposhta", ct);
+
+                if (!hasSystemCompanyIntegration)
+                {
+                    return BadRequest(new { message = "Інтеграція Нової Пошти не налаштована для активної або системної компанії." });
+                }
+
+                await syncService.SyncAllDataAsync(systemCompanyId.Value, ct);
+                return Ok(new { message = "Nova Poshta directories synced successfully." });
+            }
+            catch (Exception ex)
             {
-                return BadRequest("System company ID is missing/invalid and cannot be resolved by SystemAdminUserId.");
+                return BadRequest(new { message = ex.Message });
             }
-
-            await syncService.SyncAllDataAsync(systemCompanyId.Value, ct);
-            return Ok(new { message = "Nova Poshta directories synced successfully." });
         }
     }
 }
