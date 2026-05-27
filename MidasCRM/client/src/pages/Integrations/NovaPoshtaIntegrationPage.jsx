@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { serverApi } from '../../lib/serverApi.js'
 import shared from '../../styles/Shared.module.css'
 import styles from '../../styles/pages/Integrations.module.css'
 
@@ -10,8 +11,10 @@ export function NovaPoshtaIntegrationPage({ connection, onBack, onConnect }) {
   const [token, setToken] = useState('')
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSyncingDirectories, setIsSyncingDirectories] = useState(false)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     setError('')
     setSuccessMessage('')
@@ -21,9 +24,32 @@ export function NovaPoshtaIntegrationPage({ connection, onBack, onConnect }) {
       return
     }
 
-    onConnect(token.trim())
-    setSuccessMessage('Токен прийнято. Інтеграція Нової Пошти позначена як підключена.')
-    setToken('')
+    setIsSubmitting(true)
+
+    try {
+      await onConnect(token.trim())
+      setSuccessMessage('Токен прийнято. Інтеграція Нової Пошти позначена як підключена.')
+      setToken('')
+    } catch (connectError) {
+      setError(connectError.message || 'Не вдалося зберегти токен Нової Пошти.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleSyncDirectories() {
+    setError('')
+    setSuccessMessage('')
+    setIsSyncingDirectories(true)
+
+    try {
+      await serverApi.novaPoshta.syncDirectories()
+      setSuccessMessage('Довідники Нової Пошти успішно синхронізовано.')
+    } catch (syncError) {
+      setError(syncError.message || 'Не вдалося синхронізувати довідники Нової Пошти.')
+    } finally {
+      setIsSyncingDirectories(false)
+    }
   }
 
   return (
@@ -65,8 +91,11 @@ export function NovaPoshtaIntegrationPage({ connection, onBack, onConnect }) {
           </label>
           {error && <div className="form-error">{error}</div>}
           {successMessage && <div className={styles['success-message']}>{successMessage}</div>}
-          <button className={shared['primary-button']} type="submit">
-            Перевірити та підключити
+          <button className={shared['primary-button']} type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Збереження...' : 'Перевірити та підключити'}
+          </button>
+          <button className={shared['secondary-button']} type="button" disabled={isSyncingDirectories} onClick={handleSyncDirectories}>
+            {isSyncingDirectories ? 'Синхронізація...' : 'Синхронізувати довідники НП'}
           </button>
         </form>
       </section>

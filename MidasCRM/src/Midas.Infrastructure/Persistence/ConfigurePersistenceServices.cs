@@ -53,7 +53,12 @@ namespace Infrastructure.Persistence
             services.AddScoped<IEncryptionService, AesEncryptionService>();
             services.AddScoped<IIntegrationStateService, HmacIntegrationStateService>();
             services.Configure<AiAssistantSettings>(configuration.GetSection("AiSettings"));
-            services.AddHttpClient<IAiAssistantService, AiAssistantService>();
+            services.AddHttpClient<IAiAssistantService, AiAssistantService>(client =>
+            {
+                client.Timeout = TimeSpan.FromMinutes(5);
+            });
+
+            //services.AddHttpClient<IAIService, GroqAIService>();
 
             services.AddScoped<NovaPoshtaSyncService>();
             services.AddHostedService<NovaPoshtaSyncWorker>();
