@@ -58,8 +58,6 @@ namespace Infrastructure.Persistence
                 client.Timeout = TimeSpan.FromMinutes(5);
             });
 
-            //services.AddHttpClient<IAIService, GroqAIService>();
-
             services.AddScoped<NovaPoshtaSyncService>();
             services.AddHostedService<NovaPoshtaSyncWorker>();
             services.AddScoped<OrderTrackingService>();
