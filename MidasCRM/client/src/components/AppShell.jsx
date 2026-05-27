@@ -436,9 +436,23 @@ export function AppShell({
                         <Typography sx={{ display: 'block', mb: 1.5 }} variant="caption">
                           {isConnected ? 'Підключено' : integration.status}
                         </Typography>
-                        <Button size="small" variant={isConnected ? 'contained' : 'outlined'}>
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            minHeight: 30,
+                            alignItems: 'center',
+                            px: 1.2,
+                            borderRadius: 999,
+                            border: 1,
+                            borderColor: isConnected ? 'primary.main' : 'divider',
+                            bgcolor: isConnected ? 'primary.main' : 'background.paper',
+                            color: isConnected ? '#fff' : 'text.primary',
+                            fontSize: 12,
+                            fontWeight: 900,
+                          }}
+                        >
                           {isConnected ? 'Підключено' : 'Налаштувати'}
-                        </Button>
+                        </Box>
                       </CardContent>
                     </CardActionArea>
                   </Card>

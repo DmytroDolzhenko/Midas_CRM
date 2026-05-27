@@ -75,5 +75,15 @@ export async function apiRequest(path, options = {}) {
     return null
   }
 
-  return response.json()
+  const contentLength = response.headers.get('content-length')
+  if (contentLength === '0') {
+    return null
+  }
+
+  const responseText = await response.text()
+  if (!responseText) {
+    return null
+  }
+
+  return JSON.parse(responseText)
 }
