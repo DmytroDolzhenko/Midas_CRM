@@ -13,6 +13,7 @@ export function RegistrationForm({ onRegister }) {
     password,
     confirmPassword,
     error,
+    fieldErrors,
     setName,
     setSurname,
     setFathername,
@@ -37,12 +38,46 @@ export function RegistrationForm({ onRegister }) {
       </div>
 
       <div className={styles['auth-form-grid']}>
-        <Input label="Імʼя" value={name} onChange={(event) => setName(event.target.value)} />
-        <Input label="Прізвище" value={surname} onChange={(event) => setSurname(event.target.value)} />
-        <Input label="По батькові" value={fathername} onChange={(event) => setFathername(event.target.value)} />
-        <Input label="Телефон" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} />
-        <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-        <Input label="Пароль" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+        {/* 2. Додаємо проп error у компоненти інпутів. 
+            Сервер повертає назви з великої літери (Password, Email), тому пишемо fieldErrors.Password */}
+        <Input 
+          label="Імʼя" 
+          value={name} 
+          onChange={(event) => setName(event.target.value)} 
+          error={fieldErrors?.Name?.[0]} 
+        />
+        <Input 
+          label="Прізвище" 
+          value={surname} 
+          onChange={(event) => setSurname(event.target.value)} 
+          error={fieldErrors?.Surname?.[0]} 
+        />
+        <Input 
+          label="По батькові" 
+          value={fathername} 
+          onChange={(event) => setFathername(event.target.value)} 
+          error={fieldErrors?.Fathername?.[0]} 
+        />
+        <Input 
+          label="Телефон" 
+          value={phoneNumber} 
+          onChange={(event) => setPhoneNumber(event.target.value)} 
+          error={fieldErrors?.PhoneNumber?.[0]} 
+        />
+        <Input 
+          label="Email" 
+          type="email" 
+          value={email} 
+          onChange={(event) => setEmail(event.target.value)} 
+          error={fieldErrors?.Email?.[0]} 
+        />
+        <Input 
+          label="Пароль" 
+          type="password" 
+          value={password} 
+          onChange={(event) => setPassword(event.target.value)} 
+          error={fieldErrors?.Password?.[0]}
+        />
         <Input
           className={styles['auth-grid-span']}
           label="Підтвердження пароля"

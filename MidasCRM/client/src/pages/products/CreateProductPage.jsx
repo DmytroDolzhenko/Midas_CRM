@@ -2,6 +2,7 @@
 import { Button } from '../../components/Button.jsx'
 import sharedStyles from '../../styles/Shared.module.css'
 import pageStyles from '../../styles/pages/ProductCreate.module.css'
+import { serverApi } from '../../lib/serverApi.js'
 
 
 const cx = (...classes) => classes.flatMap((className) => {
@@ -39,6 +40,7 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
 
   const selectedWarehouseId = warehouseId || firstWarehouseId
   const selectedWarehouse = warehouses.find((item) => String(getValue(item, 'id', 'Id')) === String(selectedWarehouseId))
@@ -139,6 +141,32 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
     })
   }
 
+  async function handleGenerateDescription() {
+    if (!name.trim()) {
+      setError('Введіть назву товару перед генерацією опису')
+      return
+    }
+
+    setError('')
+    setNotice('')
+    setIsGeneratingDescription(true)
+
+    try {
+      const category = selectedCategories.map((item) => getValue(item, 'name', 'Name')).join(', ')
+      const response = await serverApi.ai.generateDescription({
+        type: 'product',
+        name: name.trim(),
+        category,
+      })
+      setDescription(response?.description ?? '')
+      setNotice('Опис згенеровано штучним інтелектом')
+    } catch (generateError) {
+      setError(generateError.message || 'Не вдалося згенерувати опис')
+    } finally {
+      setIsGeneratingDescription(false)
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
@@ -222,7 +250,19 @@ export function CreateProductPage({ categories = [], warehouses = [], onBack, on
                 <input min="0" step="0.01" type="number" value={weight} onChange={(event) => setWeight(event.target.value)} placeholder="0.4" />
               </label>
               <label className={cx('field', 'span-2')}>
-                <span>Опис</span>
+                <span className={cx('field-title-with-action')}>
+                  <span>Опис</span>
+                  <button
+                    type="button"
+                    className={cx('secondary-button', 'ai-action-button')}
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDescription}
+                    aria-label="Згенерувати опис товару через ШІ"
+                  >
+                    <span aria-hidden="true">AI</span>
+                    {isGeneratingDescription ? 'Генеруємо...' : 'Запропонувати'}
+                  </button>
+                </span>
                 <textarea required maxLength="500" rows="4" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Короткий опис товару для внутрішнього каталогу" />
               </label>
               <label className={cx('field')}>
