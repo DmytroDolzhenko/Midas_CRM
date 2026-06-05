@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Pagination } from '../../components/Pagination.jsx'
 import sharedStyles from '../../styles/Shared.module.css'
 import pageStyles from '../../styles/pages/Sales.module.css'
@@ -39,67 +39,46 @@ function formatDate(date) {
   return date.toISOString().slice(0, 10)
 }
 
-export function OrdersPage({ orders = [], onNavigate }) {
+export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
   const [activeStatus, setActiveStatus] = useState('Всі')
   const [search, setSearch] = useState('')
-  
-  // Динамічні дати за замовчуванням (Поточний місяць: від 1-го числа до сьогодні)
   const [dateFrom, setDateFrom] = useState(() => {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
   })
-  const [dateTo, setDateTo] = useState(() => {
-    return new Date().toISOString().slice(0, 10)
-  })
-
+  const [dateTo, setDateTo] = useState(() => new Date().toISOString().slice(0, 10))
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [minTotal, setMinTotal] = useState('')
   const [maxTotal, setMaxTotal] = useState('')
   const [page, setPage] = useState(1)
+  const [sendingOrderId, setSendingOrderId] = useState(null)
+  const [actionError, setActionError] = useState('')
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      // 1. Уніфікація полів (camelCase + PascalCase)
       const code = order.code || order.Code || ''
       const total = order.total || order.Total || 0
       const status = order.status !== undefined ? order.status : (order.Status !== undefined ? order.Status : 0)
-      const deliveryMode = order.deliveryMode || order.DeliveryMode || ''
-      const account = order.account || order.Account || ''
       const channel = order.channel || order.Channel || ''
+      const customerName = `${order.customerDetails?.name || ''} ${order.customerDetails?.surname || ''}`.trim()
+        || order.customer
+        || order.Customer
+        || ''
 
-      // Безпечно витягуємо клієнта та товар (якщо це об'єкти чи рядки)
-      const customerName = typeof order.customer === 'object' 
-        ? `${order.customer?.name || ''} ${order.customer?.surname || ''}`.trim() 
-        : (order.customer || order.Customer || '')
-
-      const productName = typeof order.product === 'object' 
-        ? `${order.product?.name || ''}` 
-        : (order.product || order.Product || '')
-
-      // Обробка дати (відсікаємо час T00:00:00, якщо він є)
       let orderDate = order.date || order.Date || order.createdAt || order.CreatedAt || ''
       if (orderDate.includes('T')) {
         orderDate = orderDate.split('T')[0]
       }
 
-      // 2. Фільтр пошуку
-      const matchesSearch = `${code} ${customerName} ${productName} ${channel}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
-
-      // 3. Фільтр статусів
+      const matchesSearch = `${code} ${customerName} ${channel}`.toLowerCase().includes(search.toLowerCase())
       const isReturn = Number(status) === 4 || Number(status) === 6 || status === 'cancelled'
       const matchesStatus =
         activeStatus === 'Всі' ||
         (activeStatus === 'Продано' && !isReturn) ||
         (activeStatus === 'Повернення' && isReturn)
-
-      // 4. Фільтр дат
       const matchesDate = !orderDate || (orderDate >= dateFrom && orderDate <= dateTo)
-
-      // 5. Фільтр суми
       const matchesTotal =
         (!minTotal || Number(total) >= Number(minTotal)) &&
         (!maxTotal || Number(total) <= Number(maxTotal))
@@ -124,7 +103,10 @@ export function OrdersPage({ orders = [], onNavigate }) {
     const header = ['Продаж', 'Покупець', 'Доставка', 'Рахунок', 'Сума', 'Статус']
     const rows = filteredOrders.map((order) => {
       const code = order.code || order.Code || ''
-      const customer = typeof order.customer === 'object' ? (order.customer?.name || '') : (order.customer || order.Customer || '')
+      const customer = `${order.customerDetails?.name || ''} ${order.customerDetails?.surname || ''}`.trim()
+        || order.customer
+        || order.Customer
+        || ''
       const deliveryMode = order.deliveryMode || order.DeliveryMode || ''
       const account = order.account || order.Account || ''
       const total = order.total || order.Total || 0
@@ -139,11 +121,11 @@ export function OrdersPage({ orders = [], onNavigate }) {
         formatStatus(status),
       ]
     })
+
     const csv = [header, ...rows].map((row) => row.join(';')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
-
     link.href = url
     link.download = 'midas-sales.csv'
     link.click()
@@ -179,6 +161,39 @@ export function OrdersPage({ orders = [], onNavigate }) {
     setDateFrom(formatDate(start))
     setDateTo(formatDate(end))
     setPage(1)
+  }
+
+  async function handleSendToNovaPoshta(orderId) {
+    if (!onSendToNovaPoshta || !orderId) {
+      return
+    }
+
+    setActionError('')
+    setSendingOrderId(orderId)
+
+    try {
+      await onSendToNovaPoshta(orderId)
+    } catch (error) {
+      const message = error.message || 'Не вдалося надіслати замовлення на Нову Пошту'
+      setActionError(message)
+
+      if (message.includes('Інтеграція з Новою Поштою не налаштована')) {
+        const shouldOpenIntegration = window.confirm('Інтеграція Нової Пошти не налаштована. Перейти на сторінку налаштування інтеграції?')
+        if (shouldOpenIntegration) {
+          onNavigate('novaPostIntegration')
+        }
+      } else if (
+        message.includes('Профіль відправника Нової Пошти не заповнено')
+        || message.includes('Не знайдено жодної адреси відправника у профілі логістики')
+      ) {
+        const shouldOpenProfile = window.confirm('Профіль логістики Нової Пошти не заповнено. Перейти до налаштування профілю?')
+        if (shouldOpenProfile) {
+          onNavigate('novaPostLogisticProfile')
+        }
+      }
+    } finally {
+      setSendingOrderId(null)
+    }
   }
 
   return (
@@ -266,6 +281,7 @@ export function OrdersPage({ orders = [], onNavigate }) {
       </div>
 
       <section className={cx('sales-table-card', 'panel')}>
+        {actionError && <p className={cx('form-error')}>{actionError}</p>}
         <div className={cx('sales-layout-header')}>
           <span>Продаж</span>
           <span>Покупець</span>
@@ -285,16 +301,16 @@ export function OrdersPage({ orders = [], onNavigate }) {
           </div>
         ) : (
           paginatedOrders.map((order) => {
-            const id = order.id || order.Id || order.code || order.Code;
-            const code = order.code || order.Code || '';
-            const deliveryMode = order.deliveryMode || order.DeliveryMode || '';
-            const account = order.account || order.Account || '';
-            const total = order.total || order.Total || 0;
-            const status = order.status !== undefined ? order.status : (order.Status !== undefined ? order.Status : 0);
-            
-            const customerName = typeof order.customer === 'object' 
-              ? `${order.customer?.name || ''} ${order.customer?.surname || ''}`.trim() 
-              : (order.customer || order.Customer || '');
+            const id = order.id || order.Id || order.code || order.Code
+            const code = order.code || order.Code || ''
+            const deliveryMode = order.deliveryMode || order.DeliveryMode || ''
+            const account = order.account || order.Account || ''
+            const total = order.total || order.Total || 0
+            const status = order.status !== undefined ? order.status : (order.Status !== undefined ? order.Status : 0)
+            const customerName = `${order.customerDetails?.name || ''} ${order.customerDetails?.surname || ''}`.trim()
+              || order.customer
+              || order.Customer
+              || ''
 
             return (
               <div className={cx('sales-layout-row')} key={id}>
@@ -304,9 +320,29 @@ export function OrdersPage({ orders = [], onNavigate }) {
                 <span>{account || 'Наложка NovaPay'}</span>
                 <span>{Number(total).toLocaleString('uk-UA')}</span>
                 <span>{formatStatus(status)}</span>
-                <button type="button" onClick={() => setSelectedOrder(order)}>Відкрити</button>
+                <div className={cx('order-row-actions')}>
+                  <button
+                    type="button"
+                    className={cx('row-icon-button')}
+                    onClick={() => handleSendToNovaPoshta(order.id || order.Id)}
+                    disabled={sendingOrderId === (order.id || order.Id)}
+                    aria-label="Надіслати на Нову Пошту"
+                    title="Надіслати на Нову Пошту"
+                  >
+                    ↗
+                  </button>
+                  <button
+                    type="button"
+                    className={cx('row-icon-button')}
+                    onClick={() => setSelectedOrder(order)}
+                    aria-label="Переглянути деталі"
+                    title="Деталі замовлення"
+                  >
+                    👁
+                  </button>
+                </div>
               </div>
-            );
+            )
           })
         )}
         <Pagination page={page} pageSize={PAGE_SIZE} total={filteredOrders.length} onPageChange={setPage} />
@@ -319,25 +355,24 @@ export function OrdersPage({ orders = [], onNavigate }) {
               <div>
                 <p className={cx('eyebrow')}>Sale</p>
                 <h2>{selectedOrder.code || selectedOrder.Code}</h2>
+                {(selectedOrder.trackingNumber || selectedOrder.TrackingNumber) && (
+                  <p>TrackingNumber: {selectedOrder.trackingNumber || selectedOrder.TrackingNumber}</p>
+                )}
               </div>
-              <button className={cx('modal-close-button')} type="button" onClick={() => setSelectedOrder(null)}>×</button>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setSelectedOrder(null)}>x</button>
             </div>
             <div className={cx('settings-grid')}>
               <label className={cx('field')}>
-                <span>Покупець</span>
-                <input readOnly value={
-                  typeof selectedOrder.customer === 'object' 
-                    ? `${selectedOrder.customer?.name || ''} ${selectedOrder.customer?.surname || ''}`.trim() 
-                    : (selectedOrder.customer || selectedOrder.Customer || '')
-                } />
-              </label>
-              <label className={cx('field')}>
-                <span>Товар</span>
-                <input readOnly value={
-                  typeof selectedOrder.product === 'object' 
-                    ? `${selectedOrder.product?.name || ''}` 
-                    : (selectedOrder.product || selectedOrder.Product || '')
-                } />
+                <span>Ім'я, Прізвище замовника</span>
+                <input
+                  readOnly
+                  value={
+                    `${selectedOrder.customerDetails?.name || ''} ${selectedOrder.customerDetails?.surname || ''}`.trim()
+                    || selectedOrder.customer
+                    || selectedOrder.Customer
+                    || ''
+                  }
+                />
               </label>
               <label className={cx('field')}>
                 <span>Канал</span>
@@ -347,6 +382,24 @@ export function OrdersPage({ orders = [], onNavigate }) {
                 <span>Сума</span>
                 <input readOnly value={`${Number(selectedOrder.total || selectedOrder.Total || 0).toLocaleString('uk-UA')} грн.`} />
               </label>
+              <div className={cx('field', 'span-2')}>
+                <span>Повний детальний склад замовлення</span>
+                <div className={cx('order-details-items')}>
+                  {(selectedOrder.items || []).length === 0 ? (
+                    <p>Позиції не знайдено.</p>
+                  ) : (
+                    (selectedOrder.items || []).map((item) => (
+                      <div key={item.id} className={cx('order-details-item-row')}>
+                        <strong>{item.productName}</strong>
+                        <span>{item.variantLabel || '-'} {item.uniqCode ? `(${item.uniqCode})` : ''}</span>
+                        <span>Кількість: {item.quantity}</span>
+                        <span>Ціна: {Number(item.unitPrice).toLocaleString('uk-UA')} грн</span>
+                        <span>Сума: {Number(item.lineTotal).toLocaleString('uk-UA')} грн</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
             <div className={cx('settings-actions')}>
               <button className={cx('primary-button')} type="button" onClick={() => setSelectedOrder(null)}>Закрити</button>

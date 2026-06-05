@@ -6,5 +6,7 @@ namespace Midas.Application.Common.Interfaces.Repositories
             string systemPrompt,
             string userPrompt,
             CancellationToken cancellationToken = default);
+
+        Task<string> GenerateDescription(string type, string name, string category, List<string>? items = null);
     }
 }

@@ -2,6 +2,8 @@ using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Midas.Api.DTOs.AIDtos;
+using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Core.OrderItems;
 using Midas.Core.Orders;
@@ -22,6 +24,20 @@ public class AiAgentController : ControllerBase
     {
         _aiService = aiService;
         _context = context;
+    }
+
+    [HttpPost("generate-description")]
+    public async Task<IActionResult> GenerateDescription([FromBody] GenerateDescriptionDto dto)
+    {
+        try
+        {
+            var result = await _aiService.GenerateDescription(dto.Type, dto.Name, dto.Category, dto.Items);
+            return Ok(new { description = result });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet("business-advice")]

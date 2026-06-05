@@ -138,6 +138,49 @@
   font-weight: 800;
 }
 
+.order-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.row-icon-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--primary);
+  background: rgba(var(--surface-rgb), 0.72);
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.row-icon-button:hover {
+  background: var(--primary-soft);
+  border-color: rgba(251, 146, 60, 0.55);
+}
+
+.order-details-items {
+  display: grid;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.order-details-item-row {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
 .sales-empty-state {
   display: grid;
   min-height: 320px;

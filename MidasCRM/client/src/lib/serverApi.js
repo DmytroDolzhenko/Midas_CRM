@@ -134,6 +134,43 @@ export const serverApi = {
       })
     },
   },
+  novaPoshta: {
+    createDocument(orderId) {
+      return apiRequest(`/NovaPoshta/documents/${orderId}`, {
+        method: 'POST',
+      })
+    },
+    syncDirectories() {
+      return apiRequest('/NovaPoshta/sync-directories', {
+        method: 'POST',
+      })
+    },
+    getSenders() {
+      return apiRequest('/novaposhta/settings/senders')
+    },
+    saveLogisticProfile(payload) {
+      return apiRequest('/novaposhta/settings/logistic-profile', {
+        method: 'POST',
+        body: payload,
+      })
+    },
+  },
+  userIntegrations: {
+    saveToken(provider, token) {
+      return apiRequest('/UserIntegration/save-token', {
+        method: 'POST',
+        body: { provider, token },
+      })
+    },
+  },
+  ai: {
+    generateDescription(payload) {
+      return apiRequest('/ai-agent/generate-description', {
+        method: 'POST',
+        body: payload,
+      })
+    },
+  },
   customers: {
     getAll() {
       return apiRequest('/Customer')

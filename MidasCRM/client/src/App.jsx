@@ -12,6 +12,7 @@ import { CreateCustomerPage } from './pages/customers/CreateCustomerPage.jsx'
 import { FinancesPage } from './pages/finance/FinancesPage.jsx'
 import { OperationsPage } from './pages/operations/OperationsPage.jsx'
 import { NovaPoshtaIntegrationPage } from './pages/Integrations/NovaPoshtaIntegrationPage.jsx'
+import { NovaPoshtaLogisticProfilePage } from './pages/Integrations/NovaPoshtaLogisticProfilePage.jsx'
 import { OlxIntegrationPage } from './pages/Integrations/OlxIntegrationPage.jsx'
 import { ProfilePage } from './pages/profile/ProfilePage.jsx'
 import { LoginPage } from './pages/auth/LoginPage.jsx'
@@ -145,6 +146,18 @@ function buildCustomerModels(serverCustomers) {
 }
 
 function buildOrderModels(serverOrders, customers, products) {
+  const variantsIndex = new Map()
+  products.forEach((product) => {
+    product.variants.forEach((variant) => {
+      variantsIndex.set(variant.id, {
+        productName: product.name,
+        uniqCode: variant.uniqCode,
+        color: variant.color,
+        size: variant.size,
+      })
+    })
+  })
+
   return serverOrders.map((order) => {
     const orderItems = getValue(order, 'orderItems', 'OrderItems') ?? []
     const activeOrderItems = orderItems.filter((item) => !getValue(item, 'isDeleted', 'IsDeleted'))
@@ -153,6 +166,7 @@ function buildOrderModels(serverOrders, customers, products) {
     const product = products.find((item) => item.variants?.some((variant) => variant.id === productVariantId))
     const customerId = getValue(order, 'customerId', 'CustomerId')
     const customer = customers.find((item) => item.id === customerId)
+    const customerName = customer ? `${customer.firstName || customer.name || ''} ${customer.surname || ''}`.trim() : `Клієнт #${customerId}`
     const total = Number(getValue(order, 'totalCost', 'TotalCost') ?? 0)
     const cost = activeOrderItems.reduce((sum, item) => (
       sum + Number(getValue(item, 'quantity', 'Quantity') ?? 0) * Number(getValue(item, 'costPriceSnapshot', 'CostPriceSnapshot') ?? 0)
@@ -177,7 +191,27 @@ function buildOrderModels(serverOrders, customers, products) {
       comment: getValue(order, 'description', 'Description') ?? '',
       deliveryMode: getValue(order, 'address', 'Address') ? 'nova-post' : 'simple',
       status: getValue(order, 'status', 'Status'),
-      items: activeOrderItems,
+      trackingNumber: getValue(order, 'trackingNumber', 'TrackingNumber') ?? '',
+      customerDetails: {
+        name: customer?.firstName ?? customer?.name ?? '',
+        surname: customer?.surname ?? '',
+      },
+      items: orderItems.map((item) => {
+        const variantId = getValue(item, 'productVariantId', 'ProductVariantId')
+        const variantInfo = variantsIndex.get(variantId)
+        const quantity = Number(getValue(item, 'quantity', 'Quantity') ?? 0)
+        const unitPrice = Number(getValue(item, 'unitPrice', 'UnitPrice') ?? 0)
+        return {
+          id: getValue(item, 'id', 'Id') ?? `${variantId}-${quantity}`,
+          productVariantId: variantId,
+          productName: variantInfo?.productName ?? `Variant #${variantId}`,
+          uniqCode: variantInfo?.uniqCode ?? '',
+          variantLabel: [variantInfo?.color, variantInfo?.size].filter(Boolean).join(' / '),
+          quantity,
+          unitPrice,
+          lineTotal: quantity * unitPrice,
+        }
+      }),
     }
   })
 }
@@ -654,7 +688,17 @@ export function App() {
     await runCompanyAction(() => serverApi.companyMembers.remove(userId))
   }
 
-  function connectIntegration(integrationId, token) {
+  async function sendOrderToNovaPoshta(orderId) {
+    const response = await serverApi.novaPoshta.createDocument(orderId)
+    await loadServerData()
+    return response
+  }
+
+  async function connectIntegration(integrationId, token) {
+    if (integrationId === 'nova-post') {
+      await serverApi.userIntegrations.saveToken('novaposhta', token)
+    }
+
     setConnectedIntegrations((currentIntegrations) => ({
       ...currentIntegrations,
       [integrationId]: {
@@ -706,7 +750,7 @@ export function App() {
         operations={historyOperations.slice(0, 5)}
       />
     ),
-    orders: <OrdersPage orders={orders} onNavigate={setPage} />,
+    orders: <OrdersPage orders={orders} onNavigate={setPage} onSendToNovaPoshta={sendOrderToNovaPoshta} />,
     createOrder: (
       <CreateOrderPage
         customers={customers}
@@ -753,6 +797,12 @@ export function App() {
         connection={connectedIntegrations['nova-post']}
         onBack={() => setPage('dashboard')}
         onConnect={(token) => connectIntegration('nova-post', token)}
+      />
+    ),
+    novaPostLogisticProfile: (
+      <NovaPoshtaLogisticProfilePage
+        onBack={() => setPage('orders')}
+        onSaved={() => setPage('orders')}
       />
     ),
     olxIntegration: (

@@ -2,6 +2,7 @@
 import { Button } from '../../components/Button.jsx'
 import sharedStyles from '../../styles/Shared.module.css'
 import pageStyles from '../../styles/pages/Sales.module.css'
+import { serverApi } from '../../lib/serverApi.js'
 
 const cx = (...classes) => classes.flatMap((className) => {
   const resolved = [sharedStyles[className], pageStyles[className]].filter(Boolean)
@@ -53,6 +54,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
 
   const filteredProducts = useMemo(
     () => products.filter((product) =>
@@ -131,6 +133,28 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
 
   function removeItem(productVariantId) {
     setOrderItems((currentItems) => currentItems.filter((item) => item.productVariantId !== productVariantId))
+  }
+
+  async function handleGenerateDescription() {
+    if (!orderItems.length) {
+      setError('Додайте хоча б один товар до замовлення перед генерацією опису')
+      return
+    }
+
+    setError('')
+    setIsGeneratingDescription(true)
+
+    try {
+      const response = await serverApi.ai.generateDescription({
+        type: 'order',
+        items: orderItems.map((item) => `${item.productName} (${item.variantLabel}) x${item.quantity}`),
+      })
+      setDescription(response?.description ?? '')
+    } catch (generateError) {
+      setError(generateError.message || 'Не вдалося згенерувати опис')
+    } finally {
+      setIsGeneratingDescription(false)
+    }
   }
 
   async function handleSubmit(event) {
@@ -283,9 +307,20 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                 </select>
               </label>
               <label className={cx('field', 'span-2')}>
-                <span>Опис</span>
-                <textarea rows="3" value={description} onChange={(event) => setDescription(limitWords(event.target.value, 20))} />
-                <small>{description.trim().split(/\s+/).filter(Boolean).length}/20 слів</small>
+                <span className={cx('field-title-with-action')}>
+                  <span>Опис</span>
+                  <button
+                    type="button"
+                    className={cx('secondary-button', 'ai-action-button')}
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDescription}
+                    aria-label="Згенерувати опис замовлення через ШІ"
+                  >
+                    <span aria-hidden="true">AI</span>
+                    {isGeneratingDescription ? 'Генеруємо...' : 'Запропонувати'}
+                  </button>
+                </span>
+                <textarea rows="3" value={description} onChange={(event) => setDescription(event.target.value)} />
               </label>
             </div>
           </div>
