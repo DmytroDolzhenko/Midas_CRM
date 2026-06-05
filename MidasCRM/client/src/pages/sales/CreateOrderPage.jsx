@@ -27,6 +27,11 @@ const paymentMethods = [
   { id: 2, label: 'Оплачує відправник' },
 ]
 
+function limitWords(value, maxWords) {
+  const words = value.trim().split(/\s+/).filter(Boolean)
+  return words.slice(0, maxWords).join(' ')
+}
+
 export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
   const [isVariantPickerOpen, setIsVariantPickerOpen] = useState(false)
@@ -51,12 +56,14 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
 
   const filteredProducts = useMemo(
     () => products.filter((product) =>
+      product.variants?.some((variant) => Number(variant.stockQuantity) > 0) &&
       `${product.name} ${product.category} ${product.warehouse}`.toLowerCase().includes(productQuery.toLowerCase())),
     [productQuery, products],
   )
 
   const filteredVariants = useMemo(
     () => (activeProduct?.variants ?? []).filter((variant) =>
+      Number(variant.stockQuantity) > 0 &&
       `${variant.uniqCode} ${variant.color} ${variant.size}`.toLowerCase().includes(variantQuery.toLowerCase())),
     [activeProduct, variantQuery],
   )
@@ -158,7 +165,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
         serviceType,
         cargoType,
         paymentMethods: paymentMethod,
-        description: description.trim(),
+        description: limitWords(description, 20),
         items: orderItems.map((item) => ({
           productVariantId: item.productVariantId,
           quantity: item.quantity,
@@ -223,16 +230,17 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
 
           <div className={cx('delivery-box')}>
             <strong>Замовник</strong>
-            <label className={cx('inline-switch')}>
+            <label className={cx('customer-mode-switch')}>
               <input type="checkbox" checked={isNewCustomer} onChange={(event) => setIsNewCustomer(event.target.checked)} />
-              <span>{isNewCustomer ? 'Новий замовник' : 'Існуючий замовник'}</span>
+              <span>Існуючий клієнт</span>
+              <span>Новий клієнт</span>
             </label>
 
             {!isNewCustomer ? (
               <div className={cx('form-grid-3')}>
                 <label className={cx('field', 'span-2')}>
                   <span>Пошук клієнта</span>
-                  <input value={customerQuery} onChange={(event) => setCustomerQuery(event.target.value)} placeholder="Введіть ім?я клієнта" />
+                  <input value={customerQuery} onChange={(event) => setCustomerQuery(event.target.value)} placeholder="Введіть ім'я клієнта" />
                 </label>
                 <label className={cx('field')}>
                   <span>Клієнт</span>
@@ -276,7 +284,8 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
               </label>
               <label className={cx('field', 'span-2')}>
                 <span>Опис</span>
-                <textarea rows="3" value={description} onChange={(event) => setDescription(event.target.value)} />
+                <textarea rows="3" value={description} onChange={(event) => setDescription(limitWords(event.target.value, 20))} />
+                <small>{description.trim().split(/\s+/).filter(Boolean).length}/20 слів</small>
               </label>
             </div>
           </div>
@@ -343,11 +352,12 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                   <input type="checkbox" checked={selectedVariantIds.includes(variant.id)} onChange={() => toggleVariant(variant.id)} />
                   <span>
                     <strong>{variant.uniqCode}</strong>
-                    <small>{variant.color} / {variant.size} · доступно {variant.stockQuantity}</small>
+                    <small>{variant.color} / {variant.size} · доступно {variant.stockQuantity}{variant.reservedQuantity ? ` · у замовленнях ${variant.reservedQuantity}` : ''}</small>
                   </span>
                   <b>{variant.sellPrice.toLocaleString('uk-UA')} грн</b>
                 </label>
               ))}
+              {!filteredVariants.length && <p>Немає доступних варіантів для нового замовлення.</p>}
             </div>
             <div className={cx('settings-actions')}>
               <Button type="button" onClick={addVariantsToOrder} disabled={!selectedVariantIds.length}>Додати до замовлення</Button>

@@ -40,26 +40,63 @@ function normalizeId(value) {
   return Number(value)
 }
 
-function buildProductModels(serverProducts, variants, categories, warehouses) {
+function getImageUrl(image) {
+  return getValue(image, 'url', 'Url') ?? ''
+}
+
+function getProductImages(product) {
+  return getValue(product, 'images', 'Images') ?? []
+}
+
+function getVariantReservedQuantity(orders, variantId) {
+  return orders
+    .filter((order) => !getValue(order, 'isDeleted', 'IsDeleted'))
+    .filter((order) => ![4, 6].includes(Number(getValue(order, 'status', 'Status'))))
+    .flatMap((order) => getValue(order, 'orderItems', 'OrderItems') ?? [])
+    .filter((item) => !getValue(item, 'isDeleted', 'IsDeleted'))
+    .filter((item) => Number(getValue(item, 'productVariantId', 'ProductVariantId')) === Number(variantId))
+    .reduce((sum, item) => sum + Number(getValue(item, 'quantity', 'Quantity') ?? 0), 0)
+}
+
+function buildProductModels(serverProducts, variants, categories, warehouses, serverOrders = []) {
   return serverProducts.map((product) => {
     const productId = getValue(product, 'id', 'Id')
     const warehouseId = getValue(product, 'warehouseId', 'WarehouseId')
-    const categoryIds = getValue(product, 'categoryIds', 'CategoryIds') ?? []
+    const categoryIds = getValue(product, 'categoryIds', 'CategoryIds')
+      ?? getValue(product, 'productCategoryIds', 'ProductCategoryIds')
+      ?? []
     const categoryId = categoryIds[0]
+    const images = getProductImages(product)
+      .map((image) => ({
+        id: getValue(image, 'id', 'Id'),
+        url: getImageUrl(image),
+        isMain: Boolean(getValue(image, 'isMain', 'IsMain')),
+      }))
+      .filter((image) => image.url)
     const productVariants = variants
       .filter((item) => getValue(item, 'productId', 'ProductId') === productId)
-      .map((item) => ({
-        id: getValue(item, 'id', 'Id'),
-        uniqCode: getValue(item, 'uniqCode', 'UniqCode'),
-        color: getValue(item, 'color', 'Color'),
-        size: getValue(item, 'size', 'Size'),
-        stockQuantity: Number(getValue(item, 'stockQuantity', 'StockQuantity') ?? 0),
-        costPrice: Number(getValue(item, 'costPrice', 'CostPrice') ?? 0),
-        sellPrice: Number(getValue(item, 'sellPrice', 'SellPrice') ?? 0),
-      }))
+      .map((item) => {
+        const variantId = getValue(item, 'id', 'Id')
+        const stockQuantity = Number(getValue(item, 'stockQuantity', 'StockQuantity') ?? 0)
+        const reservedQuantity = getVariantReservedQuantity(serverOrders, variantId)
+
+        return {
+          id: variantId,
+          uniqCode: getValue(item, 'uniqCode', 'UniqCode'),
+          color: getValue(item, 'color', 'Color'),
+          size: getValue(item, 'size', 'Size'),
+          stockQuantity: Math.max(stockQuantity - reservedQuantity, 0),
+          originalStockQuantity: stockQuantity,
+          reservedQuantity,
+          costPrice: Number(getValue(item, 'costPrice', 'CostPrice') ?? 0),
+          sellPrice: Number(getValue(item, 'sellPrice', 'SellPrice') ?? 0),
+        }
+      })
     const variant = productVariants[0]
     const productCategories = categories.filter((item) => categoryIds.includes(getValue(item, 'id', 'Id')))
     const warehouse = warehouses.find((item) => getValue(item, 'id', 'Id') === warehouseId)
+    const categoryNames = productCategories.map((item) => getValue(item, 'name', 'Name')).filter(Boolean)
+    const mainImage = images.find((image) => image.isMain) ?? images[0]
 
     return {
       id: productId,
@@ -72,7 +109,7 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
       barcode: '',
       name: getValue(product, 'name', 'Name') ?? '',
       description: getValue(product, 'description', 'Description') ?? '',
-      category: productCategories.map((item) => getValue(item, 'name', 'Name')).join(', ') || `Category #${categoryId}`,
+      category: categoryNames.join(', ') || 'Без категорії',
       brand: '-',
       unit: 'одиниць',
       warehouse: getValue(warehouse, 'name', 'Name') ?? `Склад #${warehouseId}`,
@@ -80,6 +117,8 @@ function buildProductModels(serverProducts, variants, categories, warehouses) {
       cost: Number(variant?.costPrice ?? 0),
       price: Number(variant?.sellPrice ?? 0),
       variants: productVariants,
+      images,
+      imageUrl: mainImage?.url ?? '',
     }
   })
 }
@@ -96,7 +135,10 @@ function buildCustomerModels(serverCustomers) {
       firstName: name,
       surname,
       email: getValue(customer, 'email', 'Email') ?? '',
-      phone: getValue(contact, 'value', 'Value') ?? getValue(customer, 'contactValue', 'ContactValue') ?? '',
+      phone: getValue(contact, 'phoneNumber', 'PhoneNumber')
+        ?? getValue(contact, 'value', 'Value')
+        ?? getValue(customer, 'contactValue', 'ContactValue')
+        ?? '',
       isDeleted: Boolean(getValue(customer, 'isDeleted', 'IsDeleted')),
     }
   })
@@ -105,32 +147,44 @@ function buildCustomerModels(serverCustomers) {
 function buildOrderModels(serverOrders, customers, products) {
   return serverOrders.map((order) => {
     const orderItems = getValue(order, 'orderItems', 'OrderItems') ?? []
-    const firstItem = orderItems[0]
+    const activeOrderItems = orderItems.filter((item) => !getValue(item, 'isDeleted', 'IsDeleted'))
+    const firstItem = activeOrderItems[0]
     const productVariantId = getValue(firstItem, 'productVariantId', 'ProductVariantId')
-    const product = products.find((item) => item.variantId === productVariantId)
+    const product = products.find((item) => item.variants?.some((variant) => variant.id === productVariantId))
     const customerId = getValue(order, 'customerId', 'CustomerId')
     const customer = customers.find((item) => item.id === customerId)
     const total = Number(getValue(order, 'totalCost', 'TotalCost') ?? 0)
+    const cost = activeOrderItems.reduce((sum, item) => (
+      sum + Number(getValue(item, 'quantity', 'Quantity') ?? 0) * Number(getValue(item, 'costPriceSnapshot', 'CostPriceSnapshot') ?? 0)
+    ), 0)
+    const quantity = activeOrderItems.reduce((sum, item) => sum + Number(getValue(item, 'quantity', 'Quantity') ?? 0), 0)
 
     return {
       id: getValue(order, 'id', 'Id'),
       code: getValue(order, 'uniqCode', 'UniqCode') ?? '',
+      companyId: getValue(order, 'companyId', 'CompanyId'),
       customer: customer?.name ?? `Клієнт #${customerId}`,
       product: product?.name ?? 'Товар із замовлення',
-      quantity: Number(getValue(firstItem, 'quantity', 'Quantity') ?? 0),
+      quantity,
       total,
-      cost: product ? product.cost : 0,
-      profit: product ? total - product.cost : total,
+      cost,
+      profit: total - cost,
       expense: 0,
       operationType: 'sale',
       account: 'Наложка NovaPay',
       channel: 'CRM',
       date: String(getValue(order, 'createdAt', 'CreatedAt') ?? '').slice(0, 10),
-      comment: '',
+      comment: getValue(order, 'description', 'Description') ?? '',
       deliveryMode: getValue(order, 'address', 'Address') ? 'nova-post' : 'simple',
       status: getValue(order, 'status', 'Status'),
+      items: activeOrderItems,
     }
   })
+}
+
+function limitWords(value, maxWords) {
+  const words = String(value ?? '').trim().split(/\s+/).filter(Boolean)
+  return words.slice(0, maxWords).join(' ')
 }
 
 function getCompanyId(company) {
@@ -197,9 +251,9 @@ export function App() {
         serverApi.companies.getBalance().catch(() => null),
       ])
 
-      const nextCustomers = buildCustomerModels(serverCustomers)
-      const nextProducts = buildProductModels(serverProducts, serverVariants, serverCategories, serverWarehouses)
       const serverOrders = await serverApi.orders.getAll()
+      const nextCustomers = buildCustomerModels(serverCustomers)
+      const nextProducts = buildProductModels(serverProducts, serverVariants, serverCategories, serverWarehouses, serverOrders)
 
       setCategories(serverCategories)
       setWarehouses(serverWarehouses)
@@ -317,6 +371,30 @@ export function App() {
     [orders],
   )
 
+  const companyOperations = useMemo(
+    () => operations.filter((operation) => String(operation.companyId) === String(activeCompanyId)),
+    [activeCompanyId, operations],
+  )
+
+  const historyOperations = useMemo(
+    () => {
+      const financialHistory = financialOperations
+        .filter((operation) => String(getValue(operation, 'companyId', 'CompanyId')) === String(activeCompanyId))
+        .map((operation) => ({
+          id: getValue(operation, 'id', 'Id'),
+          companyId: getValue(operation, 'companyId', 'CompanyId'),
+          createdAt: formatDateTime(new Date(getValue(operation, 'createdAt', 'CreatedAt'))),
+          type: Number(getValue(operation, 'operationType', 'OperationType')) === 1 ? 'Поповнення рахунку' : 'Фінансова витрата',
+          description: getValue(operation, 'comment', 'Comment') || 'Фінансова операція',
+          actor: getValue(operation, 'createdByUserId', 'CreatedByUserId') || 'company',
+          amount: `${Number(getValue(operation, 'amount', 'Amount') ?? 0).toLocaleString('uk-UA')} грн`,
+        }))
+
+      return [...financialHistory, ...companyOperations]
+    },
+    [activeCompanyId, companyOperations, financialOperations],
+  )
+
   const stats = useMemo(() => {
     const revenue = orders.reduce((sum, order) => sum + order.total, 0)
     const grossProfit = orders.reduce((sum, order) => sum + order.profit, 0)
@@ -340,6 +418,7 @@ export function App() {
     setOperations((currentOperations) => [
       {
         id: crypto.randomUUID(),
+        companyId: activeCompanyId,
         createdAt: formatDateTime(new Date()),
         actor: user?.email ?? 'system',
         ...operation,
@@ -388,7 +467,7 @@ export function App() {
       },
       serviceType: Number(sale.serviceType),
       cargoType: Number(sale.cargoType),
-      description: sale.description || 'CRM order',
+      description: limitWords(sale.description || 'CRM order', 20),
       paymentMethods: Number(sale.paymentMethods),
       items: sale.items.map((item) => ({
         productVariantId: Number(item.productVariantId),
@@ -624,7 +703,7 @@ export function App() {
         stats={stats}
         sales={orders}
         recentSales={orders.slice(0, 3)}
-        operations={operations.slice(0, 5)}
+        operations={historyOperations.slice(0, 5)}
       />
     ),
     orders: <OrdersPage orders={orders} onNavigate={setPage} />,
@@ -667,7 +746,7 @@ export function App() {
         onCreate={createCustomer}
       />
     ),
-    operations: <OperationsPage operations={operations} />,
+    operations: <OperationsPage operations={historyOperations} />,
     profile: <ProfilePage user={user} onUpdateProfile={updateUserProfile} />,
     novaPostIntegration: (
       <NovaPoshtaIntegrationPage

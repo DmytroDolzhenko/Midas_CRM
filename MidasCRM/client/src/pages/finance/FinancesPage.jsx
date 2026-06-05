@@ -96,7 +96,7 @@ export function FinancesPage({ balance, finances = [], onCreate }) {
     setPage(1)
   }
 
-  function openModal(type) {
+  function openModal(type = OPERATION_TYPES.writeOff) {
     setOperationType(type)
     setCategory(type === OPERATION_TYPES.accrual ? 4 : 1)
     setIsModalOpen(true)
@@ -140,11 +140,8 @@ export function FinancesPage({ balance, finances = [], onCreate }) {
     <section className={cx('page-stack')}>
       <div className={cx('crm-page-header')}>
         <div className={cx('finance-actions')}>
-          <button className={cx('secondary-button')} type="button" onClick={() => openModal(OPERATION_TYPES.writeOff)}>
-            Додати витрату
-          </button>
-          <button className={cx('primary-button')} type="button" onClick={() => openModal(OPERATION_TYPES.accrual)}>
-            Поповнити рахунок
+          <button className={cx('primary-button')} type="button" onClick={() => openModal()}>
+            Створити фінансову операцію
           </button>
         </div>
       </div>
@@ -198,8 +195,8 @@ export function FinancesPage({ balance, finances = [], onCreate }) {
         {filteredFinances.length === 0 ? (
           <div className={cx('expense-empty')}>
             <h2>Фінансових операцій поки немає</h2>
-            <button className={cx('primary-button')} type="button" onClick={() => openModal(OPERATION_TYPES.accrual)}>
-              Поповнити рахунок
+            <button className={cx('primary-button')} type="button" onClick={() => openModal()}>
+              Створити фінансову операцію
             </button>
           </div>
         ) : (
