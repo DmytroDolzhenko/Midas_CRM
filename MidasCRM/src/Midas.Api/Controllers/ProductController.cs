@@ -18,7 +18,9 @@ namespace Midas.Api.Controllers
         public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(CancellationToken cancellationToken)
         {
             var products = await getQueries.GetAllAsync(cancellationToken,
-                query => query.Include(p => p.Images));
+                query => query
+                    .Include(p => p.Images)
+                    .Include(p => p.ProductCategories));
             return Ok(products.Select(ProductDto.FromDomain));
         }
 
@@ -26,7 +28,9 @@ namespace Midas.Api.Controllers
         public async Task<ActionResult<ProductDto>> GetProductById(int id, CancellationToken cancellationToken)
         {
             var product = await getQueries.GetByIdAsync(id, cancellationToken,
-                query => query.Include(p => p.Images));
+                query => query
+                    .Include(p => p.Images)
+                    .Include(p => p.ProductCategories));
             if (product is null)
             {
                 return NotFound();

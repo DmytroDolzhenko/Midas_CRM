@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces;
 using Midas.Application.Common.Interfaces.Queries;
-using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
 using Midas.Core.ProductImages;
 using Midas.Core.Products;
@@ -18,7 +17,6 @@ namespace Midas.Application.Entities.Products.Commands
 
     public class AddImageToProductCommandHandler(
         IGetQueries<Product, int> productQueries,
-        IEntityRepository<Product> productRepository,
         IFileService fileService)
         : IRequestHandler<AddImageToProductCommand, ProductImage>
     {
@@ -42,8 +40,6 @@ namespace Midas.Application.Entities.Products.Commands
             product.AddImage(imageUrl);
 
             var newImage = product.Images.Last();
-
-            await productRepository.UpdateAsync(product, cancellationToken);
 
             return newImage;
         }
