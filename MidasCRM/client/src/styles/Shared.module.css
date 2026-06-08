@@ -109,7 +109,7 @@
   border: 0;
   color: #120905;
   background: linear-gradient(135deg, var(--primary), #ffb86b);
-  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.28);
+  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.1);
 }
 
 .primary-button:hover {
@@ -118,6 +118,7 @@
 
 .secondary-button {
   border: 1px solid var(--border);
+  margin: 12px 12px 12px 12px;
   color: var(--text);
   background: rgba(var(--surface-rgb), 0.68);
 }
@@ -177,6 +178,11 @@
   display: grid;
   gap: 16px;
   align-items: center;
+}
+
+.order-item-row {
+  align-items: center;
+  gap: 20px; 
 }
 
 .orders-table {
@@ -265,6 +271,12 @@
 .summary-panel {
   display: grid;
   gap: 16px;
+}
+
+.summary-panel {
+  position: sticky;
+  top: 70px;
+  align-self: start;
 }
 
 .field,
@@ -665,6 +677,9 @@
   .wide-form,
   .operation-item {
     grid-template-columns: 1fr;
+  }
+  .summary-panel {
+    position: static;
   }
   .table-filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

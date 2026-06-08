@@ -253,7 +253,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
       <div className={cx('inventory-widget-grid')}>
         <article><span>Усього товару</span><strong>{totals.total}</strong></article>
         <article><span>В наявності</span><strong>{totals.available} товарів</strong></article>
-        <article><span>Доступно</span><strong>{totals.stockUnits.toFixed(2)} одиниць</strong></article>
+        <article><span>Доступно</span><strong>{totals.stockUnits} одиниць</strong></article>
         <article><span>Товарів на складі</span><strong>{totals.storedValue.toLocaleString('uk-UA')} грн</strong></article>
         <article><span>Можливий дохід</span><strong>{totals.possibleIncome.toLocaleString('uk-UA')} грн</strong></article>
       </div>

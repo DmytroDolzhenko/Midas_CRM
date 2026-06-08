@@ -32,19 +32,19 @@ namespace Midas.Application.DTOs.NovaPoshta.Requests
     public class NpOptionsSeatItem
     {
         [JsonPropertyName("volumetricVolume")]
-        public string VolumetricVolume { get; set; } = "1";
+        public string VolumetricVolume { get; set; } = "0.002";
 
         [JsonPropertyName("volumetricWidth")]
-        public string VolumetricWidth { get; set; } = "30";
+        public string VolumetricWidth { get; set; } = "20";
 
         [JsonPropertyName("volumetricLength")]
-        public string VolumetricLength { get; set; } = "30";
+        public string VolumetricLength { get; set; } = "20";
 
         [JsonPropertyName("volumetricHeight")]
-        public string VolumetricHeight { get; set; } = "30";
+        public string VolumetricHeight { get; set; } = "5";
 
         [JsonPropertyName("weight")]
-        public string Weight { get; set; } = "20";
+        public string Weight { get; set; } = "0.3";
     }
 
     public class NpCreateInternetDocumentResult

@@ -162,6 +162,18 @@ namespace Midas.Core.Orders
         {
             PaymentMethods = newPaymentMethods;
         }
+
+        public void UpdateDetails(
+            ServiceType serviceType,
+            CargoType cargoType,
+            PaymentMethods paymentMethods,
+            string description)
+        {
+            ServiceType = serviceType;
+            CargoType = cargoType;
+            PaymentMethods = paymentMethods;
+            Description = description;
+        }
         public void RecalculateTotalWeight()
         {
             TotalWeight = 0;

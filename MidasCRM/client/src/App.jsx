@@ -166,7 +166,6 @@ function buildOrderModels(serverOrders, customers, products) {
     const product = products.find((item) => item.variants?.some((variant) => variant.id === productVariantId))
     const customerId = getValue(order, 'customerId', 'CustomerId')
     const customer = customers.find((item) => item.id === customerId)
-    const customerName = customer ? `${customer.firstName || customer.name || ''} ${customer.surname || ''}`.trim() : `Клієнт #${customerId}`
     const total = Number(getValue(order, 'totalCost', 'TotalCost') ?? 0)
     const cost = activeOrderItems.reduce((sum, item) => (
       sum + Number(getValue(item, 'quantity', 'Quantity') ?? 0) * Number(getValue(item, 'costPriceSnapshot', 'CostPriceSnapshot') ?? 0)
@@ -192,6 +191,10 @@ function buildOrderModels(serverOrders, customers, products) {
       deliveryMode: getValue(order, 'address', 'Address') ? 'nova-post' : 'simple',
       status: getValue(order, 'status', 'Status'),
       trackingNumber: getValue(order, 'trackingNumber', 'TrackingNumber') ?? '',
+      serviceType: getValue(order, 'serviceType', 'ServiceType'),
+      cargoType: getValue(order, 'cargoType', 'CargoType'),
+      paymentMethods: getValue(order, 'paymentMethods', 'PaymentMethods'),
+      address: getValue(order, 'address', 'Address'),
       customerDetails: {
         name: customer?.firstName ?? customer?.name ?? '',
         surname: customer?.surname ?? '',
@@ -219,6 +222,10 @@ function buildOrderModels(serverOrders, customers, products) {
 function limitWords(value, maxWords) {
   const words = String(value ?? '').trim().split(/\s+/).filter(Boolean)
   return words.slice(0, maxWords).join(' ')
+}
+
+function normalizePhoneNumber(value) {
+  return String(value ?? '').replace(/\D/g, '')
 }
 
 function getCompanyId(company) {
@@ -257,6 +264,7 @@ export function App() {
   const [companyError, setCompanyError] = useState('')
   const [companyPageError, setCompanyPageError] = useState('')
   const [isCompanyActionLoading, setIsCompanyActionLoading] = useState(false)
+  const [editingOrder, setEditingOrder] = useState(null)
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light'
@@ -420,7 +428,7 @@ export function App() {
           createdAt: formatDateTime(new Date(getValue(operation, 'createdAt', 'CreatedAt'))),
           type: Number(getValue(operation, 'operationType', 'OperationType')) === 1 ? 'Поповнення рахунку' : 'Фінансова витрата',
           description: getValue(operation, 'comment', 'Comment') || 'Фінансова операція',
-          actor: getValue(operation, 'createdByUserId', 'CreatedByUserId') || 'company',
+          actor: getValue(operation, 'createdByUserEmail', 'CreatedByUserEmail') || getValue(operation, 'createdByUserId', 'CreatedByUserId') || 'company',
           amount: `${Number(getValue(operation, 'amount', 'Amount') ?? 0).toLocaleString('uk-UA')} грн`,
         }))
 
@@ -468,13 +476,13 @@ export function App() {
       ? {
         firstName: sale.newCustomer?.name?.trim(),
         surname: sale.newCustomer?.surname?.trim() || '-',
-        phone: sale.newCustomer?.phone?.trim(),
+        phone: normalizePhoneNumber(sale.newCustomer?.phone),
         email: sale.newCustomer?.email?.trim(),
       }
       : {
         firstName: selectedCustomer?.firstName || selectedCustomer?.name,
         surname: selectedCustomer?.surname || '-',
-        phone: selectedCustomer?.phone,
+        phone: normalizePhoneNumber(selectedCustomer?.phone),
         email: selectedCustomer?.email,
       }
 
@@ -501,7 +509,7 @@ export function App() {
       },
       serviceType: Number(sale.serviceType),
       cargoType: Number(sale.cargoType),
-      description: limitWords(sale.description || 'CRM order', 20),
+      description: limitWords(sale.description || 'CRM order', 15),
       paymentMethods: Number(sale.paymentMethods),
       items: sale.items.map((item) => ({
         productVariantId: Number(item.productVariantId),
@@ -510,6 +518,27 @@ export function App() {
     })
 
     await loadServerData()
+    setPage('orders')
+  }
+
+  async function updateSale(orderId, sale) {
+    const deliveryPointType = sale.deliveryPointType === 'parcelLocker' ? 1 : 0
+
+    await serverApi.orders.update(orderId, {
+      address: {
+        city: sale.city || 'Київ',
+        postalCode: Number(sale.postalCode) || 1,
+        postDepartmentNumber: Number(sale.postDepartmentNumber) || 1,
+        deliveryPointType,
+      },
+      serviceType: Number(sale.serviceType),
+      cargoType: Number(sale.cargoType),
+      paymentMethods: Number(sale.paymentMethods),
+      description: limitWords(sale.description || 'CRM order', 15),
+    })
+
+    await loadServerData()
+    setEditingOrder(null)
     setPage('orders')
   }
 
@@ -750,13 +779,36 @@ export function App() {
         operations={historyOperations.slice(0, 5)}
       />
     ),
-    orders: <OrdersPage orders={orders} onNavigate={setPage} onSendToNovaPoshta={sendOrderToNovaPoshta} />,
+    orders: (
+      <OrdersPage
+        orders={orders}
+        onNavigate={setPage}
+        onSendToNovaPoshta={sendOrderToNovaPoshta}
+        onEditOrder={(order) => {
+          setEditingOrder(order)
+          setPage('editOrder')
+        }}
+      />
+    ),
     createOrder: (
       <CreateOrderPage
         customers={customers}
         products={products}
         onBack={() => setPage('orders')}
         onCreate={addSale}
+      />
+    ),
+    editOrder: (
+      <CreateOrderPage
+        customers={customers}
+        products={products}
+        editingOrder={editingOrder}
+        onBack={() => {
+          setEditingOrder(null)
+          setPage('orders')
+        }}
+        onCreate={addSale}
+        onUpdate={updateSale}
       />
     ),
     products: (

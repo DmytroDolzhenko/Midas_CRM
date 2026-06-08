@@ -46,7 +46,9 @@ namespace Midas.Infrastructure.Persistence.Services
             else if (type.Equals("order", StringComparison.OrdinalIgnoreCase) && items != null)
             {
                 string itemsList = string.Join(", ", items);
+                prompt = $"Сформуй короткий опис замовлення українською мовою до 15 слів. Без Markdown, списків, лапок, зірочок, емодзі та спеціальних символів. Тільки звичайний текст. Товари: {itemsList}.";
                 prompt = $"Сформуй короткий технічний коментар/супровідний опис для логістики на основі складу замовлення. У замовленні є такі товари: {itemsList}. Напиши українською мовою, сухо та по справі, що саме відправляється і на що звернути увагу.";
+                prompt = $"Сформуй короткий опис замовлення українською мовою до 15 слів. Без Markdown, списків, лапок, зірочок, емодзі та спеціальних символів. Тільки звичайний текст. Товари: {itemsList}.";
             }
             var requestBody = new
             {
@@ -74,7 +76,20 @@ namespace Midas.Infrastructure.Persistence.Services
                 .GetProperty("content")
                 .GetString();
 
-            return content?.Trim() ?? string.Empty;
+            var generated = content?.Trim() ?? string.Empty;
+
+            return type.Equals("order", StringComparison.OrdinalIgnoreCase)
+                ? CleanOrderDescription(generated)
+                : generated;
+        }
+
+        private static string CleanOrderDescription(string value)
+        {
+            var cleaned = new string(value
+                .Where(ch => char.IsLetterOrDigit(ch) || char.IsWhiteSpace(ch) || ch is '.' or ',' or ':' or ';' or '!' or '?' or '(' or ')' or '/' or '-')
+                .ToArray());
+
+            return string.Join(' ', cleaned.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(15));
         }
 
         public async Task<string> GetRecommendationAsync(

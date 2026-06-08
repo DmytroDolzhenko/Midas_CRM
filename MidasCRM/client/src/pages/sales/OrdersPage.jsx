@@ -31,6 +31,41 @@ function ExportIcon() {
   )
 }
 
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m5 12 5 5L20 7" />
+    </svg>
+  )
+}
+
+function EyeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  )
+}
+
 function formatStatus(status) {
   return statusNames[status] ?? status ?? 'Новий'
 }
@@ -39,7 +74,7 @@ function formatDate(date) {
   return date.toISOString().slice(0, 10)
 }
 
-export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
+export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta, onEditOrder }) {
   const [activeStatus, setActiveStatus] = useState('Всі')
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState(() => {
@@ -55,6 +90,8 @@ export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
   const [page, setPage] = useState(1)
   const [sendingOrderId, setSendingOrderId] = useState(null)
   const [actionError, setActionError] = useState('')
+  const [confirmSendOrder, setConfirmSendOrder] = useState(null)
+  const [noticeMessage, setNoticeMessage] = useState('')
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -193,7 +230,12 @@ export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
       }
     } finally {
       setSendingOrderId(null)
+      setConfirmSendOrder(null)
     }
+  }
+
+  function getTrackingNumber(order) {
+    return order.trackingNumber || order.TrackingNumber || ''
   }
 
   return (
@@ -321,15 +363,36 @@ export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
                 <span>{Number(total).toLocaleString('uk-UA')}</span>
                 <span>{formatStatus(status)}</span>
                 <div className={cx('order-row-actions')}>
+                  {getTrackingNumber(order) ? (
+                    <button
+                      type="button"
+                      className={cx('row-icon-button', 'success-icon-button')}
+                      onClick={() => setNoticeMessage('Це замовлення вже було надіслано на Нову Пошту раніше.')}
+                      aria-label="Це замовлення вже було надіслано на Нову Пошту раніше."
+                      title="Це замовлення вже було надіслано на Нову Пошту раніше."
+                    >
+                      <CheckIcon />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className={cx('row-icon-button')}
+                      onClick={() => setConfirmSendOrder(order)}
+                      disabled={sendingOrderId === (order.id || order.Id)}
+                      aria-label="Надіслати на Нову Пошту"
+                      title="Надіслати на Нову Пошту"
+                    >
+                      <SendIcon />
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={cx('row-icon-button')}
-                    onClick={() => handleSendToNovaPoshta(order.id || order.Id)}
-                    disabled={sendingOrderId === (order.id || order.Id)}
-                    aria-label="Надіслати на Нову Пошту"
-                    title="Надіслати на Нову Пошту"
+                    onClick={() => onEditOrder?.(order)}
+                    aria-label="Редагувати замовлення"
+                    title="Редагувати замовлення"
                   >
-                    ↗
+                    <PencilIcon />
                   </button>
                   <button
                     type="button"
@@ -338,7 +401,7 @@ export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
                     aria-label="Переглянути деталі"
                     title="Деталі замовлення"
                   >
-                    👁
+                    <EyeIcon />
                   </button>
                 </div>
               </div>
@@ -403,6 +466,52 @@ export function OrdersPage({ orders = [], onNavigate, onSendToNovaPoshta }) {
             </div>
             <div className={cx('settings-actions')}>
               <button className={cx('primary-button')} type="button" onClick={() => setSelectedOrder(null)}>Закрити</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {confirmSendOrder && (
+        <div className={cx('modal-backdrop')} role="presentation" onClick={() => setConfirmSendOrder(null)}>
+          <section className={cx('confirm-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className={cx('settings-header')}>
+              <div>
+                <p className={cx('eyebrow')}>Нова Пошта</p>
+                <h2>Підтвердити відправку?</h2>
+              </div>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setConfirmSendOrder(null)}>x</button>
+            </div>
+            <p className={cx('confirm-modal-text')}>
+              Створити ТТН для замовлення {confirmSendOrder.code || confirmSendOrder.Code} в кабінеті Нової Пошти?
+            </p>
+            <div className={cx('settings-actions')}>
+              <button className={cx('secondary-button')} type="button" onClick={() => setConfirmSendOrder(null)}>Скасувати</button>
+              <button
+                className={cx('primary-button')}
+                type="button"
+                onClick={() => handleSendToNovaPoshta(confirmSendOrder.id || confirmSendOrder.Id)}
+                disabled={sendingOrderId === (confirmSendOrder.id || confirmSendOrder.Id)}
+              >
+                {sendingOrderId === (confirmSendOrder.id || confirmSendOrder.Id) ? 'Надсилання...' : 'Підтвердити'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {noticeMessage && (
+        <div className={cx('modal-backdrop')} role="presentation" onClick={() => setNoticeMessage('')}>
+          <section className={cx('confirm-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className={cx('settings-header')}>
+              <div>
+                <p className={cx('eyebrow')}>Нова Пошта</p>
+                <h2>Повідомлення</h2>
+              </div>
+              <button className={cx('modal-close-button')} type="button" onClick={() => setNoticeMessage('')}>x</button>
+            </div>
+            <p className={cx('confirm-modal-text')}>{noticeMessage}</p>
+            <div className={cx('settings-actions')}>
+              <button className={cx('primary-button')} type="button" onClick={() => setNoticeMessage('')}>Зрозуміло</button>
             </div>
           </section>
         </div>

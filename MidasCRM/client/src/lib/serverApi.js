@@ -121,6 +121,12 @@ export const serverApi = {
     getAll() {
       return apiRequest('/Order')
     },
+    update(orderId, order) {
+      return apiRequest(`/Order/${orderId}`, {
+        method: 'PUT',
+        body: order,
+      })
+    },
     updateStatus(orderId, status) {
       return apiRequest('/Order/update-status', {
         method: 'PATCH',

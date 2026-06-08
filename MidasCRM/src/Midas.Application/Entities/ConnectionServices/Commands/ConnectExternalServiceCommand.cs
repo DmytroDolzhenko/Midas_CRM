@@ -89,7 +89,6 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
                 .FirstOrDefaultAsync(ct);
             if (companyId is null) return false;
 
-            // Завантажуємо разом з профілем, щоб перевірити наявність
             var integration = await _context.UserIntegrations
                 .Include(x => x.LogisticProfile)
                 .FirstOrDefaultAsync(x => x.CompanyId == companyId.Value && x.Provider == request.Provider, ct);
@@ -99,14 +98,11 @@ namespace Midas.Application.Entities.ConnectionServices.Commands
                 integration = UserIntegration.Create(companyId.Value, userId, request.Provider);
                 _context.UserIntegrations.Add(integration);
 
-                // Зберігаємо проміжний стан, щоб згенерувався числовий ID для integration.Id,
-                // який потрібен для зовнішнього ключа UserLogisticProfile
                 await _context.SaveChangesAsync(ct);
             }
 
             if (integration.LogisticProfile == null)
             {
-                // Використовуємо новий фабричний метод, щоб не ламати інкапсуляцію DDD
                 var emptyProfile = UserLogisticProfile.CreateEmpty(integration.Id);
                 _context.UserLogisticProfiles.Add(emptyProfile);
             }
