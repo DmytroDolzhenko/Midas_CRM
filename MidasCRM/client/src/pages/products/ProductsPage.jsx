@@ -32,13 +32,17 @@ function ExportIcon() {
   )
 }
 
-export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWarehouse, onUpdateWarehouse }) {
+export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWarehouse, onUpdateWarehouse, onWriteOffProduct }) {
   const firstWarehouseId = String(getValue(warehouses[0], 'id', 'Id') ?? '')
   const [activeWarehouseId, setActiveWarehouseId] = useState(firstWarehouseId)
   const [search, setSearch] = useState('')
   const [stockFilter, setStockFilter] = useState('all')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const [writeOffProduct, setWriteOffProduct] = useState(null)
+  const [writeOffSelection, setWriteOffSelection] = useState({})
+  const [writeOffError, setWriteOffError] = useState('')
+  const [isWriteOffSubmitting, setIsWriteOffSubmitting] = useState(false)
   const [editingWarehouse, setEditingWarehouse] = useState(null)
   const [warehouseName, setWarehouseName] = useState('')
   const [warehouseError, setWarehouseError] = useState('')
@@ -178,6 +182,141 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
     }
   }
 
+  function openWriteOffModal(product) {
+    setWriteOffProduct(product)
+    setWriteOffSelection({})
+    setWriteOffError('')
+  }
+
+  function closeWriteOffModal() {
+    setWriteOffProduct(null)
+    setWriteOffSelection({})
+    setWriteOffError('')
+  }
+
+  function selectAllVariantsForWriteOff() {
+    const nextSelection = {}
+
+    ;(writeOffProduct?.variants ?? []).forEach((variant) => {
+      const availableQuantity = Number(variant.stockQuantity) || 0
+
+      if (availableQuantity > 0) {
+        nextSelection[variant.id] = {
+          checked: true,
+          quantity: availableQuantity,
+        }
+      }
+    })
+
+    setWriteOffSelection(nextSelection)
+  }
+
+  function toggleWriteOffVariant(variant) {
+    setWriteOffSelection((currentSelection) => {
+      const currentVariant = currentSelection[variant.id]
+
+      if (currentVariant?.checked) {
+        return {
+          ...currentSelection,
+          [variant.id]: {
+            ...currentVariant,
+            checked: false,
+            quantity: '',
+          },
+        }
+      }
+
+      return {
+        ...currentSelection,
+        [variant.id]: {
+          checked: true,
+          quantity: Number(variant.stockQuantity) > 0 ? 1 : 0,
+        },
+      }
+    })
+  }
+
+  function updateWriteOffQuantity(variantId, quantity) {
+    setWriteOffSelection((currentSelection) => ({
+      ...currentSelection,
+      [variantId]: {
+        checked: true,
+        quantity,
+      },
+    }))
+  }
+
+  const writeOffRows = useMemo(
+    () => (writeOffProduct?.variants ?? []).map((variant) => {
+      const selection = writeOffSelection[variant.id] ?? {}
+      const quantity = Number(selection.quantity) || 0
+      const availableQuantity = Number(variant.stockQuantity) || 0
+      const checked = Boolean(selection.checked)
+      const isInvalid = checked && (quantity < 1 || quantity > availableQuantity)
+
+      return {
+        variant,
+        checked,
+        quantity,
+        availableQuantity,
+        isInvalid,
+        totalCost: checked && !isInvalid ? quantity * Number(variant.costPrice ?? 0) : 0,
+      }
+    }),
+    [writeOffProduct, writeOffSelection],
+  )
+
+  const writeOffSummary = useMemo(
+    () => {
+      const selectedRows = writeOffRows.filter((row) => row.checked)
+      const hasInvalidRows = selectedRows.some((row) => row.isInvalid)
+
+      return {
+        selectedRows,
+        hasInvalidRows,
+        totalQuantity: selectedRows.reduce((sum, row) => sum + (row.isInvalid ? 0 : row.quantity), 0),
+        totalCost: selectedRows.reduce((sum, row) => sum + row.totalCost, 0),
+      }
+    },
+    [writeOffRows],
+  )
+
+  async function submitWriteOff(event) {
+    event.preventDefault()
+    setWriteOffError('')
+
+    if (!writeOffSummary.selectedRows.length) {
+      setWriteOffError('Оберіть хоча б один варіант для списання')
+      return
+    }
+
+    if (writeOffSummary.hasInvalidRows) {
+      setWriteOffError('Перевірте кількість: списання не може перевищувати поточний залишок')
+      return
+    }
+
+    setIsWriteOffSubmitting(true)
+
+    try {
+      await onWriteOffProduct?.({
+        productId: writeOffProduct.id,
+        productName: writeOffProduct.name,
+        totalQuantity: writeOffSummary.totalQuantity,
+        totalCost: writeOffSummary.totalCost,
+        items: writeOffSummary.selectedRows.map((row) => ({
+          productVariantId: row.variant.id,
+          quantity: row.quantity,
+          nextQuantity: Math.max(Number(row.variant.originalStockQuantity ?? row.variant.stockQuantity) - row.quantity, 0),
+        })),
+      })
+      closeWriteOffModal()
+    } catch (error) {
+      setWriteOffError(error.message || 'Не вдалося списати товар')
+    } finally {
+      setIsWriteOffSubmitting(false)
+    }
+  }
+
   return (
     
     <section className={cx('catalog-page')}>
@@ -301,6 +440,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
                   <span>ID: {product.sku}</span>
                   <span>Категорія: {product.category || 'Без категорії'}</span>
                   <button type="button" onClick={(event) => { event.stopPropagation(); setEditingProduct(product) }}>Варіанти</button>
+                  <button type="button" onClick={(event) => { event.stopPropagation(); openWriteOffModal(product) }}>Списати</button>
                 </div>
               </div>
               <div className={cx('large-product-cell', 'available-cell')}>
@@ -368,6 +508,80 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
               <button className={cx('primary-button')} type="button" onClick={() => setEditingProduct(null)}>Готово</button>
             </div>
           </section>
+        </div>
+      )}
+
+      {writeOffProduct && (
+        <div className={cx('modal-backdrop')} role="presentation" onClick={closeWriteOffModal}>
+          <form className={cx('write-off-modal')} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()} onSubmit={submitWriteOff}>
+            <div className={cx('settings-header')}>
+              <div>
+                <p className={cx('eyebrow')}>Write-off</p>
+                <h2>Списання товару: {writeOffProduct.name}</h2>
+                <span className={cx('write-off-subtitle')}>Артикул: {writeOffProduct.sku}</span>
+              </div>
+              <button className={cx('modal-close-button')} type="button" onClick={closeWriteOffModal}>x</button>
+            </div>
+
+            <div className={cx('write-off-actions')}>
+              <button className={cx('secondary-button')} type="button" onClick={selectAllVariantsForWriteOff}>
+                Вибрати всі варіанти для повного списання
+              </button>
+            </div>
+
+            <div className={cx('write-off-table')}>
+              <div className={cx('write-off-header')}>
+                <span />
+                <span>Характеристики</span>
+                <span>Поточний залишок</span>
+                <span>Кількість</span>
+              </div>
+
+              {writeOffRows.map((row) => (
+                <div className={cx('write-off-row')} key={row.variant.id}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={row.checked}
+                      disabled={row.availableQuantity <= 0}
+                      onChange={() => toggleWriteOffVariant(row.variant)}
+                    />
+                  </label>
+                  <div>
+                    <strong>{row.variant.size || '-'} / {row.variant.color || '-'}</strong>
+                    <small>{row.variant.uniqCode || `Variant #${row.variant.id}`}</small>
+                  </div>
+                  <span>Доступно: {row.availableQuantity} од.</span>
+                  <input
+                    className={row.isInvalid ? cx('write-off-input-error') : ''}
+                    disabled={!row.checked}
+                    min="1"
+                    max={row.availableQuantity}
+                    type="number"
+                    value={writeOffSelection[row.variant.id]?.quantity ?? ''}
+                    onChange={(event) => updateWriteOffQuantity(row.variant.id, event.target.value)}
+                  />
+                </div>
+              ))}
+
+              {!writeOffRows.length && <p className={cx('write-off-empty')}>У цього товару немає варіантів для списання.</p>}
+            </div>
+
+            {writeOffError && <p className={cx('form-error')}>{writeOffError}</p>}
+
+            <div className={cx('write-off-footer')}>
+              <strong>
+                Буде списано: {writeOffSummary.totalQuantity} од. товарів на суму {writeOffSummary.totalCost.toLocaleString('uk-UA')} грн
+              </strong>
+              <button
+                className={cx('primary-button')}
+                type="submit"
+                disabled={isWriteOffSubmitting || !writeOffSummary.selectedRows.length || writeOffSummary.hasInvalidRows}
+              >
+                {isWriteOffSubmitting ? 'Списання...' : 'Підтвердити списання'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
