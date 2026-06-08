@@ -214,15 +214,35 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
 }
 
 .product-preview {
+  display: grid;
+  place-items: center;
   width: 64px;
   height: 64px;
   flex: 0 0 auto;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 18px;
   background: radial-gradient(circle at 28% 24%, rgba(255, 184, 107, 0.85), rgba(249, 115, 22, 0.28) 42%, rgba(var(--surface-rgb), 0.9));
+}
+
+.product-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-preview span {
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 900;
 }
 
 .product-main-cell strong,
@@ -261,6 +281,29 @@
   color: #34d399;
 }
 
+.variant-list {
+  display: grid;
+  gap: 10px;
+  padding: 0 22px 22px;
+}
+
+.variant-list article {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-muted);
+}
+
+.variant-list span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 @media (max-width: 1100px) {
   .inventory-widget-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -280,6 +323,9 @@
   }
   .warehouse-tab {
     flex: 0 0 auto;
+  }
+  .variant-list article {
+    grid-template-columns: 1fr;
   }
 }
 

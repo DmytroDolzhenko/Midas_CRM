@@ -12,6 +12,7 @@ namespace Api.Dtos
         string? Comment,
         Guid? OrderId,
         Guid? CreatedByUserId,
+        string? CreatedByUserEmail,
         DateTime CreatedAt,
         bool IsDeleted)
     {
@@ -25,6 +26,7 @@ namespace Api.Dtos
                 operation.Comment,
                 operation.OrderId,
                 operation.CreatedByUserId,
+                operation.CreatedByUser?.Email,
                 operation.CreatedAt,
                 operation.IsDeleted);
     }

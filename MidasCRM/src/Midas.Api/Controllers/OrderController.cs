@@ -99,6 +99,25 @@ namespace Midas.Api.Controllers
             return Ok(OrderDto.FromDomain(result));
         }
 
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<OrderDto>> UpdateOrder(Guid id, [FromBody] UpdateOrderDto request, CancellationToken cancellationToken)
+        {
+            var command = new UpdateOrderDetailsCommand
+            {
+                Id = id,
+                City = request.Address.City,
+                PostDepartmentNumber = request.Address.PostDepartmentNumber,
+                DeliveryPointType = request.Address.DeliveryPointType,
+                ServiceType = request.ServiceType,
+                CargoType = request.CargoType,
+                PaymentMethods = request.PaymentMethods,
+                Description = request.Description
+            };
+
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(OrderDto.FromDomain(result));
+        }
+
         [HttpPost("one-click")]
         public async Task<ActionResult<OrderDto>> CreateOrderOneClick(
             [FromBody] CreateOrderOneClickDto request,

@@ -28,7 +28,46 @@ const paymentMethods = [
   { id: 2, label: 'Оплачує відправник' },
 ]
 
-export function CreateOrderPage({ customers, products, onBack, onCreate }) {
+function limitWords(value, maxWords) {
+  const words = value.trim().split(/\s+/).filter(Boolean)
+  return words.slice(0, maxWords).join(' ')
+}
+
+function cleanDescription(value) {
+  return limitWords(value.replace(/[^\p{L}\p{N}\s.,:;!?()/-]/gu, '').replace(/\s+/g, ' '), 15)
+}
+
+function getOrderValue(order, camelKey, pascalKey) {
+  return order?.[camelKey] ?? order?.[pascalKey]
+}
+
+function getOrderAddress(order) {
+  return getOrderValue(order, 'address', 'Address') ?? {}
+}
+
+function getDeliveryPointTypeValue(value) {
+  return Number(value) === 1 ? 'parcelLocker' : 'branch'
+}
+
+function formatUkrainianPhoneInput(value) {
+  let digits = value.replace(/\D/g, '')
+
+  if (digits.startsWith('380')) {
+    digits = digits.slice(3)
+  } else if (digits.startsWith('0')) {
+    digits = digits.slice(1)
+  }
+
+  return `+380${digits.slice(0, 9)}`
+}
+
+function isValidUkrainianPhone(value) {
+  return /^\+380\d{9}$/.test(value)
+}
+
+export function CreateOrderPage({ customers, products, editingOrder = null, onBack, onCreate, onUpdate }) {
+  const isEditMode = Boolean(editingOrder)
+  const editingAddress = getOrderAddress(editingOrder)
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
   const [isVariantPickerOpen, setIsVariantPickerOpen] = useState(false)
   const [productQuery, setProductQuery] = useState('')
@@ -39,26 +78,28 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
   const [isNewCustomer, setIsNewCustomer] = useState(false)
   const [customerQuery, setCustomerQuery] = useState('')
   const [customerId, setCustomerId] = useState(String(customers[0]?.id ?? ''))
-  const [newCustomer, setNewCustomer] = useState({ name: '', surname: '', phone: '', email: '' })
-  const [city, setCity] = useState('Київ')
-  const [postDepartmentNumber, setPostDepartmentNumber] = useState(1)
-  const [deliveryPointType, setDeliveryPointType] = useState('branch')
-  const [serviceType, setServiceType] = useState(2)
-  const [cargoType, setCargoType] = useState(1)
-  const [paymentMethod, setPaymentMethod] = useState(1)
-  const [description, setDescription] = useState('')
+  const [newCustomer, setNewCustomer] = useState({ name: '', surname: '', phone: '+380', email: '' })
+  const [city, setCity] = useState(getOrderValue(editingAddress, 'city', 'City') || 'Київ')
+  const [postDepartmentNumber, setPostDepartmentNumber] = useState(Number(getOrderValue(editingAddress, 'postDepartmentNumber', 'PostDepartmentNumber') ?? 1))
+  const [deliveryPointType, setDeliveryPointType] = useState(getDeliveryPointTypeValue(getOrderValue(editingAddress, 'deliveryPointType', 'DeliveryPointType')))
+  const [serviceType, setServiceType] = useState(Number(getOrderValue(editingOrder, 'serviceType', 'ServiceType') ?? 2))
+  const [cargoType, setCargoType] = useState(Number(getOrderValue(editingOrder, 'cargoType', 'CargoType') ?? 1))
+  const [paymentMethod, setPaymentMethod] = useState(Number(getOrderValue(editingOrder, 'paymentMethods', 'PaymentMethods') ?? 1))
+  const [description, setDescription] = useState(getOrderValue(editingOrder, 'comment', 'Comment') ?? getOrderValue(editingOrder, 'description', 'Description') ?? '')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
 
   const filteredProducts = useMemo(
     () => products.filter((product) =>
+      product.variants?.some((variant) => Number(variant.stockQuantity) > 0) &&
       `${product.name} ${product.category} ${product.warehouse}`.toLowerCase().includes(productQuery.toLowerCase())),
     [productQuery, products],
   )
 
   const filteredVariants = useMemo(
     () => (activeProduct?.variants ?? []).filter((variant) =>
+      Number(variant.stockQuantity) > 0 &&
       `${variant.uniqCode} ${variant.color} ${variant.size}`.toLowerCase().includes(variantQuery.toLowerCase())),
     [activeProduct, variantQuery],
   )
@@ -142,7 +183,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
         type: 'order',
         items: orderItems.map((item) => `${item.productName} (${item.variantLabel}) x${item.quantity}`),
       })
-      setDescription(response?.description ?? '')
+      setDescription(cleanDescription(response?.description ?? ''))
     } catch (generateError) {
       setError(generateError.message || 'Не вдалося згенерувати опис')
     } finally {
@@ -154,25 +195,30 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
     event.preventDefault()
     setError('')
 
-    if (!orderItems.length) {
+    if (!isEditMode && !orderItems.length) {
       setError('Додайте хоча б один товар до замовлення')
       return
     }
 
-    if (!isNewCustomer && !customerId) {
+    if (!isEditMode && !isNewCustomer && !customerId) {
       setError('Оберіть клієнта')
       return
     }
 
-    if (isNewCustomer && (!newCustomer.name.trim() || !newCustomer.phone.trim() || !newCustomer.email.trim())) {
+    if (!isEditMode && isNewCustomer && (!newCustomer.name.trim() || !newCustomer.phone.trim() || !newCustomer.email.trim())) {
       setError('Заповніть обов?язкові поля нового замовника')
+      return
+    }
+
+    if (!isEditMode && isNewCustomer && !isValidUkrainianPhone(newCustomer.phone)) {
+      setError('Вкажіть телефон отримувача у форматі +380XXXXXXXXX')
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      await onCreate({
+      const payload = {
         isNewCustomer,
         customerId,
         newCustomer,
@@ -182,14 +228,20 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
         serviceType,
         cargoType,
         paymentMethods: paymentMethod,
-        description: description.trim(),
+        description: cleanDescription(description),
         items: orderItems.map((item) => ({
           productVariantId: item.productVariantId,
           quantity: item.quantity,
         })),
-      })
+      }
+
+      if (isEditMode) {
+        await onUpdate?.(editingOrder.id || editingOrder.Id, payload)
+      } else {
+        await onCreate(payload)
+      }
     } catch (submitError) {
-      setError(submitError.message || 'Не вдалося створити замовлення')
+      setError(submitError.message || (isEditMode ? 'Не вдалося оновити замовлення' : 'Не вдалося створити замовлення'))
     } finally {
       setIsSubmitting(false)
     }
@@ -200,13 +252,15 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
       <div className={cx('page-header')}>
         <div>
           <p className={cx('eyebrow')}>Sales</p>
-          <h1>Створення замовлення</h1>
+          <h1>{isEditMode ? 'Редагування замовлення' : 'Створення замовлення'}</h1>
         </div>
         <Button variant="secondary" onClick={onBack}>До продажів</Button>
       </div>
 
       <form className={cx('wide-form')} onSubmit={handleSubmit}>
         <section className={cx('panel', 'form-section')}>
+          {!isEditMode && (
+            <>
           <div className={cx('form-grid-3')}>
             <label className={cx('field', 'span-2')}>
               <span>Товари</span>
@@ -225,6 +279,7 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                   <div className={cx('order-item-row')} key={item.productVariantId}>
                     <div>
                       <strong>{item.productName}</strong>
+                      <br />
                       <small>{item.variantLabel}</small>
                     </div>
                     <label className={cx('field')}>
@@ -247,16 +302,17 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
 
           <div className={cx('delivery-box')}>
             <strong>Замовник</strong>
-            <label className={cx('inline-switch')}>
+            <label className={cx('customer-mode-switch')}>
               <input type="checkbox" checked={isNewCustomer} onChange={(event) => setIsNewCustomer(event.target.checked)} />
-              <span>{isNewCustomer ? 'Новий замовник' : 'Існуючий замовник'}</span>
+              <span>Існуючий клієнт</span>
+              <span>Новий клієнт</span>
             </label>
 
             {!isNewCustomer ? (
               <div className={cx('form-grid-3')}>
                 <label className={cx('field', 'span-2')}>
                   <span>Пошук клієнта</span>
-                  <input value={customerQuery} onChange={(event) => setCustomerQuery(event.target.value)} placeholder="Введіть ім?я клієнта" />
+                  <input value={customerQuery} onChange={(event) => setCustomerQuery(event.target.value)} placeholder="Введіть ім'я клієнта" />
                 </label>
                 <label className={cx('field')}>
                   <span>Клієнт</span>
@@ -269,13 +325,34 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
               </div>
             ) : (
               <div className={cx('form-grid-3')}>
-                <label className={cx('field')}><span>Ім?я</span><input value={newCustomer.name} onChange={(event) => setNewCustomer((s) => ({ ...s, name: event.target.value }))} /></label>
+                <label className={cx('field')}><span>Ім'я</span><input value={newCustomer.name} onChange={(event) => setNewCustomer((s) => ({ ...s, name: event.target.value }))} /></label>
                 <label className={cx('field')}><span>Прізвище</span><input value={newCustomer.surname} onChange={(event) => setNewCustomer((s) => ({ ...s, surname: event.target.value }))} /></label>
-                <label className={cx('field')}><span>Телефон</span><input value={newCustomer.phone} onChange={(event) => setNewCustomer((s) => ({ ...s, phone: event.target.value }))} /></label>
+                <label className={cx('field')}><span>Телефон</span><input inputMode="tel" maxLength="13" placeholder="+380XXXXXXXXX" value={newCustomer.phone} onChange={(event) => setNewCustomer((s) => ({ ...s, phone: formatUkrainianPhoneInput(event.target.value) }))} /></label>
                 <label className={cx('field', 'span-2')}><span>Email</span><input type="email" value={newCustomer.email} onChange={(event) => setNewCustomer((s) => ({ ...s, email: event.target.value }))} /></label>
               </div>
             )}
           </div>
+            </>
+          )}
+
+          {isEditMode && (
+            <div className={cx('delivery-box')}>
+              <strong>Замовлення {editingOrder.code || editingOrder.Code}</strong>
+              <div className={cx('order-details-items')}>
+                {(editingOrder.items || []).length === 0 ? (
+                  <p>Позиції не знайдено.</p>
+                ) : (
+                  (editingOrder.items || []).map((item) => (
+                    <div key={item.id} className={cx('order-details-item-row')}>
+                      <strong>{item.productName}</strong>
+                      <span>{item.variantLabel || '-'} {item.uniqCode ? `(${item.uniqCode})` : ''}</span>
+                      <span>Кількість: {item.quantity}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
 
           <div className={cx('delivery-box')}>
             <strong>Параметри замовлення</strong>
@@ -301,16 +378,18 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
               <label className={cx('field', 'span-2')}>
                 <span className={cx('field-title-with-action')}>
                   <span>Опис</span>
-                  <button
-                    type="button"
-                    className={cx('secondary-button', 'ai-action-button')}
-                    onClick={handleGenerateDescription}
-                    disabled={isGeneratingDescription}
-                    aria-label="Згенерувати опис замовлення через ШІ"
-                  >
-                    <span aria-hidden="true">AI</span>
-                    {isGeneratingDescription ? 'Генеруємо...' : 'Запропонувати'}
-                  </button>
+                  {!isEditMode && (
+                    <button
+                      type="button"
+                      className={cx('secondary-button', 'ai-action-button')}
+                      onClick={handleGenerateDescription}
+                      disabled={isGeneratingDescription}
+                      aria-label="Згенерувати опис замовлення через ШІ"
+                    >
+                      <span aria-hidden="true">AI</span>
+                      {isGeneratingDescription ? 'Генеруємо...' : 'Запропонувати'}
+                    </button>
+                  )}
                 </span>
                 <textarea rows="3" value={description} onChange={(event) => setDescription(event.target.value)} />
               </label>
@@ -337,10 +416,10 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
 
         <section className={cx('panel', 'summary-panel')}>
           <h2>Підсумок замовлення</h2>
-          <div className={cx('summary-line')}><span>Позицій</span><strong>{orderItems.length}</strong></div>
-          <div className={cx('summary-total')}><span>Орієнтовна сума</span><strong>{subtotal.toLocaleString('uk-UA')} грн</strong></div>
+          <div className={cx('summary-line')}><span>Позицій</span><strong>{isEditMode ? (editingOrder.items || []).length : orderItems.length}</strong></div>
+          <div className={cx('summary-total')}><span>Сума</span><strong>{(isEditMode ? Number(editingOrder.total || editingOrder.Total || 0) : subtotal).toLocaleString('uk-UA')} грн</strong></div>
           <Button className={cx('full-width')} type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Створення...' : 'Створити замовлення'}
+            {isSubmitting ? (isEditMode ? 'Збереження...' : 'Створення...') : (isEditMode ? 'Зберегти зміни' : 'Створити замовлення')}
           </Button>
         </section>
       </form>
@@ -379,11 +458,12 @@ export function CreateOrderPage({ customers, products, onBack, onCreate }) {
                   <input type="checkbox" checked={selectedVariantIds.includes(variant.id)} onChange={() => toggleVariant(variant.id)} />
                   <span>
                     <strong>{variant.uniqCode}</strong>
-                    <small>{variant.color} / {variant.size} · доступно {variant.stockQuantity}</small>
+                    <small>{variant.color} / {variant.size} · доступно {variant.stockQuantity}{variant.reservedQuantity ? ` · у замовленнях ${variant.reservedQuantity}` : ''}</small>
                   </span>
                   <b>{variant.sellPrice.toLocaleString('uk-UA')} грн</b>
                 </label>
               ))}
+              {!filteredVariants.length && <p>Немає доступних варіантів для нового замовлення.</p>}
             </div>
             <div className={cx('settings-actions')}>
               <Button type="button" onClick={addVariantsToOrder} disabled={!selectedVariantIds.length}>Додати до замовлення</Button>

@@ -9,6 +9,7 @@ using Midas.Core.Enums;
 using Midas.Core.Orders;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -213,6 +214,9 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 _ => "Parcel"
             };
 
+            var packageWeight = NormalizePackageWeight(order.TotalWeight);
+            var packageVolume = CalculatePackageVolume(packageWeight);
+
             var npRequest = new NpCreateInternetDocumentProperties
             {
                // SenderWarehouseIndex = senderAddress.WarehouseIndex,
@@ -231,7 +235,7 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
                 RecipientAddress = order.Address.NovaPoshtaWarehouseRef,
                 ContactRecipient = contactRecipientRef,
                 RecipientsPhone = order.Customer.Contact.PhoneNumber,
-                Weight = order.TotalWeight > 0 ? order.TotalWeight : 1m,
+                Weight = packageWeight,
                 Cost = order.TotalCost <= 0 ? 1m : order.TotalCost,
                 Description = string.IsNullOrWhiteSpace(order.Description) ? $"Замовлення {order.UniqCode}" : order.Description,
                 SeatsAmount = "1",
@@ -240,13 +244,17 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
 
             if (isBranchDelivery)
             {
-                npRequest.VolumeGeneral = 0.45m;
+                npRequest.VolumeGeneral = packageVolume;
             }
             else
             {
                 npRequest.OptionsSeat =
                 [
-                    new NpOptionsSeatItem()
+                    new NpOptionsSeatItem
+                    {
+                        VolumetricVolume = packageVolume.ToString("0.###", CultureInfo.InvariantCulture),
+                        Weight = packageWeight.ToString("0.###", CultureInfo.InvariantCulture)
+                    }
                 ];
             }
 
@@ -264,6 +272,17 @@ namespace Midas.Application.Entities.NovaPoshta.Commands
             await context.SaveChangesAsync(ct);
 
             return createdDocument.IntDocNumber;
+        }
+
+        private static decimal NormalizePackageWeight(decimal totalWeight)
+        {
+            return totalWeight > 0 ? Math.Max(totalWeight, 0.1m) : 0.3m;
+        }
+
+        private static decimal CalculatePackageVolume(decimal weight)
+        {
+            var volume = weight / 250m;
+            return Math.Clamp(volume, 0.002m, 0.12m);
         }
     }
 }

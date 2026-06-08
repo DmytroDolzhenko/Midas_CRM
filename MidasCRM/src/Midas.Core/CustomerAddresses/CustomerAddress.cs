@@ -91,6 +91,18 @@ namespace Midas.Core.CustomerAddresses
             DeliveryPointType = deliveryPointType;
         }
 
+        public void UpdateDelivery(
+            string city,
+            int postDepartmentNumber,
+            DeliveryPointType deliveryPointType)
+        {
+            City = city;
+            PostDepartmentNumber = postDepartmentNumber;
+            DeliveryPointType = deliveryPointType;
+            NovaPoshtaCityRef = null;
+            NovaPoshtaWarehouseRef = null;
+        }
+
         public void Delete()
         {
             IsDeleted = true;

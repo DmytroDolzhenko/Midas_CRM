@@ -61,7 +61,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
   const filteredProducts = useMemo(
     () =>
       warehouseProducts.filter((product) => {
-        const matchesSearch = `${product.name} ${product.sku} ${product.category}`
+        const matchesSearch = `${product.name} ${product.sku} ${product.category ?? ''}`
           .toLowerCase()
           .includes(search.toLowerCase())
         const matchesStock =
@@ -253,7 +253,7 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
       <div className={cx('inventory-widget-grid')}>
         <article><span>Усього товару</span><strong>{totals.total}</strong></article>
         <article><span>В наявності</span><strong>{totals.available} товарів</strong></article>
-        <article><span>Доступно</span><strong>{totals.stockUnits.toFixed(2)} одиниць</strong></article>
+        <article><span>Доступно</span><strong>{totals.stockUnits} одиниць</strong></article>
         <article><span>Товарів на складі</span><strong>{totals.storedValue.toLocaleString('uk-UA')} грн</strong></article>
         <article><span>Можливий дохід</span><strong>{totals.possibleIncome.toLocaleString('uk-UA')} грн</strong></article>
       </div>
@@ -286,13 +286,21 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
           return (
             <div className={cx('product-layout-row')} key={product.id}>
               <label className={cx('product-check')}><input type="checkbox" /></label>
-              <div className={cx('product-main-cell')}>
-                <div className={cx('product-preview')} />
+              <div
+                className={cx('product-main-cell')}
+                role="button"
+                tabIndex={0}
+                onClick={() => setEditingProduct(product)}
+                onKeyDown={(event) => { if (event.key === 'Enter') setEditingProduct(product) }}
+              >
+                <div className={cx('product-preview')}>
+                  {product.imageUrl ? <img alt={product.name} src={product.imageUrl} /> : <span>{product.name?.slice(0, 1)?.toUpperCase() || 'P'}</span>}
+                </div>
                 <div>
                   <strong>{product.name}</strong>
                   <span>ID: {product.sku}</span>
-                  <span>Категорія: {product.category}</span>
-                  <button type="button" onClick={() => setEditingProduct(product)}>Редагувати</button>
+                  <span>Категорія: {product.category || 'Без категорії'}</span>
+                  <button type="button" onClick={(event) => { event.stopPropagation(); setEditingProduct(product) }}>Варіанти</button>
                 </div>
               </div>
               <div className={cx('large-product-cell', 'available-cell')}>
@@ -336,9 +344,25 @@ export function ProductsPage({ products, warehouses = [], onNavigate, onCreateWa
                 <input readOnly value={editingProduct.warehouse} />
               </label>
               <label className={cx('field')}>
+                <span>Категорія</span>
+                <input readOnly value={editingProduct.category || 'Без категорії'} />
+              </label>
+              <label className={cx('field')}>
                 <span>Ціна продажу</span>
                 <input readOnly value={`${editingProduct.price} грн`} />
               </label>
+            </div>
+            <div className={cx('variant-list')}>
+              {(editingProduct.variants ?? []).map((variant) => (
+                <article key={variant.id}>
+                  <strong>{variant.uniqCode || `Variant #${variant.id}`}</strong>
+                  <span>{variant.color || '-'} / {variant.size || '-'}</span>
+                  <span>Доступно: {variant.stockQuantity} з {variant.originalStockQuantity}</span>
+                  <span>У замовленнях: {variant.reservedQuantity}</span>
+                  <span>{variant.sellPrice.toLocaleString('uk-UA')} грн</span>
+                </article>
+              ))}
+              {!editingProduct.variants?.length && <p>Варіантів для цього товару немає.</p>}
             </div>
             <div className={cx('settings-actions')}>
               <button className={cx('primary-button')} type="button" onClick={() => setEditingProduct(null)}>Готово</button>

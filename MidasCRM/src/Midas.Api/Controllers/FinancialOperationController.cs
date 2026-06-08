@@ -2,6 +2,7 @@ using Api.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Entities.FinancialOperations.Commands;
 using Midas.Core.FinancialOperations;
@@ -16,14 +17,19 @@ namespace Midas.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<FinancialOperationDto>>> GetAll(CancellationToken cancellationToken)
         {
-            var operations = await getQueries.GetAllAsync(cancellationToken);
+            var operations = await getQueries.GetAllAsync(
+                cancellationToken,
+                query => query.Include(operation => operation.CreatedByUser));
             return Ok(operations.Select(FinancialOperationDto.FromDomain));
         }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<FinancialOperationDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var operation = await getQueries.GetByIdAsync(id, cancellationToken);
+            var operation = await getQueries.GetByIdAsync(
+                id,
+                cancellationToken,
+                query => query.Include(item => item.CreatedByUser));
             if (operation is null)
             {
                 return NotFound();

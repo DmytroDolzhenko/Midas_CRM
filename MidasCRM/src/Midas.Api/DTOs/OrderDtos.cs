@@ -9,6 +9,7 @@ namespace Api.Dtos
         int CustomerId,
         CustomerAddressDto? Address,
         ServiceType ServiceType,
+        CargoType CargoType,
         OrderStatus Status,
         decimal TotalCost,
         string Description,
@@ -27,6 +28,7 @@ namespace Api.Dtos
                 order.CustomerId,
                 order.Address is null ? null : CustomerAddressDto.FromDomain(order.Address),
                 order.ServiceType,
+                order.CargoType,
                 order.Status,
                 order.TotalCost,
                 order.Description,
@@ -79,6 +81,14 @@ namespace Api.Dtos
 
     public record DeleteOrderDto(
         bool IsDeleted
+    );
+
+    public record UpdateOrderDto(
+        CreateOneClickAddressDto Address,
+        ServiceType ServiceType,
+        CargoType CargoType,
+        PaymentMethods PaymentMethods,
+        string Description
     );
 
     public record AddItemToOrderDto(
