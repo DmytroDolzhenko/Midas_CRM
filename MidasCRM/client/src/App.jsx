@@ -648,6 +648,20 @@ export function App() {
     await loadServerData()
   }
 
+  async function writeOffProduct(payload) {
+    await Promise.all(payload.items.map((item) =>
+      serverApi.productVariants.updateQuantity(item.productVariantId, item.nextQuantity),
+    ))
+
+    addOperation({
+      type: 'Списання товару',
+      description: `Списано ${payload.totalQuantity} од. товару ${payload.productName}`,
+      amount: `${Number(payload.totalCost).toLocaleString('uk-UA')} грн`,
+    })
+
+    await loadServerData()
+  }
+
   async function runCompanyAction(action) {
     setIsCompanyActionLoading(true)
     setCompanyPageError('')
@@ -818,6 +832,7 @@ export function App() {
         onNavigate={setPage}
         onCreateWarehouse={createWarehouse}
         onUpdateWarehouse={updateWarehouse}
+        onWriteOffProduct={writeOffProduct}
       />
     ),
     createProduct: (

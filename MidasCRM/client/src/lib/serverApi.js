@@ -116,6 +116,12 @@ export const serverApi = {
         body: variant,
       })
     },
+    updateQuantity(id, quantity) {
+      return apiRequest(`/ProductVariant/${id}/quantity`, {
+        method: 'PUT',
+        body: { quantity },
+      })
+    },
   },
   orders: {
     getAll() {

@@ -150,7 +150,7 @@ export function FinancesPage({ balance, finances = [], onCreate }) {
         <article className={cx('account-card')}>
           <span>Поточний баланс</span>
           <strong>{formatMoney(getValue(balance, 'balance', 'Balance'))}</strong>
-          <small>Дані з серверного Company/balance</small>
+          <small>Дані поточного балансу компанії</small>
         </article>
         <article className={cx('account-card')}>
           <span>Поповнення</span>

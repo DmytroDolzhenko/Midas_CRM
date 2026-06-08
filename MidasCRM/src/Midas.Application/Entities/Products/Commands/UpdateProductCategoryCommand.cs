@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Midas.Application.Common.Interfaces.Queries;
 using Midas.Application.Common.Interfaces.Repositories;
 using Midas.Application.Common.Messaging;
@@ -23,7 +24,8 @@ namespace Midas.Application.Entities.Products.Commands
     {
         public async Task<Product> Handle(UpdateProductCategoryCommand request, CancellationToken cancellationToken)
         {
-            var product = await queries.GetByIdAsync(request.Id, cancellationToken);
+            var product = await queries.GetByIdAsync(request.Id, cancellationToken,
+                query => query.Include(p => p.ProductCategories));
             if (product == null)
             {
                 throw new Exception($"Product with id {request.Id} not found.");
